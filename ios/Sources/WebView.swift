@@ -5,7 +5,11 @@ import UIKit
 struct WebView: UIViewRepresentable {
   let url: URL
 
-  func makeCoordinator() -> Coordinator { Coordinator() }
+  private var fallbackURL: URL? {
+    Bundle.main.resourceURL?.appendingPathComponent("web/index.html")
+  }
+
+  func makeCoordinator() -> Coordinator { Coordinator(fallbackURL: fallbackURL) }
 
   func makeUIView(context: Context) -> WKWebView {
     let configuration = WKWebViewConfiguration()
@@ -25,6 +29,7 @@ struct WebView: UIViewRepresentable {
     webView.scrollView.keyboardDismissMode = .interactive
     webView.isOpaque = true
     webView.backgroundColor = .systemBackground
+    context.coordinator.webView = webView
     webView.load(URLRequest(url: url))
     return webView
   }
@@ -39,12 +44,48 @@ struct WebView: UIViewRepresentable {
   }
 
   final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
+    let fallbackURL: URL?
+    weak var webView: WKWebView?
+    private var triedFallback = false
+
+    init(fallbackURL: URL?) {
+      self.fallbackURL = fallbackURL
+    }
+
     func userContentController(
       _ userContentController: WKUserContentController,
       didReceive message: WKScriptMessage
     ) {
       guard message.name == "mcpHttp" else { return }
       McpBridge.handle(message: message, webView: message.webView)
+    }
+
+    private func loadFallbackIfNeeded(_ webView: WKWebView) {
+      guard !triedFallback, let fallbackURL else { return }
+      triedFallback = true
+      webView.loadFileURL(fallbackURL, allowingReadAccessTo: fallbackURL.deletingLastPathComponent())
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+      // 本地 HTTP 服务如果返回 404，WKWebView 仍是“加载成功”的白页；
+      // 检查 React 根节点，为空就退回直接读取打包的 index.html。
+      DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self, weak webView] in
+        guard let self, let webView, !self.triedFallback else { return }
+        webView.evaluateJavaScript("document.getElementById('root') ? document.getElementById('root').childElementCount : -1") { value, _ in
+          let count = (value as? NSNumber)?.intValue ?? -1
+          if count == 0 {
+            self.loadFallbackIfNeeded(webView)
+          }
+        }
+      }
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+      loadFallbackIfNeeded(webView)
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+      loadFallbackIfNeeded(webView)
     }
 
     func webView(
