@@ -35,8 +35,8 @@ struct WebView: UIViewRepresentable {
   }
 
   func updateUIView(_ webView: WKWebView, context: Context) {
-    guard webView.url != url else { return }
-    webView.load(URLRequest(url: url))
+    // 页面只在 makeUIView 里加载一次。这里不能再次 load，否则 fallback 到
+    // 本地 file:// 之后又被重新拉回 HTTP 白页，且 triedFallback 已经置位。
   }
 
   static func dismantleUIView(_ webView: WKWebView, coordinator: Coordinator) {
