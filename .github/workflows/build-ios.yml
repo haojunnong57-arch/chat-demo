@@ -9,13 +9,16 @@ on:
       - "ios/**"
       - "package.json"
       - "pnpm-lock.yaml"
-      - ".github/workflows/build-ios.yml"
+  workflow_run:
+    workflows: ["Apply source patch"]
+    types: [completed]
 
 permissions:
   contents: write
 
 jobs:
   build:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: macos-26
     timeout-minutes: 40
     steps:
