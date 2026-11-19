@@ -30,8 +30,26 @@ final class WebServer: ObservableObject {
       self?.serve(request: request, relativePath: "index.html") ?? .notFound()
     }
     server["/:path"] = { [weak self] request in
-      let path = request.params[":path"] ?? request.params["path"] ?? ""
+      let path = request.params["path"] ?? ""
       return self?.serve(request: request, relativePath: path) ?? .notFound()
+    }
+    server["/:path/:path2"] = { [weak self] request in
+      let a = request.params["path"] ?? ""
+      let b = request.params["path2"] ?? ""
+      return self?.serve(request: request, relativePath: "\(a)/\(b)") ?? .notFound()
+    }
+    server["/:path/:path2/:path3"] = { [weak self] request in
+      let a = request.params["path"] ?? ""
+      let b = request.params["path2"] ?? ""
+      let c = request.params["path3"] ?? ""
+      return self?.serve(request: request, relativePath: "\(a)/\(b)/\(c)") ?? .notFound()
+    }
+    server["/:path/:path2/:path3/:path4"] = { [weak self] request in
+      let a = request.params["path"] ?? ""
+      let b = request.params["path2"] ?? ""
+      let c = request.params["path3"] ?? ""
+      let d = request.params["path4"] ?? ""
+      return self?.serve(request: request, relativePath: "\(a)/\(b)/\(c)/\(d)") ?? .notFound()
     }
 
     do {
