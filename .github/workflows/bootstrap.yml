@@ -1,0 +1,25 @@
+name: Apply source patch
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply patch archive
+        run: |
+          tar -xzf ds-patch2.tar.gz -C .
+          rm -f ds-patch2.tar.gz
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add MCP client, API settings, and iOS shell" || true
+          git push
