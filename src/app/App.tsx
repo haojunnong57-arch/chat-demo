@@ -19,6 +19,7 @@ import { SettingsDialog } from '../components/settings/SettingsDialog.js'
 import { Toast } from '../components/base/Toast.js'
 import { showToast } from '../components/base/toastState.js'
 import { onUploadNotice } from '../services/attachments.js'
+import { loadMcp } from '../services/mcp/store.js'
 import { Button } from '../components/base/Button.js'
 import { stopReadAloud } from '../services/speech/readAloud.js'
 import { CollapsedSider } from '../components/sider/CollapsedSider.js'
@@ -69,6 +70,7 @@ export const App = () => {
 
   useEffect(() => {
     void initChat()
+    loadMcp()
     // 首次打开先在设置里输入 API Key
     ensureApiKey()
   }, [])

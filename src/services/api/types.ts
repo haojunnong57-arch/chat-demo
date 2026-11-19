@@ -118,8 +118,16 @@ export type ServerToolBlock =
   | WebSearchToolResultBlock
   | WebFetchToolResultBlock
 
-/** 用于识别客户端工具调用的内容块类型 */
+/** 客户端工具调用（MCP）：input 在流式过程中由 input_json_delta 拼出 */
 export type ToolUseBlock = { type: 'tool_use'; id: string; name: string; input: unknown }
+
+/** 客户端工具执行结果，作为下一条 user 消息的内容块回传 */
+export type ToolResultBlockParam = {
+  type: 'tool_result'
+  tool_use_id: string
+  content: string
+  is_error?: boolean
+}
 
 // ---------- 请求 ----------
 
@@ -152,12 +160,13 @@ export type AssistantBlockParam =
   | ServerToolUseBlockParam
   | WebSearchToolResultBlockParam
   | WebFetchToolResultBlockParam
+  | ToolUseBlock
 
 /** 末尾 assistant 自动触发继续生成，无需 prefix 字段 */
 export type MessageParam =
   /** Chat Engine 扩展角色，位于对应 user 前；需服务端支持 latest_reminder。 */
   | { role: 'latest_reminder'; content: string }
-  | { role: 'user'; content: string | (FileBlockParam | TextBlockParam)[] }
+  | { role: 'user'; content: string | (FileBlockParam | TextBlockParam | ToolResultBlockParam)[] }
   | { role: 'assistant'; content: AssistantBlockParam[] }
 
 /** 开启联网搜索与边想边搜 */
@@ -172,12 +181,19 @@ export type DeepseekReadUrlTool = {
   name: 'deepseek_read_url'
 }
 
+/** Anthropic 格式的客户端工具声明（MCP 工具转成此结构） */
+export type ClientTool = {
+  name: string
+  description: string
+  input_schema: Record<string, unknown>
+}
+
 export type CreateMessageRequest = {
   model: ChatModel
   system: string
   messages: MessageParam[]
   thinking: { type: 'enabled' | 'disabled' }
-  tools: (DeepseekWebSearchTool | DeepseekReadUrlTool)[]
+  tools: (DeepseekWebSearchTool | DeepseekReadUrlTool | ClientTool)[]
   safety_check: { level: 'high' }
   title?: { enabled: boolean }
 }

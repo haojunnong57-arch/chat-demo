@@ -1,10 +1,16 @@
 import { create } from 'zustand'
 import { createId } from '../../utils/id.js'
 import { ApiError, streamMessage } from '../api/client.js'
-import type { ChatModel, CreateMessageRequest } from '../api/types.js'
+import type {
+  AssistantBlockParam,
+  ChatModel,
+  CreateMessageRequest,
+  MessageParam,
+} from '../api/types.js'
 import { extractFileIds, getFileErrorCode, isRetryableApiError } from '../api/errors.js'
 import { cancelUpload, describeUploadError, uploadAttachment, useUploads } from '../attachments.js'
 import { useSettings } from '../settings.js'
+import { callMcpTool, getMcpToolDefinitions } from '../mcp/store.js'
 import { appendBranch, getVisibleMessages, normalizeSession, selectVersion } from './branches.js'
 import * as db from './db.js'
 import {
@@ -27,10 +33,13 @@ import {
   type AssistantMessage,
   type FileAttachment,
   type Message,
+  type ReplyBlock,
   type Session,
   type SessionSummary,
   type UserMessage,
 } from './types.js'
+
+type McpCall = Extract<ReplyBlock, { type: 'mcp_tool' }>
 
 /** deepseek-flash 同时支持深度思考与图片输入 */
 const MODEL: ChatModel = 'deepseek-flash'
@@ -38,6 +47,8 @@ const MODEL: ChatModel = 'deepseek-flash'
 const SYSTEM_PROMPT = '该助手为DeepSeek，由深度求索公司创造。'
 /** 保留最近打开的详情；当前会话、生成中及尚未成功保存的会话不淘汰。 */
 const SESSION_CACHE_LIMIT = 5
+/** 单次提问里允许的 MCP 工具往返轮数，避免模型在工具间无限循环 */
+const MAX_MCP_TOOL_ROUNDS = 8
 /** 安全审核固定开启，所有请求都走扩展模式 */
 const SAFETY_CHECK = { level: 'high' } as const
 /** 服务端判定 file_id 失效后，重新补传并重发的最多次数（不含首次请求） */
@@ -989,49 +1000,148 @@ const streamReply = async (sessionId: string, initial: AssistantMessage, request
         reply = { ...reply, latestReminder }
         updateReply(sessionId, reply)
         persist(sessionId)
-        const messages = toRequestMessages(
+        let messages: MessageParam[] = toRequestMessages(
           prepared.history,
           prepared.question,
           prepared.prefix,
           initial.thinking ?? false,
           latestReminder
         )
-        const events = streamMessage(
-          useSettings.getState().apiKey ?? '',
-          {
-            model: initial.model ?? MODEL,
-            system: SYSTEM_PROMPT,
-            messages,
-            thinking: { type: initial.thinking ? 'enabled' : 'disabled' },
-            safety_check: SAFETY_CHECK,
-            tools: serverTools(initial.search ?? false),
-            ...(titleRequests.has(controller) ? { title: { enabled: true } } : {}),
-          },
-          controller.signal
-        )
-        const blockIndexes = new Map<number, number>()
-        for await (const event of events) {
-          receivedContent ||= event.type === 'content_block_start'
-          if (
-            event.type === 'message_delta' &&
-            (event.delta.stop_reason === 'end_turn' || event.delta.stop_reason === 'max_tokens') &&
-            event.delta.title?.trim() &&
-            titleRequests.has(controller) &&
-            !controller.signal.aborted &&
-            !get().importingHistory
-          ) {
-            const title = event.delta.title.trim()
-            updateSession(sessionId, (session) => (session.title ? session : { ...session, title }))
-            titleRequests.delete(controller)
+        // 只有首轮请求允许服务端补标题；工具往返轮不重复请求标题。
+        const titleEnabled = titleRequests.has(controller)
+        let completed = false
+        for (let toolRound = 0; toolRound <= MAX_MCP_TOOL_ROUNDS; toolRound += 1) {
+          const roundStart = reply.blocks.length
+          const tools = [
+            ...serverTools(initial.search ?? false),
+            ...getMcpToolDefinitions(),
+          ]
+          const events = streamMessage(
+            useSettings.getState().apiKey ?? '',
+            {
+              model: initial.model ?? MODEL,
+              system: SYSTEM_PROMPT,
+              messages,
+              thinking: { type: initial.thinking ? 'enabled' : 'disabled' },
+              safety_check: SAFETY_CHECK,
+              tools,
+              ...(titleEnabled && toolRound === 0 ? { title: { enabled: true } } : {}),
+            },
+            controller.signal
+          )
+          const blockIndexes = new Map<number, number>()
+          for await (const event of events) {
+            receivedContent ||= event.type === 'content_block_start'
+            if (
+              event.type === 'message_delta' &&
+              (event.delta.stop_reason === 'end_turn' || event.delta.stop_reason === 'max_tokens') &&
+              event.delta.title?.trim() &&
+              titleRequests.has(controller) &&
+              !controller.signal.aborted &&
+              !get().importingHistory
+            ) {
+              const title = event.delta.title.trim()
+              updateSession(sessionId, (session) => (session.title ? session : { ...session, title }))
+              titleRequests.delete(controller)
+            }
+            reply = applyEvent(reply, event, Date.now(), blockIndexes)
+            if (document.visibilityState === 'hidden') {
+              flush()
+            } else {
+              frame ||= requestAnimationFrame(flush)
+            }
           }
-          reply = applyEvent(reply, event, Date.now(), blockIndexes)
-          if (document.visibilityState === 'hidden') {
-            flush()
-          } else {
-            frame ||= requestAnimationFrame(flush)
+
+          // 没有工具调用，正常结束。
+          if (reply.stopReason !== 'tool_use') {
+            completed = true
+            break
           }
+
+          const roundBlocks = reply.blocks.slice(roundStart)
+          const calls = roundBlocks.filter(
+            (block): block is McpCall => block.type === 'mcp_tool' && block.status === 'running'
+          )
+          if (calls.length === 0) {
+            // 服务端声明了 tool_use 但没有可执行的客户端工具调用，按正常结束处理，避免死循环。
+            completed = true
+            break
+          }
+
+          for (const call of calls) {
+            if (controller.signal.aborted) {
+              break
+            }
+            let result = ''
+            let status: 'done' | 'error' = 'done'
+            try {
+              result = await callMcpTool(call.name, call.input, controller.signal)
+            } catch (error) {
+              status = 'error'
+              result = error instanceof Error ? error.message : String(error)
+            }
+            reply = {
+              ...reply,
+              blocks: reply.blocks.map((block) =>
+                block.type === 'mcp_tool' && block.id === call.id
+                  ? { ...block, status, result }
+                  : block
+              ),
+            }
+            updateReply(sessionId, reply)
+            persist(sessionId)
+          }
+
+          if (controller.signal.aborted) {
+            reply = settleReply(reply, 'stopped', Date.now())
+            completed = true
+            break
+          }
+
+          if (toolRound === MAX_MCP_TOOL_ROUNDS) {
+            break
+          }
+
+          const assistantContent: AssistantBlockParam[] = []
+          for (const block of roundBlocks) {
+            if (block.type === 'thinking') {
+              assistantContent.push({
+                type: 'thinking',
+                thinking: block.thinking,
+                signature: block.signature ?? '',
+              })
+            } else if (block.type === 'text') {
+              assistantContent.push({ type: 'text', text: block.text })
+            } else if (block.type === 'mcp_tool') {
+              assistantContent.push({
+                type: 'tool_use',
+                id: block.id,
+                name: block.name,
+                input: block.input,
+              })
+            }
+          }
+          const executedCalls = reply.blocks.filter(
+            (block): block is McpCall =>
+              block.type === 'mcp_tool' && calls.some((call) => call.id === block.id)
+          )
+          const toolResults = executedCalls.map((call) => ({
+            type: 'tool_result' as const,
+            tool_use_id: call.id,
+            content: call.result?.trim() || '（工具没有返回内容）',
+            ...(call.status === 'error' ? { is_error: true } : {}),
+          }))
+          if (assistantContent.length === 0 || toolResults.length === 0) {
+            completed = true
+            break
+          }
+          messages = [
+            ...messages,
+            { role: 'assistant' as const, content: assistantContent },
+            { role: 'user' as const, content: toolResults },
+          ]
         }
-        reply = settleReply(reply, 'done', Date.now())
+        reply = settleReply(reply, completed ? 'done' : 'stopped', Date.now())
         break
       } catch (error) {
         if (controller.signal.aborted) {

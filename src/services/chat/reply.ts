@@ -46,6 +46,14 @@ const toReplyBlock = (block: OutputBlockStart, now: number): ReplyBlock | null =
     case 'web_search_tool_result':
     case 'web_fetch_tool_result':
       return block
+    case 'tool_use':
+      return {
+        type: 'mcp_tool',
+        id: block.id,
+        name: block.name,
+        input: {},
+        status: 'running',
+      }
     default:
       return null
   }
@@ -109,6 +117,9 @@ export const applyEvent = (
         if (block.type === 'text' && delta.type === 'citations_delta') {
           return { ...block, citations: [...(block.citations ?? []), delta.citation] }
         }
+        if (block.type === 'mcp_tool' && delta.type === 'input_json_delta') {
+          return { ...block, partialInput: (block.partialInput ?? '') + delta.partial_json }
+        }
         return block
       })
     }
@@ -118,11 +129,24 @@ export const applyEvent = (
         return next
       }
       blockIndexes.delete(event.index)
-      return updateBlock(next, index, (block) =>
-        block.type === 'thinking' && block.startedAt !== undefined && block.endedAt === undefined
-          ? { ...block, endedAt: now }
-          : block
-      )
+      return updateBlock(next, index, (block) => {
+        if (block.type === 'thinking' && block.startedAt !== undefined && block.endedAt === undefined) {
+          return { ...block, endedAt: now }
+        }
+        if (block.type === 'mcp_tool' && block.partialInput !== undefined) {
+          let input: Record<string, unknown> = block.input
+          try {
+            const parsed = JSON.parse(block.partialInput || '{}') as unknown
+            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+              input = parsed as Record<string, unknown>
+            }
+          } catch {
+            // 参数 JSON 不完整时保留空对象，调用阶段再报错
+          }
+          return { ...block, input, partialInput: undefined }
+        }
+        return block
+      })
     }
     case 'message_delta':
       return {
@@ -179,6 +203,7 @@ export const canContinueReply = (reply: AssistantMessage): boolean => {
         block.type === 'server_tool_use' ||
         block.type === 'web_search_tool_result' ||
         block.type === 'web_fetch_tool_result' ||
+        block.type === 'mcp_tool' ||
         (block.type === 'text' && block.isTemplate)
     )
   ) {

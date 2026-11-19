@@ -62,8 +62,20 @@ export type TextPart = {
   isTemplate?: boolean
 }
 
+/** MCP 客户端工具调用：参数流式拼装，执行后把结果写回同一个块 */
+export type McpToolCallPart = {
+  type: 'mcp_tool'
+  id: string
+  name: string
+  input: Record<string, unknown>
+  /** 流式过程中累计的 JSON 原文，结束后清空 */
+  partialInput?: string
+  status: 'running' | 'done' | 'error'
+  result?: string
+}
+
 /** 服务端工具调用与结果块按协议原样保存；历史请求只回传 read_link 调用与结果 */
-export type ReplyBlock = ThinkingPart | TextPart | ServerToolBlock
+export type ReplyBlock = ThinkingPart | TextPart | ServerToolBlock | McpToolCallPart
 
 /**
  * pending：已发出请求，还没收到事件；streaming：正在接收；

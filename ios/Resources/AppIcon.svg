@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#081f6b"/>
+      <stop offset="0.52" stop-color="#2455e6"/>
+      <stop offset="1" stop-color="#43c6ff"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0.2" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#dbeafe"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <circle cx="180" cy="190" r="210" fill="#60a5fa" opacity="0.12"/>
+  <circle cx="860" cy="780" r="260" fill="#22d3ee" opacity="0.10"/>
+  <path d="M0 770 C150 700 260 820 420 770 C560 726 690 790 810 762 C910 738 980 770 1024 750 L1024 1024 L0 1024 Z" fill="#ffffff" opacity="0.10"/>
+  <path d="M0 828 C170 760 300 866 470 812 C610 768 760 830 880 806 C940 794 990 812 1024 800 L1024 1024 L0 1024 Z" fill="#ffffff" opacity="0.08"/>
+  <!-- tail -->
+  <path d="M392 532 C330 492 280 432 232 380 C214 360 186 368 190 398 C198 458 236 516 286 556 C324 586 366 592 400 574 Z" fill="url(#body)"/>
+  <path d="M238 386 C214 360 190 358 178 380 C198 386 220 406 232 430 Z" fill="#bfdbfe"/>
+  <!-- body -->
+  <path d="M352 522 C390 438 492 390 610 396 C710 400 788 438 818 486 C842 524 834 560 796 582 C736 618 648 634 558 626 C466 618 386 590 352 552 Z" fill="url(#body)"/>
+  <!-- nose highlight -->
+  <path d="M786 468 C812 478 832 500 838 526 C812 532 786 524 768 506 Z" fill="#ffffff"/>
+  <!-- fin -->
+  <path d="M566 548 C604 556 650 584 678 620 C640 624 596 610 570 586 Z" fill="#bfdbfe"/>
+  <path d="M566 548 C590 564 616 586 632 606 C606 606 582 594 564 576 Z" fill="#93c5fd"/>
+  <!-- eye -->
+  <circle cx="702" cy="486" r="19" fill="#0b2a79"/>
+  <circle cx="708" cy="480" r="6" fill="#ffffff"/>
+  <!-- belly lines -->
+  <path d="M470 592 C540 612 640 608 708 580" stroke="#bfdbfe" stroke-width="8" fill="none" opacity="0.8"/>
+  <path d="M480 614 C548 630 630 626 686 602" stroke="#bfdbfe" stroke-width="7" fill="none" opacity="0.6"/>
+  <!-- splash dots -->
+  <circle cx="320" cy="640" r="9" fill="#ffffff" opacity="0.75"/>
+  <circle cx="348" cy="668" r="5" fill="#ffffff" opacity="0.55"/>
+  <circle cx="286" cy="674" r="4" fill="#ffffff" opacity="0.45"/>
+</svg>

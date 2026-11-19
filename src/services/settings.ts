@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { TtsVoice } from './api/speech.js'
+import type { ChatModel } from './api/types.js'
 import { normalizeLocation, type UserLocation } from './location.js'
 
 export type Locale = 'zh-CN' | 'en-US'
@@ -10,6 +11,10 @@ export type ThemePreference = 'light' | 'dark' | 'system'
 /** 本机设置，存 localStorage：API Key、语言、主题、位置、朗读音色、深度思考与智能搜索开关、侧边栏收起状态 */
 type Settings = {
   apiKey: string | null
+  /** DeepSeek 兼容 API 地址；默认官方地址 */
+  apiBaseUrl: string
+  /** 对话模型 */
+  model: ChatModel
   locale: Locale
   themePreference: ThemePreference
   location: UserLocation | null
@@ -21,6 +26,8 @@ type Settings = {
 
 const KEYS = {
   apiKey: 'chat-demo:api-key',
+  apiBaseUrl: 'chat-demo:api-base-url',
+  model: 'chat-demo:model',
   locale: 'chat-demo:locale',
   location: 'chat-demo:location',
   themePreference: 'chat-demo:theme-preference',
@@ -89,6 +96,8 @@ const initialTtsVoice = (): TtsVoice => (read(KEYS.ttsVoice) === 'tide' ? 'tide'
 
 export const useSettings = create<Settings>(() => ({
   apiKey: read(KEYS.apiKey),
+  apiBaseUrl: read(KEYS.apiBaseUrl) || 'https://api.deepseek.com',
+  model: read(KEYS.model) === 'deepseek-v4-pro' ? 'deepseek-v4-pro' : 'deepseek-flash',
   locale: initialLocale(),
   location: initialLocation(),
   themePreference: initialThemePreference(),
@@ -122,6 +131,17 @@ export const setTtsVoice = (ttsVoice: TtsVoice) => {
 export const setApiKey = (apiKey: string | null) => {
   write(KEYS.apiKey, apiKey)
   useSettings.setState({ apiKey })
+}
+
+export const setApiBaseUrl = (apiBaseUrl: string) => {
+  const value = apiBaseUrl.trim().replace(/\/+$/, '') || 'https://api.deepseek.com'
+  write(KEYS.apiBaseUrl, value)
+  useSettings.setState({ apiBaseUrl: value })
+}
+
+export const setModel = (model: ChatModel) => {
+  write(KEYS.model, model)
+  useSettings.setState({ model })
 }
 
 export const setThinking = (thinking: boolean) => {

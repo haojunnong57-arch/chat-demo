@@ -6,6 +6,7 @@ import {
   IconDownloadOutline16,
   IconFollowsystemOutline16,
   IconLightOutline16,
+  IconLinkOutline16,
   IconSettingsOutline16,
   IconUploadOutline14,
 } from '../base/icons.js'
@@ -20,8 +21,10 @@ import { useChatStore } from '../../services/chat/store.js'
 import { regionCodes, getRegionName, provinces } from '../../services/location.js'
 import {
   isChineseBrowser,
+  setApiBaseUrl,
   setLocale,
   setLocation,
+  setModel,
   setThemePreference,
   setTtsVoice,
   useSettings,
@@ -33,6 +36,7 @@ import { Modal } from '../base/Modal.js'
 import { Select } from '../base/Select.js'
 import { showToast } from '../base/toastState.js'
 import { ApiKeyConfirm, ApiKeyField, useApiKeyEditor } from './ApiKeyField.js'
+import { McpSettings } from './McpSettings.js'
 import { closeSettings, useSettingsDialog, type SettingsSection } from './settingsDialogState.js'
 import styles from './Settings.module.css'
 
@@ -52,6 +56,7 @@ const sections: { value: SettingsSection; label: TranslationKey; icon: ReactNode
     icon: <IconSettingsOutline16 />,
   },
   { value: 'data', label: 'settingDialogAsideDataOptionLabel', icon: <IconDataOutline16 /> },
+  { value: 'mcp', label: 'settingDialogAsideMcpOptionLabel', icon: <IconLinkOutline16 /> },
 ]
 
 const SettingsContent = () => {
@@ -101,9 +106,13 @@ const SettingsContent = () => {
               <TtsVoiceSetting />
               <LocationSetting />
             </>
+          ) : section === 'mcp' ? (
+            <McpSettings />
           ) : (
             <>
               <ApiKeyField editor={apiKeyEditor} />
+              <ApiEndpointSetting />
+              <ModelSetting />
               <ImportHistory historyImport={historyImport} disabled={historyBusy} />
               <ExportHistory disabled={historyBusy} />
               <SettingCell
@@ -390,6 +399,68 @@ const ThemeSetting = () => {
         ))}
       </div>
     </div>
+  )
+}
+
+/** API 地址：失焦或回车保存，留空恢复官方地址。 */
+const ApiEndpointSetting = () => {
+  const t = useTranslate()
+  const apiBaseUrl = useSettings((state) => state.apiBaseUrl)
+  const [value, setValue] = useState(apiBaseUrl)
+  const commit = () => {
+    setApiBaseUrl(value)
+    setValue(useSettings.getState().apiBaseUrl)
+  }
+  return (
+    <SettingCell
+      label={t('settingsApiBaseUrl')}
+      description={t('settingsApiBaseUrlDescription')}
+      status={null}
+      action={
+        <input
+          className={styles.endpointInput}
+          type="url"
+          inputMode="url"
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
+          value={value}
+          placeholder="https://api.deepseek.com"
+          onChange={(event) => setValue(event.target.value)}
+          onBlur={commit}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+              commit()
+              event.currentTarget.blur()
+            }
+          }}
+        />
+      }
+    />
+  )
+}
+
+/** 对话模型：与官方 App 一致的 Flash / V4 Pro 两档。 */
+const ModelSetting = () => {
+  const t = useTranslate()
+  const model = useSettings((state) => state.model)
+  return (
+    <SettingCell
+      label={t('settingsModel')}
+      description={t('settingsModelDescription')}
+      status={null}
+      action={
+        <Select
+          ariaLabel={t('settingsModel')}
+          value={model}
+          options={[
+            { value: 'deepseek-flash', label: t('settingsModelFlash') },
+            { value: 'deepseek-v4-pro', label: t('settingsModelPro') },
+          ]}
+          onChange={(value) => setModel(value === 'deepseek-v4-pro' ? 'deepseek-v4-pro' : 'deepseek-flash')}
+        />
+      }
+    />
   )
 }
 
