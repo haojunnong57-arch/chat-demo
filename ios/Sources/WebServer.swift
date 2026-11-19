@@ -27,31 +27,12 @@ final class WebServer: ObservableObject {
     }
     webDirectory = webDir
 
-    server["/"] = { [weak self] request in
-      self?.serve(request: request, relativePath: "index.html") ?? .notFound
-    }
-    server["/:path"] = { [weak self] request in
-      let path = request.params["path"] ?? ""
-      return self?.serve(request: request, relativePath: path) ?? .notFound
-    }
-    server["/:path/:path2"] = { [weak self] request in
-      let a = request.params["path"] ?? ""
-      let b = request.params["path2"] ?? ""
-      return self?.serve(request: request, relativePath: "\(a)/\(b)") ?? .notFound
-    }
-    server["/:path/:path2/:path3"] = { [weak self] request in
-      let a = request.params["path"] ?? ""
-      let b = request.params["path2"] ?? ""
-      let c = request.params["path3"] ?? ""
-      return self?.serve(request: request, relativePath: "\(a)/\(b)/\(c)") ?? .notFound
-    }
-    server["/:path/:path2/:path3/:path4"] = { [weak self] request in
-      let a = request.params["path"] ?? ""
-      let b = request.params["path2"] ?? ""
-      let c = request.params["path3"] ?? ""
-      let d = request.params["path4"] ?? ""
-      return self?.serve(request: request, relativePath: "\(a)/\(b)/\(c)/\(d)") ?? .notFound
-    }
+    // 用 middleware 接管所有 GET 请求，避免 Swifter 的多段动态路由匹配不到
+    // static/js/...、static/css/async/... 这类嵌套资源。
+    server.middleware = [{ [weak self] request in
+      guard request.method == "GET" || request.method == "HEAD" else { return nil }
+      return self?.serve(path: request.path) ?? .notFound
+    }]
 
     do {
       try server.start(0, forceIPv4: true)
@@ -66,16 +47,21 @@ final class WebServer: ObservableObject {
     }
   }
 
-  private func serve(request: HttpRequest, relativePath: String) -> HttpResponse {
+  private func serve(path: String) -> HttpResponse {
     guard let webDirectory else { return .notFound }
     let root = webDirectory.standardizedFileURL
-    var relative = relativePath
-    if relative.isEmpty {
+    var relative = path
+    if relative.isEmpty || relative == "/" {
       relative = "index.html"
     }
     if relative.hasPrefix("/") {
       relative.removeFirst()
     }
+    relative = relative.removingPercentEncoding ?? relative
+    if relative.contains("..") {
+      return .notFound
+    }
+
     let fileURL = root.appendingPathComponent(relative).standardizedFileURL
     let rootPrefix = root.path.hasSuffix("/") ? root.path : root.path + "/"
     guard fileURL.path.hasPrefix(rootPrefix) else {
