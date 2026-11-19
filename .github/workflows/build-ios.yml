@@ -1,0 +1,99 @@
+name: Build DeepSeek iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "ios/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/build-ios.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Build web frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+          rm -rf ios/Resources/web
+          mkdir -p ios/Resources/web
+          cp -R dist/* ios/Resources/web/
+
+      - name: Generate app icon
+        run: |
+          brew install librsvg
+          mkdir -p ios/Resources/Assets.xcassets/AppIcon.appiconset
+          rsvg-convert -w 1024 -h 1024 ios/Resources/AppIcon.svg \
+            -o ios/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: |
+          cd ios
+          xcodegen generate
+
+      - name: Build unsigned app
+        run: |
+          cd ios
+          xcodebuild \
+            -project DeepSeek.xcodeproj \
+            -scheme DeepSeek \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            -archivePath build/DeepSeek.xcarchive \
+            archive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="" \
+            ONLY_ACTIVE_ARCH=NO
+
+      - name: Package unsigned IPA
+        run: |
+          cd ios
+          rm -rf build/Payload build/DeepSeek-iOS.ipa
+          mkdir -p build/Payload
+          cp -R build/DeepSeek.xcarchive/Products/Applications/DeepSeek.app build/Payload/
+          cd build
+          zip -qr DeepSeek-iOS.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DeepSeek-iOS-IPA
+          path: ios/build/DeepSeek-iOS.ipa
+          if-no-files-found: error
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build
+          name: DeepSeek iOS build
+          body: |
+            基于 DeepSeek 官方开源 chat-demo 前端打包的 iOS App。
+            包含 API Key / 自定义 API 地址、MCP 连接与工具调用、官方语音输入和 TTS。
+            这是未签名 IPA，请使用 Sideloadly / AltStore 自签安装。
+          files: ios/build/DeepSeek-iOS.ipa
+          make_latest: true
