@@ -28,29 +28,29 @@ final class WebServer: ObservableObject {
     webDirectory = webDir
 
     server["/"] = { [weak self] request in
-      self?.serve(request: request, relativePath: "index.html") ?? .notFound()
+      self?.serve(request: request, relativePath: "index.html") ?? .notFound
     }
     server["/:path"] = { [weak self] request in
       let path = request.params["path"] ?? ""
-      return self?.serve(request: request, relativePath: path) ?? .notFound()
+      return self?.serve(request: request, relativePath: path) ?? .notFound
     }
     server["/:path/:path2"] = { [weak self] request in
       let a = request.params["path"] ?? ""
       let b = request.params["path2"] ?? ""
-      return self?.serve(request: request, relativePath: "\(a)/\(b)") ?? .notFound()
+      return self?.serve(request: request, relativePath: "\(a)/\(b)") ?? .notFound
     }
     server["/:path/:path2/:path3"] = { [weak self] request in
       let a = request.params["path"] ?? ""
       let b = request.params["path2"] ?? ""
       let c = request.params["path3"] ?? ""
-      return self?.serve(request: request, relativePath: "\(a)/\(b)/\(c)") ?? .notFound()
+      return self?.serve(request: request, relativePath: "\(a)/\(b)/\(c)") ?? .notFound
     }
     server["/:path/:path2/:path3/:path4"] = { [weak self] request in
       let a = request.params["path"] ?? ""
       let b = request.params["path2"] ?? ""
       let c = request.params["path3"] ?? ""
       let d = request.params["path4"] ?? ""
-      return self?.serve(request: request, relativePath: "\(a)/\(b)/\(c)/\(d)") ?? .notFound()
+      return self?.serve(request: request, relativePath: "\(a)/\(b)/\(c)/\(d)") ?? .notFound
     }
 
     do {
@@ -67,7 +67,7 @@ final class WebServer: ObservableObject {
   }
 
   private func serve(request: HttpRequest, relativePath: String) -> HttpResponse {
-    guard let webDirectory else { return .notFound() }
+    guard let webDirectory else { return .notFound }
     let root = webDirectory.standardizedFileURL
     var relative = relativePath
     if relative.isEmpty {
@@ -79,11 +79,11 @@ final class WebServer: ObservableObject {
     let fileURL = root.appendingPathComponent(relative).standardizedFileURL
     let rootPrefix = root.path.hasSuffix("/") ? root.path : root.path + "/"
     guard fileURL.path.hasPrefix(rootPrefix) else {
-      return .notFound()
+      return .notFound
     }
     guard FileManager.default.fileExists(atPath: fileURL.path),
           let data = try? Data(contentsOf: fileURL) else {
-      return .notFound()
+      return .notFound
     }
 
     var headers: [String: String] = [
