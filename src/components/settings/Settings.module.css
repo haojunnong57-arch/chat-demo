@@ -466,3 +466,82 @@
     width: 100%;
   }
 }
+
+.support {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 0 8px;
+}
+
+.supportCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 16px;
+  background: var(--dsw-alias-bg-layer-2);
+}
+
+.supportLabel {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.supportGroup {
+  color: var(--dsw-alias-brand-primary);
+  font-size: 30px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.035em;
+  line-height: 1.15;
+  word-break: break-all;
+}
+
+.supportHint {
+  margin: 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.supportCard > .Button,
+.supportCard > button {
+  align-self: flex-start;
+}
+
+.rewardLayout {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.rewardQr {
+  display: block;
+  flex-shrink: 0;
+  width: 132px;
+  height: 132px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.rewardNote {
+  margin: 0;
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+@media (max-width: 520px) {
+  .rewardLayout {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .rewardQr {
+    width: 160px;
+    height: 160px;
+  }
+}

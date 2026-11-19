@@ -37,6 +37,7 @@ import { Select } from '../base/Select.js'
 import { showToast } from '../base/toastState.js'
 import { ApiKeyConfirm, ApiKeyField, useApiKeyEditor } from './ApiKeyField.js'
 import { McpSettings } from './McpSettings.js'
+import { SupportSettings } from './SupportSettings.js'
 import { closeSettings, useSettingsDialog, type SettingsSection } from './settingsDialogState.js'
 import styles from './Settings.module.css'
 
@@ -57,6 +58,11 @@ const sections: { value: SettingsSection; label: TranslationKey; icon: ReactNode
   },
   { value: 'data', label: 'settingDialogAsideDataOptionLabel', icon: <IconDataOutline16 /> },
   { value: 'mcp', label: 'settingDialogAsideMcpOptionLabel', icon: <IconLinkOutline16 /> },
+  {
+    value: 'community',
+    label: 'settingDialogAsideCommunityOptionLabel',
+    icon: <IconLinkOutline16 />,
+  },
 ]
 
 const SettingsContent = () => {
@@ -108,6 +114,8 @@ const SettingsContent = () => {
             </>
           ) : section === 'mcp' ? (
             <McpSettings />
+          ) : section === 'community' ? (
+            <SupportSettings />
           ) : (
             <>
               <ApiKeyField editor={apiKeyEditor} />

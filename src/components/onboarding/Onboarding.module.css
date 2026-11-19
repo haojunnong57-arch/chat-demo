@@ -1,0 +1,225 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(77, 107, 254, 0.12), transparent 34%),
+    radial-gradient(circle at 88% 92%, rgba(77, 107, 254, 0.08), transparent 38%),
+    var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+}
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 460px;
+  min-height: min(680px, calc(100vh - 48px));
+}
+
+.brand {
+  flex-shrink: 0;
+  color: var(--dsw-alias-brand-primary);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 0 24px;
+}
+
+.eyebrow {
+  margin-bottom: 10px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(28px, 7vw, 38px);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.18;
+}
+
+.lead {
+  margin: 14px 0 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.card,
+.qrCard {
+  margin-top: 28px;
+  padding: 22px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 20px;
+  background: var(--dsw-alias-bg-layer-2);
+}
+
+.cardLabel {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+}
+
+.groupNumber {
+  margin-top: 8px;
+  color: var(--dsw-alias-brand-primary);
+  font-size: clamp(30px, 8vw, 42px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.035em;
+  line-height: 1.15;
+  word-break: break-all;
+}
+
+.groupHint {
+  margin: 14px 0 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.copyButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 18px;
+  padding: 8px 12px;
+  border: 1px solid var(--dsw-alias-border-l3);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.copyButton:active {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.qrCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.qr {
+  display: block;
+  width: min(300px, 70vw);
+  height: auto;
+  border-radius: 16px;
+}
+
+.rewardNote {
+  margin: 18px 4px 0;
+  color: var(--dsw-alias-label-primary);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.footer {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 20px;
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.dot,
+.dotActive {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dsw-alias-border-l3);
+  transition: width 180ms ease, background-color 180ms ease;
+}
+
+.dotActive {
+  width: 20px;
+  border-radius: 999px;
+  background: var(--dsw-alias-brand-primary);
+}
+
+.nextButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--dsw-alias-button-primary-fill);
+  color: var(--dsw-alias-label-primary-foreground);
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(77, 107, 254, 0.28);
+  transition: transform 150ms ease, background-color 150ms ease;
+}
+
+.nextButton:active {
+  transform: scale(0.94);
+  background: var(--dsw-alias-button-primary-hover);
+}
+
+.startButton {
+  min-height: 48px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--dsw-alias-button-primary-fill);
+  color: var(--dsw-alias-label-primary-foreground);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(77, 107, 254, 0.24);
+}
+
+.startButton:active {
+  background: var(--dsw-alias-button-primary-hover);
+}
+
+@media (max-width: 420px) {
+  .overlay {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .page {
+    padding-top: 28px;
+  }
+
+  .card,
+  .qrCard {
+    padding: 18px;
+    margin-top: 22px;
+  }
+
+  .qr {
+    width: min(260px, 68vw);
+  }
+}
