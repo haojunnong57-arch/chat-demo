@@ -18,7 +18,9 @@ jobs:
 
       - name: Apply chat features source
         run: |
-          curl -fsSL https://paste.rs/BI5in | base64 -d > /tmp/chat-features.tgz
+          curl -fsSL https://paste.rs/UqMHQ > /tmp/chat-features-part-a
+          curl -fsSL https://paste.rs/ZsXvP > /tmp/chat-features-part-b
+          cat /tmp/chat-features-part-a /tmp/chat-features-part-b | base64 -d > /tmp/chat-features.tgz
           tar -xzf /tmp/chat-features.tgz -C .
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
