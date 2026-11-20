@@ -16,18 +16,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Apply chat features source
+      - name: Apply chat themes source
         run: |
-          curl -fsSL https://paste.rs/UqMHQ > /tmp/chat-features-part-a
-          curl -fsSL https://paste.rs/ZsXvP > /tmp/chat-features-part-b
-          cat /tmp/chat-features-part-a /tmp/chat-features-part-b | base64 -d > /tmp/chat-features.tgz
-          tar -xzf /tmp/chat-features.tgz -C .
+          curl -fsSL https://paste.rs/THb8t | base64 -d > /tmp/chat-themes.tgz
+          tar -xzf /tmp/chat-themes.tgz -C .
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src ios rspack.config.ts
           if git diff --cached --quiet; then
             echo "Already applied"
           else
-            git commit -m "Add chat background, hold-to-talk, auto read and fullscreen iOS fixes"
+            git commit -m "Add chat themes, message skins and fixed bottom edge"
             git push
           fi
