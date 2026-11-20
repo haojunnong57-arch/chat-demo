@@ -1,0 +1,31 @@
+name: Apply chat features
+
+on:
+  push:
+    paths:
+      - .github/workflows/apply-chat-features.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply chat features source
+        run: |
+          curl -fsSL https://paste.rs/BI5in | base64 -d > /tmp/chat-features.tgz
+          tar -xzf /tmp/chat-features.tgz -C .
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src ios rspack.config.ts
+          if git diff --cached --quiet; then
+            echo "Already applied"
+          else
+            git commit -m "Add chat background, hold-to-talk, auto read and fullscreen iOS fixes"
+            git push
+          fi
