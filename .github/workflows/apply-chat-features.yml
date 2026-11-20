@@ -18,9 +18,9 @@ jobs:
 
       - name: Apply chat UI source
         run: |
-          curl -fsSL https://paste.rs/HkW5n > /tmp/chat-ui.b64
-          curl -fsSL https://paste.rs/VXIco >> /tmp/chat-ui.b64
-          curl -fsSL https://paste.rs/8EZdw >> /tmp/chat-ui.b64
+          curl -fsSL https://paste.rs/V2qLB > /tmp/chat-ui.b64
+          curl -fsSL https://paste.rs/R9zF2 >> /tmp/chat-ui.b64
+          curl -fsSL https://paste.rs/nH6He >> /tmp/chat-ui.b64
           base64 -d /tmp/chat-ui.b64 > /tmp/chat-ui.tgz
           tar -xzf /tmp/chat-ui.tgz -C .
           rm -f src/components/chatInput/VoiceButton.tsx src/components/chatInput/VoiceButton.module.css
@@ -30,6 +30,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "Already applied"
           else
-            git commit -m "Rebuild chat input, session instructions and native haptics"
+            git commit -m "Match official recording UI and persist session storage"
             git push
           fi
