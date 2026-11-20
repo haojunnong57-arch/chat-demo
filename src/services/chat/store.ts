@@ -45,6 +45,15 @@ type McpCall = Extract<ReplyBlock, { type: 'mcp_tool' }>
 const MODEL: ChatModel = 'deepseek-flash'
 /** 所有生成请求统一携带的助手身份说明 */
 const SYSTEM_PROMPT = '该助手为DeepSeek，由深度求索公司创造。'
+
+/** 把当前会话设定放在系统提示最后，作为本对话最高优先级的执行规则。 */
+const getSystemPrompt = (sessionId: string) => {
+  const instructions = getSession(sessionId)?.instructions?.trim()
+  if (!instructions) {
+    return SYSTEM_PROMPT
+  }
+  return `${SYSTEM_PROMPT}\n\n以下 <conversation_instructions> 是本对话的用户设定，具有最高优先级。请始终严格执行；当它与默认助手身份、历史消息或后续用户要求冲突时，以该设定为准（用户明确要求修改设定的情况除外）。\n<conversation_instructions>\n${instructions}\n</conversation_instructions>`
+}
 /** 保留最近打开的详情；当前会话、生成中及尚未成功保存的会话不淘汰。 */
 const SESSION_CACHE_LIMIT = 5
 /** 单次提问里允许的 MCP 工具往返轮数，避免模型在工具间无限循环 */
@@ -114,7 +123,10 @@ const getStreamController = (id: string) => {
 }
 
 const sameSummary = (a: SessionSummary, b: SessionSummary) =>
-  a.title === b.title && a.createdAt === b.createdAt && a.updatedAt === b.updatedAt
+  a.title === b.title &&
+  a.createdAt === b.createdAt &&
+  a.updatedAt === b.updatedAt &&
+  a.instructions === b.instructions
 
 const sessionAccess = new Map<string, number>()
 const unsavedSessions = new Set<string>()
@@ -548,6 +560,29 @@ const removeSessionData = async (id: string): Promise<boolean> => {
       }
     }
   }
+}
+
+/** 保存当前对话设定；已打开的会话实时更新并落盘，未打开的会话只原子改摘要和详情。 */
+export const updateSessionInstructions = async (
+  sessionId: string,
+  instructions: string
+): Promise<void> => {
+  const trimmed = instructions.trim()
+  const session = getSession(sessionId)
+  if (session) {
+    updateSession(sessionId, (current) => ({
+      ...current,
+      instructions: trimmed || undefined,
+    }))
+    persist(sessionId)
+    return
+  }
+  await db.saveSessionInstructions(sessionId, trimmed)
+  set((state) => ({
+    sessions: state.sessions.map((summary) =>
+      summary.id === sessionId ? { ...summary, instructions: trimmed || undefined } : summary
+    ),
+  }))
 }
 
 export const stopReply = (sessionId: string) => getStreamController(sessionId)?.abort()
@@ -1012,6 +1047,7 @@ const streamReply = async (sessionId: string, initial: AssistantMessage, request
         let completed = false
         for (let toolRound = 0; toolRound <= MAX_MCP_TOOL_ROUNDS; toolRound += 1) {
           const roundStart = reply.blocks.length
+          const systemPrompt = getSystemPrompt(sessionId)
           const tools = [
             ...serverTools(initial.search ?? false),
             ...getMcpToolDefinitions(),
@@ -1020,7 +1056,7 @@ const streamReply = async (sessionId: string, initial: AssistantMessage, request
             useSettings.getState().apiKey ?? '',
             {
               model: initial.model ?? MODEL,
-              system: SYSTEM_PROMPT,
+              system: systemPrompt,
               messages,
               thinking: { type: initial.thinking ? 'enabled' : 'disabled' },
               safety_check: SAFETY_CHECK,

@@ -60,7 +60,7 @@ export const SessionView = ({
       style={chatBackground ? { backgroundImage: `url(${chatBackground})` } : undefined}
     >
       {isMobile ? (
-        <MobileHeader title={title} />
+        <MobileHeader title={title} streaming={streaming} chatTheme={chatTheme} />
       ) : (
         <div className={styles.header}>
           <div className={clsx(styles.title, siderCollapsed && styles.withCollapsedSider)}>

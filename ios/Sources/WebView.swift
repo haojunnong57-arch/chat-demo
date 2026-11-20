@@ -20,6 +20,7 @@ struct WebView: UIViewRepresentable {
     configuration.websiteDataStore = .default()
     configuration.applicationNameForUserAgent = "DeepSeekMobile/1.0"
     configuration.userContentController.add(context.coordinator, name: "mcpHttp")
+    configuration.userContentController.add(context.coordinator, name: "haptic")
 
     let webView = WKWebView(frame: .zero, configuration: configuration)
     webView.navigationDelegate = context.coordinator
@@ -46,6 +47,7 @@ struct WebView: UIViewRepresentable {
 
   static func dismantleUIView(_ webView: WKWebView, coordinator: Coordinator) {
     webView.configuration.userContentController.removeScriptMessageHandler(forName: "mcpHttp")
+    webView.configuration.userContentController.removeScriptMessageHandler(forName: "haptic")
   }
 
   final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
@@ -61,8 +63,36 @@ struct WebView: UIViewRepresentable {
       _ userContentController: WKUserContentController,
       didReceive message: WKScriptMessage
     ) {
-      guard message.name == "mcpHttp" else { return }
-      McpBridge.handle(message: message, webView: message.webView)
+      switch message.name {
+      case "mcpHttp":
+        McpBridge.handle(message: message, webView: message.webView)
+      case "haptic":
+        playHaptic(style: message.body as? String ?? "light")
+      default:
+        return
+      }
+    }
+
+    /// Web 侧的发送、松手、上滑取消等动作在这里转成 UIKit 触感。
+    private func playHaptic(style: String) {
+      switch style {
+      case "success", "warning":
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(style == "success" ? .success : .warning)
+      case "medium":
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.prepare()
+        generator.impactOccurred()
+      case "soft":
+        let generator = UIImpactFeedbackGenerator(style: .soft)
+        generator.prepare()
+        generator.impactOccurred()
+      default:
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.prepare()
+        generator.impactOccurred()
+      }
     }
 
     private func loadFallbackIfNeeded(_ webView: WKWebView) {

@@ -14,6 +14,7 @@ import { closeSearchPanel } from '../components/search/searchPanelState.js'
 import { SessionView } from '../components/session/SessionView.js'
 import { MobileHeader } from '../components/session/MobileHeader.js'
 import { Welcome } from '../components/session/Welcome.js'
+import { SessionInstructionsDialog } from '../components/session/SessionInstructionsDialog.js'
 import { ensureApiKey } from '../components/settings/settingsDialogState.js'
 import { SettingsDialog } from '../components/settings/SettingsDialog.js'
 import { Onboarding } from '../components/onboarding/Onboarding.js'
@@ -136,6 +137,7 @@ export const App = () => {
         <SearchPanel />
       </div>
       <SettingsDialog />
+      <SessionInstructionsDialog />
       <Onboarding />
       <Toast />
     </>

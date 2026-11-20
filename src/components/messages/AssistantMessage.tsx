@@ -1,6 +1,6 @@
 import { useTranslate } from '../../i18n/index.js'
 import clsx from 'clsx'
-import { memo } from 'react'
+import { memo, useEffect, useRef } from 'react'
 import { IconRefreshOutline16, IconWarningOutline16 } from '../base/icons.js'
 import { describeReply } from '../../services/chat/describe.js'
 import { canContinueReply } from '../../services/chat/reply.js'
@@ -18,6 +18,8 @@ import { CopyButton } from './CopyButton.js'
 import { ReplyArea } from './ReplyArea.js'
 import { McpToolCalls } from './McpToolCalls.js'
 import { useReplyView } from './useReplyView.js'
+import { useSettings } from '../../services/settings.js'
+import { haptic } from '../../utils/haptics.js'
 import {
   BranchSwitcher,
   type MessageVersions,
@@ -45,7 +47,17 @@ export const AssistantMessage = memo(function AssistantMessage({
   onSelectVersion: SelectMessageVersion
 }) {
   const t = useTranslate()
+  const chatTheme = useSettings((state) => state.chatTheme)
+  const wasStreamingRef = useRef(streaming)
   const view = useReplyView(message, streaming)
+
+  useEffect(() => {
+    const wasStreaming = wasStreamingRef.current
+    wasStreamingRef.current = streaming
+    if (wasStreaming && !streaming && message.stopReason !== 'refusal' && chatTheme === 'instagram') {
+      haptic('medium')
+    }
+  }, [chatTheme, message.stopReason, streaming])
   const panelEntry = useSearchPanel((state) => state.entry)
   const notice = streaming ? null : describeReply(message)
   // 安全拒绝：已下发的思考与正文按协议丢弃，只显示模板答复。
@@ -59,7 +71,13 @@ export const AssistantMessage = memo(function AssistantMessage({
   const summaryEntry = `${message.id}-summary`
   return (
     <div className={styles.message}>
-      <div className={clsx(styles.body, refused && styles.bodyEmpty)}>
+      <div
+        className={clsx(
+          styles.body,
+          'ds-assistant-message-body',
+          refused && styles.bodyEmpty
+        )}
+      >
         {refused ? null : (
         <ReplyArea
           message={message}
@@ -80,7 +98,7 @@ export const AssistantMessage = memo(function AssistantMessage({
         />
       ) : null}
       {waiting ? (
-        <div className={styles.waiting}>
+        <div className={styles.waiting} data-typing="true">
           {[0, 1, 2].map((index) => (
             <span key={index} className={styles.waitingDot} />
           ))}

@@ -5,9 +5,18 @@ import { newChat } from '../../services/chat/store.js'
 import { IconButton } from '../base/IconButton.js'
 import { openMobileSider } from '../sider/mobileSiderState.js'
 import styles from './MobileHeader.module.css'
+import clsx from 'clsx'
 
-/** 移动端顶栏：左侧菜单打开侧边栏；会话页再显示标题与开启新对话 */
-export const MobileHeader = ({ title }: { title?: string }) => {
+/** 移动端顶栏：左侧菜单打开侧边栏；会话页再显示标题、输入状态与开启新对话 */
+export const MobileHeader = ({
+  title,
+  streaming = false,
+  chatTheme = 'default',
+}: {
+  title?: string
+  streaming?: boolean
+  chatTheme?: string
+}) => {
   const t = useTranslate()
   return (
     <div className={styles.header}>
@@ -20,7 +29,32 @@ export const MobileHeader = ({ title }: { title?: string }) => {
       />
       {title === undefined ? null : (
         <>
-          <div className={styles.title}>{title}</div>
+          <div className={styles.titleWrap}>
+            <div className={styles.title}>{title}</div>
+            {chatTheme === 'imessage' || chatTheme === 'wechat' || chatTheme === 'instagram' ? (
+              <div
+                className={clsx(
+                  styles.status,
+                  streaming && styles.statusActive,
+                  chatTheme === 'instagram' && !streaming && styles.statusActive
+                )}
+                aria-live="polite"
+              >
+                {streaming ? (
+                  <>
+                    <span className={styles.statusDots} aria-hidden>
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                    {t(chatTheme === 'wechat' ? 'wechatTypingStatus' : 'typingStatus')}
+                  </>
+                ) : chatTheme === 'instagram' ? (
+                  t('instagramActiveStatus')
+                ) : null}
+              </div>
+            ) : null}
+          </div>
           <IconButton
             size="xl"
             tone="primary"

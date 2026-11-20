@@ -20,6 +20,17 @@ declare const styles: {
   readonly "right": string;
   readonly "sendButton": string;
   readonly "disabled": string;
+  readonly "modeButton": string;
+  readonly "holdButton": string;
+  readonly "holdIdleText": string;
+  readonly "holdButtonActive": string;
+  readonly "holdButtonCancel": string;
+  readonly "holdButtonTranscribing": string;
+  readonly "holdTopLine": string;
+  readonly "holdMic": string;
+  readonly "holdText": string;
+  readonly "holdTimer": string;
+  readonly "holdWaveClip": string;
+  readonly "voiceMode": string;
 };
 export = styles;
-

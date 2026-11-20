@@ -393,3 +393,83 @@ body[data-ds-dark-theme] .chat-theme-glass {
     --chat-assistant-bg: #232d3e;
   }
 }
+
+/* ============================================================================
+   主题专属气泡结构
+   ----------------------------------------------------------------------------
+   不是只换颜色：微信/短信/Instagram 的用户气泡和 AI 气泡都补上尾巴，
+   AI 的“正在输入”三点保持在灰色气泡内，结构上对应各自 App。
+   ========================================================================== */
+
+.chat-theme-imessage .ds-user-message-bubble,
+.chat-theme-wechat .ds-user-message-bubble,
+.chat-theme-instagram .ds-user-message-bubble {
+  position: relative;
+  border-bottom-right-radius: 6px;
+}
+
+.chat-theme-imessage .ds-user-message-bubble::after,
+.chat-theme-wechat .ds-user-message-bubble::after,
+.chat-theme-instagram .ds-user-message-bubble::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  bottom: -1px;
+  width: 10px;
+  height: 13px;
+  background: var(--chat-user-bubble);
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+  pointer-events: none;
+}
+
+.chat-theme-imessage .ds-assistant-message-body,
+.chat-theme-wechat .ds-assistant-message-body,
+.chat-theme-instagram .ds-assistant-message-body {
+  position: relative;
+  border-bottom-left-radius: 6px;
+}
+
+.chat-theme-imessage .ds-assistant-message-body::after,
+.chat-theme-wechat .ds-assistant-message-body::after,
+.chat-theme-instagram .ds-assistant-message-body::after {
+  content: '';
+  position: absolute;
+  left: -5px;
+  bottom: -1px;
+  width: 10px;
+  height: 13px;
+  background: var(--chat-assistant-bg);
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+  pointer-events: none;
+}
+
+.chat-theme-imessage .ds-assistant-message-body .waiting,
+.chat-theme-wechat .ds-assistant-message-body .waiting,
+.chat-theme-instagram .ds-assistant-message-body .waiting {
+  height: 30px;
+  padding: 0 2px;
+}
+
+.chat-theme-imessage .ds-assistant-message-body .waitingDot {
+  width: 7px;
+  height: 7px;
+  background: #8e8e93;
+}
+
+.chat-theme-wechat .ds-assistant-message-body .waitingDot {
+  width: 6px;
+  height: 6px;
+  background: #8a8a8a;
+}
+
+.chat-theme-instagram .ds-assistant-message-body .waitingDot {
+  width: 6px;
+  height: 6px;
+  background: #a8a8a8;
+}
+
+/* 输入栏结构：短信输入胶囊里的发送箭头、Instagram 的渐变发送 */
+.chat-theme-imessage .ds-user-message-bubble,
+.chat-theme-instagram .ds-user-message-bubble {
+  box-shadow: var(--chat-user-shadow);
+}

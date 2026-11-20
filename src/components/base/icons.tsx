@@ -254,6 +254,62 @@ export const IconSettingsOutline16 = () => (
   </svg>
 )
 
+export const IconKeyboardOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x={1.5} y={4} width={13} height={8} rx={2} stroke="currentColor" strokeWidth={1.3} />
+    <path
+      d="M4 6.6H4.01M6.4 6.6H6.41M8.8 6.6H8.81M11.2 6.6H11.21M4 9.2H4.01M6.4 9.2H6.41M8.8 9.2H8.81M11.2 9.2H11.21"
+      stroke="currentColor"
+      strokeWidth={1.3}
+      strokeLinecap="round"
+    />
+  </svg>
+)
+
+export const IconCameraOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M2.2 5.5C2.2 4.7 2.8 4.1 3.6 4.1H5L5.8 2.9H10.2L11 4.1H12.4C13.2 4.1 13.8 4.7 13.8 5.5V11.2C13.8 12 13.2 12.6 12.4 12.6H3.6C2.8 12.6 2.2 12 2.2 11.2V5.5Z"
+      stroke="currentColor"
+      strokeWidth={1.25}
+      strokeLinejoin="round"
+    />
+    <circle cx={8} cy={8.3} r={2.4} stroke="currentColor" strokeWidth={1.25} />
+  </svg>
+)
+
+export const IconImageOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x={1.7} y={2.3} width={12.6} height={11.4} rx={2} stroke="currentColor" strokeWidth={1.25} />
+    <circle cx={5} cy={5.6} r={1.1} fill="currentColor" />
+    <path
+      d="M2.2 11.5L5.7 8.1C6.2 7.6 6.9 7.6 7.4 8.1L9 9.7L10.5 8.3C11 7.8 11.7 7.8 12.2 8.3L13.8 9.8"
+      stroke="currentColor"
+      strokeWidth={1.25}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+)
+
+export const IconStickerOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M13.7 8.7V7.2C13.7 4.1 11.9 2.2 8 2.2C4.1 2.2 2.3 4.1 2.3 7.2V8.8C2.3 11.9 4.1 13.8 8 13.8H9.4C11.1 13.8 12.5 13.1 13.7 11.9C13.7 11 13.7 9.9 13.7 8.7Z"
+      stroke="currentColor"
+      strokeWidth={1.25}
+      strokeLinejoin="round"
+    />
+    <path d="M13.5 10.2C12.1 10.7 10.9 10.8 9.9 10.8V13" stroke="currentColor" strokeWidth={1.25} />
+    <path
+      d="M5.1 7.1H5.11M10.9 7.1H10.91M5.4 10C6.3 10.8 9.7 10.8 10.6 10"
+      stroke="currentColor"
+      strokeWidth={1.25}
+      strokeLinecap="round"
+    />
+  </svg>
+)
+
 export const IconStopFill16 = () => (
   <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
