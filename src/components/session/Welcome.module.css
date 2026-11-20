@@ -2,6 +2,27 @@
   position: absolute;
   inset: 0;
   display: flex;
+  background: var(--chat-page-bg, var(--dsw-alias-bg-base));
+}
+
+.withBackground {
+  --chat-header-bg: transparent;
+  --chat-header-border: 0;
+  background-position: center;
+  background-size: cover;
+}
+
+.withBackground::before {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: var(--chat-image-veil, color-mix(in srgb, var(--dsw-alias-bg-base) 58%, transparent));
+  pointer-events: none;
+}
+
+.withBackground > * {
+  position: relative;
+  z-index: 1;
 }
 
 .welcome {
@@ -62,7 +83,7 @@
     font-size: 11px;
     line-height: 16px;
     text-align: center;
-    color: var(--dsw-alias-label-tertiary);
+    color: var(--chat-caveat-color, var(--dsw-alias-label-tertiary));
     user-select: none;
   }
 }

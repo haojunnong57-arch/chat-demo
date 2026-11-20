@@ -1,14 +1,29 @@
+import clsx from 'clsx'
 import { useRef, useState } from 'react'
 import { Button } from '../base/Button.js'
 import { showToast } from '../base/toastState.js'
-import { useTranslate } from '../../i18n/index.js'
-import { setChatBackground, useSettings } from '../../services/settings.js'
+import { useTranslate, type TranslationKey } from '../../i18n/index.js'
+import {
+  setChatBackground,
+  setChatTheme,
+  useSettings,
+  type ChatTheme,
+} from '../../services/settings.js'
 import { imageFileToBackground } from '../../utils/image.js'
 import styles from './Settings.module.css'
 
-/** 聊天背景：点击预览或按钮从 iOS 相册选图，压缩后保存在本机。 */
+const chatThemes: { value: ChatTheme; label: TranslationKey }[] = [
+  { value: 'default', label: 'settingsChatThemeDefault' },
+  { value: 'wechat', label: 'settingsChatThemeWechat' },
+  { value: 'imessage', label: 'settingsChatThemeImessage' },
+  { value: 'instagram', label: 'settingsChatThemeInstagram' },
+  { value: 'glass', label: 'settingsChatThemeGlass' },
+]
+
+/** 聊天外观：主题皮肤 + 自定义相册背景；两者可叠加。 */
 export const BackgroundSetting = () => {
   const t = useTranslate()
+  const chatTheme = useSettings((state) => state.chatTheme)
   const background = useSettings((state) => state.chatBackground)
   const inputRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
@@ -37,8 +52,44 @@ export const BackgroundSetting = () => {
 
   return (
     <div className={styles.background}>
+      <div className={styles.backgroundTitle}>{t('settingsChatThemeTitle')}</div>
+      <div className={styles.backgroundDescription}>
+        {t('settingsChatThemeDescription')}
+      </div>
+      <div
+        role="radiogroup"
+        aria-label={t('settingsChatThemeTitle')}
+        className={styles.chatThemeGrid}
+      >
+        {chatThemes.map((theme) => {
+          const selected = chatTheme === theme.value
+          return (
+            <button
+              key={theme.value}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              className={clsx(styles.chatThemeCard, selected && styles.chatThemeCardSelected)}
+              onClick={() => setChatTheme(theme.value)}
+            >
+              <span className={styles.chatThemePreview} data-preview={theme.value}>
+                <span className={styles.chatThemePreviewBar} />
+                <span className={styles.chatThemePreviewIn} />
+                <span className={styles.chatThemePreviewOut} />
+              </span>
+              <span className={styles.chatThemeName}>{t(theme.label)}</span>
+              {selected ? <span className={styles.chatThemeCheck}>✓</span> : null}
+            </button>
+          )
+        })}
+      </div>
+      <div className={styles.chatThemeHint}>{t('settingsChatThemeHint')}</div>
+
+      <div className={styles.chatBackgroundDivider} />
       <div className={styles.backgroundTitle}>{t('settingsChatBackground')}</div>
-      <div className={styles.backgroundDescription}>{t('settingsChatBackgroundDescription')}</div>
+      <div className={styles.backgroundDescription}>
+        {t('settingsChatBackgroundDescription')}
+      </div>
       <button
         type="button"
         className={styles.backgroundPreview}

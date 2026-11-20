@@ -1,5 +1,8 @@
 .message {
   position: relative;
+  display: var(--chat-assistant-layout, block);
+  flex-direction: column;
+  align-items: flex-start;
 
   &:hover .actions,
   &:focus-within .actions {
@@ -9,6 +12,23 @@
   :global(.ds-assistant-message-main-content) {
     padding-bottom: 6px;
   }
+}
+
+.body {
+  display: var(--chat-assistant-display, contents);
+  box-sizing: border-box;
+  max-width: var(--chat-assistant-max-width, none);
+  padding: var(--chat-assistant-padding, 0);
+  border-radius: var(--chat-assistant-radius, 0);
+  color: var(--chat-assistant-text, var(--dsw-alias-label-primary));
+  background: var(--chat-assistant-bg, transparent);
+  box-shadow: var(--chat-assistant-shadow, none);
+  backdrop-filter: var(--chat-bubble-backdrop, none);
+  -webkit-backdrop-filter: var(--chat-bubble-backdrop, none);
+}
+
+.bodyEmpty {
+  display: none !important;
 }
 
 .waiting {

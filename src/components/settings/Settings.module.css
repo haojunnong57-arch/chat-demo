@@ -608,3 +608,187 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
+/* 聊天主题卡片 */
+.chatThemeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 2px 0 0;
+}
+
+.chatThemeCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 7px;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 14px;
+  background: var(--dsw-alias-bg-layer-2);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color var(--ds-transition-duration) var(--ds-ease-in-out),
+    box-shadow var(--ds-transition-duration) var(--ds-ease-in-out),
+    background-color var(--ds-transition-duration) var(--ds-ease-in-out);
+
+  &:hover {
+    background: var(--dsw-alias-interactive-bg-hover);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--dsw-alias-button-primary-fill);
+  }
+}
+
+.chatThemeCardSelected {
+  border-color: var(--dsw-alias-brand-primary);
+  box-shadow: 0 0 0 1px var(--dsw-alias-brand-primary);
+}
+
+.chatThemePreview {
+  position: relative;
+  display: block;
+  height: 44px;
+  overflow: hidden;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.chatThemePreviewBar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.chatThemePreviewIn,
+.chatThemePreviewOut {
+  position: absolute;
+  display: block;
+  height: 10px;
+  border-radius: 6px;
+}
+
+.chatThemePreviewIn {
+  top: 16px;
+  left: 8px;
+  width: 40%;
+  background: #e5e5ea;
+}
+
+.chatThemePreviewOut {
+  right: 8px;
+  bottom: 8px;
+  width: 34%;
+  background: #0b84ff;
+}
+
+.chatThemePreview[data-preview='wechat'] {
+  background: #ededed;
+
+  .chatThemePreviewBar {
+    background: #dedede;
+  }
+
+  .chatThemePreviewIn {
+    background: #ffffff;
+  }
+
+  .chatThemePreviewOut {
+    background: #95ec69;
+  }
+}
+
+.chatThemePreview[data-preview='imessage'] {
+  background: #ffffff;
+
+  .chatThemePreviewIn {
+    background: #e9e9eb;
+  }
+
+  .chatThemePreviewOut {
+    background: #0b84ff;
+  }
+}
+
+.chatThemePreview[data-preview='instagram'] {
+  background: #ffffff;
+
+  .chatThemePreviewIn {
+    background: #efefef;
+  }
+
+  .chatThemePreviewOut {
+    background: linear-gradient(135deg, #405de6, #833ab4 48%, #e1306c 82%, #fd1d1d);
+  }
+}
+
+.chatThemePreview[data-preview='glass'] {
+  background:
+    radial-gradient(80px 50px at 0% 0%, rgba(0, 122, 255, 0.25), transparent 70%),
+    radial-gradient(90px 60px at 100% 100%, rgba(255, 45, 85, 0.2), transparent 70%),
+    linear-gradient(145deg, #f5f9ff, #e4ecf7);
+
+  .chatThemePreviewIn {
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .chatThemePreviewOut {
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+}
+
+.chatThemeName {
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 17px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chatThemeCheck {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--dsw-alias-brand-primary);
+  color: var(--dsw-specific-bg-base, #fff);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.chatThemeHint {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.chatBackgroundDivider {
+  height: 1px;
+  margin: 4px 0 2px;
+  background: var(--dsw-alias-border-l2-darkmode-thin);
+}
+
+@media (max-width: 560px) {
+  .chatThemeGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

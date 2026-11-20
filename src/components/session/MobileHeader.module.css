@@ -5,6 +5,10 @@
   box-sizing: border-box;
   height: calc(60px + env(safe-area-inset-top, 0px));
   padding: calc(12px + env(safe-area-inset-top, 0px)) 10px 4px;
+  background: var(--chat-header-bg, transparent);
+  border-bottom: var(--chat-header-border, 0);
+  backdrop-filter: var(--chat-header-backdrop, none);
+  -webkit-backdrop-filter: var(--chat-header-backdrop, none);
 }
 
 .title {

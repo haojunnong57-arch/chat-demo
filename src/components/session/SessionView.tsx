@@ -28,6 +28,7 @@ export const SessionView = ({
   const isMobile = useIsMobile()
   const title = session.title || t('untitledChat')
   const chatBackground = useSettings((state) => state.chatBackground)
+  const chatTheme = useSettings((state) => state.chatTheme)
   const autoRead = useSettings((state) => state.autoRead)
   const previousStreaming = useRef(streaming)
 
@@ -50,7 +51,12 @@ export const SessionView = ({
 
   return (
     <div
-      className={clsx(styles.view, chatBackground && styles.withBackground)}
+      className={clsx(
+        styles.view,
+        `chat-theme-${chatTheme}`,
+        chatBackground && styles.withBackground
+      )}
+      data-chat-theme={chatTheme}
       style={chatBackground ? { backgroundImage: `url(${chatBackground})` } : undefined}
     >
       {isMobile ? (

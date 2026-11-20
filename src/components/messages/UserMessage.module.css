@@ -28,21 +28,24 @@
 }
 
 .bubble {
-  max-width: calc(100% - 88px);
+  max-width: var(--chat-user-max-width, calc(100% - 88px));
   box-sizing: border-box;
   padding: 10px 16px;
-  border-radius: 22px;
-  font-size: 16px;
-  line-height: 24px;
-  color: var(--dsw-alias-label-primary);
-  background-color: var(--dsw-specific-bubble);
+  border-radius: var(--chat-user-radius, 22px);
+  font-size: var(--chat-bubble-font-size, 16px);
+  line-height: var(--chat-bubble-line-height, 24px);
+  color: var(--chat-user-text, var(--dsw-alias-label-primary));
+  background: var(--chat-user-bubble, var(--dsw-specific-bubble));
+  box-shadow: var(--chat-user-shadow, none);
+  backdrop-filter: var(--chat-bubble-backdrop, none);
+  -webkit-backdrop-filter: var(--chat-bubble-backdrop, none);
   white-space: pre-wrap;
   word-break: break-word;
 }
 
 @media not all and (min-width: 440px) {
   .bubble {
-    max-width: calc(100% - 68px);
+    max-width: var(--chat-user-max-width, calc(100% - 68px));
   }
 }
 

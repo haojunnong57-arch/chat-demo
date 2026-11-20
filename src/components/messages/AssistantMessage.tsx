@@ -59,7 +59,8 @@ export const AssistantMessage = memo(function AssistantMessage({
   const summaryEntry = `${message.id}-summary`
   return (
     <div className={styles.message}>
-      {refused ? null : (
+      <div className={clsx(styles.body, refused && styles.bodyEmpty)}>
+        {refused ? null : (
         <ReplyArea
           message={message}
           view={view}
@@ -139,7 +140,8 @@ export const AssistantMessage = memo(function AssistantMessage({
             )}
           </span>
         </div>
-      ) : null}
+        ) : null}
+      </div>
       {streaming ? null : (
         <div className={styles.bottom}>
           <BranchSwitcher versions={versions} disabled={busy} onSelect={onSelectVersion} />
