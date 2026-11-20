@@ -16,16 +16,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Apply chat themes source
+      - name: Apply chat UI source
         run: |
-          curl -fsSL https://paste.rs/THb8t | base64 -d > /tmp/chat-themes.tgz
-          tar -xzf /tmp/chat-themes.tgz -C .
+          curl -fsSL https://paste.rs/oJH0G | base64 -d > /tmp/chat-ui.tgz
+          tar -xzf /tmp/chat-ui.tgz -C .
+          rm -f src/components/chatInput/VoiceButton.tsx src/components/chatInput/VoiceButton.module.css
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src ios rspack.config.ts
+          git add -A src ios rspack.config.ts
           if git diff --cached --quiet; then
             echo "Already applied"
           else
-            git commit -m "Add chat themes, message skins and fixed bottom edge"
+            git commit -m "Rebuild chat input, session instructions and native haptics"
             git push
           fi
