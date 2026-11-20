@@ -25,22 +25,32 @@ const describeRecordingError = (error: unknown): TranslationMessage => {
   return { key: 'voiceInputFailed' }
 }
 
+type VoiceInputOptions = {
+  /** 转写并插入草稿后触发；按住说话用它来自动发送 */
+  onComplete?: (text: string) => void
+}
+
 /**
- * 语音输入（oneshot）：点击开始录音，再次点击结束并转写，结果交给 onText 填入输入框。
- * 转写中再次点击取消。录满 120 秒自动结束。
+ * 语音输入：按住开始录音，松手结束并转写。
+ * 转写结果先交给 onText 插入草稿；如果提供了 onComplete，再在状态回到 idle 后回调。
+ * 录满 120 秒自动结束。
  */
-export const useVoiceInput = (onText: (text: string) => void) => {
+export const useVoiceInput = (onText: (text: string) => void, options: VoiceInputOptions = {}) => {
   const [status, setStatus] = useState<VoiceInputStatus>('idle')
   /** 本次录音已录秒数，只在录音中递增 */
   const [seconds, setSeconds] = useState(0)
   const recordingRef = useRef<Recording | null>(null)
   const controllerRef = useRef<AbortController | null>(null)
   const operationRef = useRef(0)
+  const pendingStopRef = useRef(false)
   const onTextRef = useRef(onText)
+  const onCompleteRef = useRef(options.onComplete)
   onTextRef.current = onText
+  onCompleteRef.current = options.onComplete
 
   const cancelOperation = useCallback(() => {
     operationRef.current++
+    pendingStopRef.current = false
     recordingRef.current?.cancel()
     recordingRef.current = null
     controllerRef.current?.abort()
@@ -55,13 +65,15 @@ export const useVoiceInput = (onText: (text: string) => void) => {
   const finish = useCallback(async () => {
     const recording = recordingRef.current
     if (!recording) {
-      // 仍在等待麦克风授权时也允许取消；迟到的录音对象会立即释放。
-      cancel()
+      // 还在等待麦克风授权就松手了：等录音对象创建后立刻结束，而不是丢掉这次操作。
+      pendingStopRef.current = true
       return
     }
+    pendingStopRef.current = false
     const operation = operationRef.current
     recordingRef.current = null
     let controller: AbortController | null = null
+    let recognized = ''
     try {
       let audio: Blob | null
       try {
@@ -79,8 +91,9 @@ export const useVoiceInput = (onText: (text: string) => void) => {
       if (controller.signal.aborted || operationRef.current !== operation) {
         return
       }
-      if (text.trim()) {
-        onTextRef.current(text.trim())
+      recognized = text.trim()
+      if (recognized) {
+        onTextRef.current(recognized)
       } else {
         showToast({ key: 'voiceInputEmpty' })
       }
@@ -92,22 +105,18 @@ export const useVoiceInput = (onText: (text: string) => void) => {
       if (operationRef.current === operation) {
         controllerRef.current = null
         setStatus('idle')
+        if (recognized) {
+          onCompleteRef.current?.(recognized)
+        }
       }
     }
-  }, [cancel])
+  }, [])
 
-  const toggle = useCallback(async () => {
-    if (!AVAILABLE) {
+  const start = useCallback(async () => {
+    if (!AVAILABLE || status !== 'idle') {
       return
     }
-    if (status === 'recording') {
-      await finish()
-      return
-    }
-    if (status === 'transcribing') {
-      cancel()
-      return
-    }
+    pendingStopRef.current = false
     const operation = ++operationRef.current
     setStatus('recording')
     try {
@@ -122,13 +131,28 @@ export const useVoiceInput = (onText: (text: string) => void) => {
         return
       }
       recordingRef.current = recording
+      if (pendingStopRef.current) {
+        void finish()
+      }
     } catch (error) {
       if (operationRef.current === operation) {
         setStatus('idle')
         showToast(describeRecordingError(error))
       }
     }
-  }, [status, finish, cancel])
+  }, [status, finish])
+
+  const toggle = useCallback(async () => {
+    if (status === 'recording') {
+      await finish()
+      return
+    }
+    if (status === 'transcribing') {
+      cancel()
+      return
+    }
+    await start()
+  }, [status, start, finish, cancel])
 
   useEffect(() => {
     if (status !== 'recording') {
@@ -148,5 +172,5 @@ export const useVoiceInput = (onText: (text: string) => void) => {
   /** 当前录音的频谱分析节点，未录音时为 null */
   const getAnalyser = useCallback(() => recordingRef.current?.analyser ?? null, [])
 
-  return { status, seconds, getAnalyser, toggle, cancel, available: AVAILABLE }
+  return { status, seconds, getAnalyser, start, finish, toggle, cancel, available: AVAILABLE }
 }

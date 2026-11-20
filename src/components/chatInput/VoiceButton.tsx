@@ -15,14 +15,18 @@ export const VoiceButton = ({
   status,
   disabled = false,
   seconds,
-  onClick,
+  onPressStart,
+  onPressEnd,
+  onPressCancel,
 }: {
   status: VoiceInputStatus
   /** 非安全上下文中按钮置灰，tooltip 提示录音需要 HTTPS */
   disabled?: boolean
   /** 本次录音已录秒数，录音中显示在按钮左侧 */
   seconds: number
-  onClick: () => void
+  onPressStart: () => void
+  onPressEnd: () => void
+  onPressCancel: () => void
 }) => {
   const t = useTranslate()
   const recording = status === 'recording'
@@ -49,11 +53,19 @@ export const VoiceButton = ({
           aria-label={label}
           aria-pressed={recording}
           aria-disabled={disabled}
-          onClick={() => {
-            if (!disabled) {
-              onClick()
+          onPointerDown={(event) => {
+            if (disabled) {
+              return
             }
+            event.preventDefault()
+            event.currentTarget.setPointerCapture(event.pointerId)
+            onPressStart()
           }}
+          onPointerUp={(event) => {
+            event.preventDefault()
+            onPressEnd()
+          }}
+          onPointerCancel={() => onPressCancel()}
         >
           {recording ? (
             <span className={styles.active}>

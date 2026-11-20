@@ -31,7 +31,7 @@ private struct RootView: View {
       Color(uiColor: .systemBackground).ignoresSafeArea()
       if let url = webServer.rootURL {
         WebView(url: url)
-          .ignoresSafeArea(.keyboard, edges: .bottom)
+          .ignoresSafeArea()
       } else if let error = webServer.error {
         VStack(spacing: 12) {
           Image(systemName: "exclamationmark.triangle")

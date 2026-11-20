@@ -36,6 +36,7 @@ import { Modal } from '../base/Modal.js'
 import { Select } from '../base/Select.js'
 import { showToast } from '../base/toastState.js'
 import { ApiKeyConfirm, ApiKeyField, useApiKeyEditor } from './ApiKeyField.js'
+import { BackgroundSetting } from './BackgroundSetting.js'
 import { McpSettings } from './McpSettings.js'
 import { SupportSettings } from './SupportSettings.js'
 import { closeSettings, useSettingsDialog, type SettingsSection } from './settingsDialogState.js'
@@ -108,6 +109,7 @@ const SettingsContent = () => {
           {section === 'general' ? (
             <>
               <ThemeSetting />
+              <BackgroundSetting />
               <LocaleSetting />
               <TtsVoiceSetting />
               <LocationSetting />

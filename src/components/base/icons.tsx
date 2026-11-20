@@ -484,6 +484,22 @@ export const IconMicFill16 = () => (
   </svg>
 )
 
+
+export const IconVolumeOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2.25 6.25H4.5L7.75 3.75V12.25L4.5 9.75H2.25V6.25Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+    <path d="M10.25 5.5C11.15 6.2 11.65 7.05 11.65 8C11.65 8.95 11.15 9.8 10.25 10.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    <path d="M12.2 3.7C13.55 4.85 14.35 6.3 14.35 8C14.35 9.7 13.55 11.15 12.2 12.3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+)
+
+export const IconVolumeMuteOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2.25 6.25H4.5L7.75 3.75V12.25L4.5 9.75H2.25V6.25Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+    <path d="M10.75 6.25L14.25 9.75M14.25 6.25L10.75 9.75" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+)
+
 export const IconPlayMediaOutline16 = () => (
   <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path

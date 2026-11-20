@@ -13,3 +13,9 @@ declare module 'prismjs/components/*' {}
 
 /** KaTeX 化学公式扩展通过副作用注册到 KaTeX */
 declare module 'katex/contrib/mhchem' {}
+
+/** 本机图片资源，由 rspack 作为 asset 输出 URL */
+declare module '*.png' {
+  const src: string
+  export default src
+}

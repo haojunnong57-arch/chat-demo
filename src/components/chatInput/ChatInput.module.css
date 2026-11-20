@@ -330,3 +330,120 @@
     cursor: not-allowed;
   }
 }
+
+/* 按住说话：录音时浮在输入框上方的蓝色胶囊 */
+.holdBar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 132px);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 40px);
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 52%),
+    linear-gradient(135deg, #3568ff, #2449db);
+  box-shadow:
+    0 12px 30px rgba(38, 79, 219, 0.32),
+    0 0 0 1px rgba(38, 79, 219, 0.08);
+  color: #fff;
+  font-size: 13px;
+  line-height: 20px;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: holdBarIn 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.holdBarTranscribing {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 52%),
+    linear-gradient(135deg, #4f7cff, #2d55e2);
+}
+
+.holdMic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.holdWave {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 18px;
+}
+
+.holdWave i {
+  display: block;
+  width: 3px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  animation: holdWave 1.1s ease-in-out infinite;
+}
+
+.holdWave i:nth-child(2) {
+  animation-delay: -0.18s;
+}
+
+.holdWave i:nth-child(3) {
+  animation-delay: -0.36s;
+}
+
+.holdWave i:nth-child(4) {
+  animation-delay: -0.54s;
+}
+
+.holdWave i:nth-child(5) {
+  animation-delay: -0.72s;
+}
+
+.holdText {
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+@keyframes holdBarIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+@keyframes holdWave {
+  0%,
+  100% {
+    height: 6px;
+    opacity: 0.65;
+  }
+  50% {
+    height: 16px;
+    opacity: 1;
+  }
+}
+
+@media not all and (min-width: 768px) {
+  .holdBar {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 118px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holdBar,
+  .holdWave i {
+    animation: none;
+  }
+}

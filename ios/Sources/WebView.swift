@@ -26,6 +26,11 @@ struct WebView: UIViewRepresentable {
     webView.uiDelegate = context.coordinator
     webView.allowsBackForwardNavigationGestures = false
     webView.scrollView.contentInsetAdjustmentBehavior = .never
+    // 和官方移动端一致：页面固定为 1 倍，不允许双指缩放
+    webView.scrollView.pinchGestureRecognizer?.isEnabled = false
+    webView.scrollView.minimumZoomScale = 1
+    webView.scrollView.maximumZoomScale = 1
+    webView.scrollView.bouncesZoom = false
     webView.scrollView.keyboardDismissMode = .interactive
     webView.isOpaque = true
     webView.backgroundColor = .systemBackground

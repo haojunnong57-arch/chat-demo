@@ -6,6 +6,7 @@ import {
   IconSendOutline16,
   IconStopFill16,
   IconThinkOutline14,
+  IconMicFill16,
 } from '../base/icons.js'
 import { setSearch, setThinking, useSettings } from '../../services/settings.js'
 import { useIsMobile } from '../../app/viewport.js'
@@ -20,7 +21,7 @@ import {
   setDraftText,
   useDrafts,
 } from '../../services/chat/drafts.js'
-import { stopReadAloud } from '../../services/speech/readAloud.js'
+import { primeReadAloud, stopReadAloud } from '../../services/speech/readAloud.js'
 import { IconButton } from '../base/IconButton.js'
 import { Tooltip } from '../base/Tooltip.js'
 import { ensureApiKey } from '../settings/settingsDialogState.js'
@@ -55,6 +56,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
   const search = useSettings((state) => state.search)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const holdActiveRef = useRef(false)
   const togglesRef = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
@@ -102,6 +104,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
   const dragging = useFileDrop(acceptFiles)
 
   /** 转写结果插入到光标处，并把光标移到插入内容之后 */
+  const voiceSendRef = useRef<() => void>(() => {})
   const voice = useVoiceInput((transcript) => {
     const textarea = textareaRef.current
     const current = getDraft(sessionId).text
@@ -112,6 +115,8 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
       textarea?.focus({ preventScroll: true })
       textarea?.setSelectionRange(start + transcript.length, start + transcript.length)
     })
+  }, {
+    onComplete: () => voiceSendRef.current(),
   })
 
   // 欢迎页导入后会话 ID 不变，不能依赖卸载取消语音；订阅开始事件也覆盖快速完成的导入。
@@ -132,10 +137,10 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
   // 排队、上传中或上传失败的附件都留在输入框，全部上传成功后才能发送
   const canSend = !importingHistory && !streaming && voice.status === 'idle' && draftReady
 
-  const send = () => {
+  const send = (fromVoice = false) => {
     if (
       useChatStore.getState().importingHistory ||
-      voice.status !== 'idle' ||
+      (!fromVoice && voice.status !== 'idle') ||
       !prepareDraftMessage(getDraft(sessionId), useUploads.getState().tasks)
     ) {
       return
@@ -144,12 +149,38 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
     if (!ensureApiKey() || !sendMessage(sessionId)) {
       return
     }
+    if (useSettings.getState().autoRead) {
+      primeReadAloud()
+    }
     stopReadAloud()
     if (isMobile) {
       textareaRef.current?.blur()
     } else {
       textareaRef.current?.focus()
     }
+  }
+
+  voiceSendRef.current = () => send(true)
+
+  const holdStart = () => {
+    if (
+      voice.status !== 'idle' ||
+      useChatStore.getState().importingHistory ||
+      streaming ||
+      !ensureApiKey()
+    ) {
+      return
+    }
+    holdActiveRef.current = true
+    void voice.start()
+  }
+
+  const holdEnd = () => {
+    if (!holdActiveRef.current) {
+      return
+    }
+    holdActiveRef.current = false
+    void voice.finish()
   }
 
   return (
@@ -230,16 +261,11 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
         <div className={styles.right}>
           <VoiceButton
             status={voice.status}
-            disabled={!voice.available}
+            disabled={!voice.available || streaming || importingHistory}
             seconds={voice.seconds}
-            onClick={() => {
-              if (
-                voice.status !== 'idle' ||
-                (!useChatStore.getState().importingHistory && ensureApiKey())
-              ) {
-                void voice.toggle()
-              }
-            }}
+            onPressStart={holdStart}
+            onPressEnd={holdEnd}
+            onPressCancel={() => voice.cancel()}
           />
           <IconButton
             size="m"
@@ -278,13 +304,37 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
               className={clsx(styles.sendButton, !canSend && styles.disabled)}
               aria-label={t('send')}
               aria-disabled={!canSend}
-              onClick={send}
+              onClick={() => send()}
             >
               <IconSendOutline16 />
             </button>
           )}
         </div>
       </div>
+      {voice.status !== 'idle' ? (
+        <div
+          className={clsx(
+            styles.holdBar,
+            voice.status === 'transcribing' && styles.holdBarTranscribing
+          )}
+          role="status"
+          aria-live="polite"
+        >
+          <span className={styles.holdMic}>
+            <IconMicFill16 />
+          </span>
+          <span className={styles.holdWave} aria-hidden>
+            {[0, 1, 2, 3, 4].map((index) => (
+              <i key={index} />
+            ))}
+          </span>
+          <span className={styles.holdText}>
+            {voice.status === 'transcribing'
+              ? t('voiceInputTranscribing')
+              : t('voiceInputReleaseToSend')}
+          </span>
+        </div>
+      ) : null}
       {dragging ? <DragMask /> : null}
     </div>
   )

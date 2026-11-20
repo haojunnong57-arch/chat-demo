@@ -23,24 +23,63 @@ export const useReadAloud = create<ReadAloudState>(() => ({ messageId: null, sta
 /** 首帧前多缓冲一点，减少网络抖动造成的断续 */
 const START_DELAY = 0.1
 
-let current: { controller: AbortController; context: AudioContext } | null = null
+type Current = {
+  controller: AbortController
+  context: AudioContext
+  sources: Set<AudioBufferSourceNode>
+}
+
+let current: Current | null = null
+/** 复用一个 AudioContext：发送时用静音帧解锁，自动朗读才能在回复结束后出声 */
+let sharedContext: AudioContext | null = null
+
+const getContext = (): AudioContext => {
+  if (!sharedContext || sharedContext.state === 'closed') {
+    sharedContext = new AudioContext({ sampleRate: TTS_SAMPLE_RATE })
+  }
+  if (sharedContext.state === 'suspended') {
+    void sharedContext.resume().catch(() => {})
+  }
+  return sharedContext
+}
+
+/** 在用户点击发送的手势里调用，解锁后续自动朗读 */
+export const primeReadAloud = () => {
+  try {
+    const context = getContext()
+    const source = context.createBufferSource()
+    source.buffer = context.createBuffer(1, 1, context.sampleRate)
+    source.connect(context.destination)
+    source.start(0)
+  } catch {
+    // 解锁失败只影响自动朗读，不影响聊天
+  }
+}
 
 const finish = (controller: AbortController) => {
   if (current?.controller !== controller) {
     return
   }
-  void current.context.close()
   current = null
   useReadAloud.setState({ messageId: null, status: 'idle' })
 }
 
 /** 停止当前朗读（发送、停止生成、切换会话等场景调用） */
 export const stopReadAloud = () => {
-  if (current) {
-    const { controller } = current
-    controller.abort()
-    finish(controller)
+  const active = current
+  if (!active) {
+    return
   }
+  active.controller.abort()
+  for (const source of active.sources) {
+    try {
+      source.stop()
+    } catch {
+      // 已经自然播完的节点再次 stop 会抛错，忽略即可
+    }
+  }
+  active.sources.clear()
+  finish(active.controller)
 }
 
 /** 16-bit 小端 PCM 转成 Float32；奇数字节留到下一段 */
@@ -73,23 +112,22 @@ export const describeReadAloudError = (error: unknown): TranslationMessage | str
   }
 }
 
-/**
- * 开始朗读一条回复的正文；同一条正在朗读时调用等于停止。
- * 必须在点击事件中同步调用：AudioContext 需要用户手势才能出声。
- */
-export const toggleReadAloud = (
+const begin = (
   messageId: string,
   text: string,
-  onError: (error: unknown) => void
+  onError: (error: unknown) => void,
+  toggle: boolean
 ) => {
   const reading = useReadAloud.getState().messageId
-  stopReadAloud()
-  if (reading === messageId) {
+  if (toggle && reading === messageId) {
+    stopReadAloud()
     return
   }
+  stopReadAloud()
   const controller = new AbortController()
-  const context = new AudioContext({ sampleRate: TTS_SAMPLE_RATE })
-  current = { controller, context }
+  const context = getContext()
+  const sources = new Set<AudioBufferSourceNode>()
+  current = { controller, context, sources }
   useReadAloud.setState({ messageId, status: 'loading' })
   // 音色在开始朗读时读取，设置中切换后下一次朗读生效
   const { apiKey, ttsVoice } = useSettings.getState()
@@ -125,12 +163,19 @@ export const toggleReadAloud = (
         source.start(nextTime)
         nextTime += buffer.duration
         lastSource = source
+        sources.add(source)
         if (useReadAloud.getState().status === 'loading') {
           useReadAloud.setState({ status: 'playing' })
         }
       }
       if (lastSource) {
-        lastSource.onended = () => finish(controller)
+        const finalSource = lastSource
+        finalSource.onended = () => {
+          sources.delete(finalSource)
+          if (sources.size === 0) {
+            finish(controller)
+          }
+        }
       } else {
         finish(controller)
       }
@@ -141,4 +186,25 @@ export const toggleReadAloud = (
       }
     }
   })()
+}
+
+/**
+ * 开始朗读一条回复的正文；同一条正在朗读时调用等于停止。
+ * 必须在点击事件中同步调用：AudioContext 需要用户手势才能出声。
+ */
+export const toggleReadAloud = (
+  messageId: string,
+  text: string,
+  onError: (error: unknown) => void
+) => {
+  begin(messageId, text, onError, true)
+}
+
+/** 自动朗读入口：即使该条正在朗读也重新开始，不做 toggle。 */
+export const startReadAloud = (
+  messageId: string,
+  text: string,
+  onError: (error: unknown) => void
+) => {
+  begin(messageId, text, onError, false)
 }

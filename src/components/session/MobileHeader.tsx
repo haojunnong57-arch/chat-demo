@@ -1,4 +1,5 @@
 import { IconMenuOutline20, IconNewChatOutline20 } from '../base/icons.js'
+import { AutoReadButton } from './AutoReadButton.js'
 import { useTranslate } from '../../i18n/index.js'
 import { newChat } from '../../services/chat/store.js'
 import { IconButton } from '../base/IconButton.js'
@@ -27,6 +28,9 @@ export const MobileHeader = ({ title }: { title?: string }) => {
             aria-label={t('newChat')}
             onClick={newChat}
           />
+          <div className={styles.actions}>
+            <AutoReadButton />
+          </div>
         </>
       )}
     </div>

@@ -19,6 +19,10 @@ type Settings = {
   themePreference: ThemePreference
   location: UserLocation | null
   ttsVoice: TtsVoice
+  /** 自定义聊天背景，data URL；null 表示使用默认背景 */
+  chatBackground: string | null
+  /** AI 回复完成后自动朗读 */
+  autoRead: boolean
   thinking: boolean
   search: boolean
   siderCollapsed: boolean
@@ -32,6 +36,8 @@ const KEYS = {
   location: 'chat-demo:location',
   themePreference: 'chat-demo:theme-preference',
   ttsVoice: 'chat-demo:tts-voice',
+  chatBackground: 'chat-demo:chat-background',
+  autoRead: 'chat-demo:auto-read',
   thinking: 'chat-demo:thinking',
   search: 'chat-demo:search',
   siderCollapsed: 'chat-demo:sider-collapsed',
@@ -102,6 +108,8 @@ export const useSettings = create<Settings>(() => ({
   location: initialLocation(),
   themePreference: initialThemePreference(),
   ttsVoice: initialTtsVoice(),
+  chatBackground: read(KEYS.chatBackground),
+  autoRead: read(KEYS.autoRead) === 'true',
   thinking: read(KEYS.thinking) === 'true',
   search: read(KEYS.search) === 'true',
   siderCollapsed: read(KEYS.siderCollapsed) === 'true',
@@ -126,6 +134,17 @@ export const setThemePreference = (themePreference: ThemePreference) => {
 export const setTtsVoice = (ttsVoice: TtsVoice) => {
   write(KEYS.ttsVoice, ttsVoice)
   useSettings.setState({ ttsVoice })
+}
+
+export const setChatBackground = (chatBackground: string | null) => {
+  // data URL 可能较大，存储失败时仍保留当前会话内的状态
+  write(KEYS.chatBackground, chatBackground)
+  useSettings.setState({ chatBackground })
+}
+
+export const setAutoRead = (autoRead: boolean) => {
+  write(KEYS.autoRead, String(autoRead))
+  useSettings.setState({ autoRead })
 }
 
 export const setApiKey = (apiKey: string | null) => {
