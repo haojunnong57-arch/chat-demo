@@ -8,6 +8,12 @@ final class WebServer: ObservableObject {
   @Published private(set) var rootURL: URL?
   @Published private(set) var error: String?
 
+  /// 页面必须固定在同一 origin。
+  /// WKWebView 的 localStorage / IndexedDB 都按 scheme + host + port 隔离；以前用
+  /// `server.start(0)` 每次启动随机端口，重开 App 就等于换了一个网站，API Key、
+  /// 聊天记录和引导状态自然全部“消失”。
+  private static let fixedPort: UInt16 = 48123
+
   private let server = HttpServer()
   private var started = false
   private var webDirectory: URL?
@@ -35,7 +41,7 @@ final class WebServer: ObservableObject {
     }]
 
     do {
-      try server.start(0, forceIPv4: true)
+      try server.start(Self.fixedPort, forceIPv4: true)
       let port = try server.port()
       guard let url = URL(string: "http://127.0.0.1:\(port)/") else {
         error = "无法生成本地页面地址"
@@ -43,7 +49,7 @@ final class WebServer: ObservableObject {
       }
       rootURL = url
     } catch {
-      self.error = error.localizedDescription
+      self.error = "本地页面端口 \(Self.fixedPort) 启动失败：\(error.localizedDescription)"
     }
   }
 

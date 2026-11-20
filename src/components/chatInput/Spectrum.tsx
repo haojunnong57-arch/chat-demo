@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import styles from './Spectrum.module.css'
 
-/** 与设计稿一致：2px 宽、3px 间距，静止 5px，最高 36px */
+/** 与官方录音条一致：2px 宽、3px 间距，静止 5px，最高 20px */
 const BAR_WIDTH = 2
 const BAR_GAP = 3
 const BAR_MIN = 5
-const BAR_MAX = 36
+const BAR_MAX = 20
 const MAX_BARS = 60
 /** 人声频段，按对数分布到各柱 */
 const FREQ_LOW = 100

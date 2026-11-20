@@ -249,8 +249,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
-  padding: 12px;
+  margin-top: 0;
+  padding: 10px 12px 12px;
 }
 
 .toggles {
@@ -311,8 +311,38 @@
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   margin-left: auto;
+}
+
+/* 官方输入栏右侧的圆形描边按钮：加号 / 麦克风 */
+.roundButton {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1.5px solid var(--dsw-alias-label-primary);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.12s ease, opacity 0.18s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--dsw-alias-interactive-bg-hover);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.92);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
 }
 
 .sendButton {
@@ -342,12 +372,13 @@
 }
 
 
-/* 输入模式按钮：只在圆形图标，不抢输入框视觉 */
+/* 输入模式按钮：键盘图标无描边，麦克风用圆形描边，和官方底栏一致 */
 .modeButton {
   display: flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
   width: 34px;
   height: 34px;
   padding: 0;
@@ -373,7 +404,12 @@
   }
 }
 
-/* 按住说话：就在输入框最上方，整条蓝，松手发送 */
+.outlinedMode {
+  border: 1.5px solid var(--dsw-alias-label-primary);
+}
+
+/* 按住说话：官方语音模式最上方是一整条「按住说话」；
+   按下后同一条平滑展开为蓝色渐变录音卡，下方工具栏保持不动。 */
 .holdButton {
   position: relative;
   z-index: 1;
@@ -384,15 +420,16 @@
   justify-content: center;
   box-sizing: border-box;
   width: 100%;
-  min-height: 52px;
+  min-height: 64px;
   padding: 0;
   border: none;
+  border-radius: 0;
   color: var(--dsw-alias-label-primary);
   font: inherit;
   font-size: 17px;
   line-height: 24px;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   text-align: center;
   background: transparent;
   cursor: grab;
@@ -400,7 +437,12 @@
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
-  transition: min-height 0.18s cubic-bezier(0.22, 1, 0.36, 1), background 0.18s ease;
+  overflow: hidden;
+  transition:
+    min-height 0.3s cubic-bezier(0.2, 0.95, 0.24, 1.08),
+    background-color 0.2s ease,
+    color 0.2s ease;
+  will-change: min-height;
 
   &:active {
     cursor: grabbing;
@@ -410,6 +452,19 @@
     cursor: not-allowed;
     opacity: 0.55;
   }
+
+  /* 官方未录音时，按住说话与工具栏之间有一条极淡的分隔线 */
+  &::after {
+    position: absolute;
+    right: 12px;
+    bottom: 0;
+    left: 12px;
+    height: 1px;
+    content: '';
+    background: var(--dsw-alias-border-l2-darkmode-thin);
+    opacity: 0.55;
+    pointer-events: none;
+  }
 }
 
 .holdIdleText {
@@ -418,25 +473,30 @@
 }
 
 .holdButtonActive {
-  min-height: 92px;
-  gap: 7px;
+  min-height: 94px;
+  gap: 5px;
+  padding: 9px 0 9px;
   color: #fff;
+  /* 官方录音条是横向蓝色渐变：左端偏亮，右端偏深 */
   background:
-    radial-gradient(120% 180% at 16% -20%, rgba(255, 255, 255, 0.36), transparent 46%),
-    linear-gradient(135deg, #4f8cff 0%, #3267f4 42%, #244ddc 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    radial-gradient(75% 180% at 14% -24%, rgba(255, 255, 255, 0.24), transparent 58%),
+    linear-gradient(90deg, #6496ff 0%, #4d80fa 34%, #3467f1 66%, #2450dd 100%);
+
+  &::after {
+    opacity: 0;
+  }
 }
 
 .holdButtonCancel {
   color: #fff;
   background:
-    radial-gradient(120% 180% at 16% -20%, rgba(255, 255, 255, 0.24), transparent 46%),
-    linear-gradient(135deg, #8f9ab2 0%, #737f96 50%, #5f6a80 100%);
+    radial-gradient(75% 180% at 14% -24%, rgba(255, 255, 255, 0.18), transparent 58%),
+    linear-gradient(90deg, #9aa5ba 0%, #8994aa 36%, #778297 68%, #667086 100%);
 }
 
 .holdButtonTranscribing {
   cursor: wait;
-  opacity: 0.88;
+  opacity: 0.9;
 }
 
 .holdTopLine {
@@ -446,22 +506,25 @@
   justify-content: center;
   box-sizing: border-box;
   width: 100%;
+  height: 42px;
   padding: 0 50px;
-  animation: holdLineIn 0.16s ease both;
+  animation: holdLineIn 0.2s cubic-bezier(0.2, 0.9, 0.2, 1) both;
 }
 
 .holdMic {
   position: absolute;
-  left: 14px;
+  left: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border: 1px solid rgba(255, 255, 255, 0.26);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 1px 4px rgba(20, 40, 100, 0.16);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 1px 3px rgba(18, 45, 120, 0.18);
 }
 
 .holdText {
@@ -470,24 +533,25 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-shadow: 0 1px 1px rgba(20, 52, 140, 0.28);
+  text-shadow: 0 1px 1px rgba(20, 52, 140, 0.22);
 }
 
 .holdTimer {
   position: absolute;
-  right: 14px;
-  font-size: 13px;
+  right: 16px;
+  font-size: 14px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
-  opacity: 0.86;
+  opacity: 0.9;
 }
 
 .holdWaveClip {
   position: relative;
   width: 100%;
-  height: 30px;
+  height: 26px;
+  padding: 0 16px;
   overflow: hidden;
-  animation: holdLineIn 0.2s 0.04s ease both;
+  animation: holdWaveIn 0.24s 0.04s cubic-bezier(0.2, 0.9, 0.2, 1) both;
 }
 
 /* Spectrum 原本是绝对定位覆盖在文字上，这里改为蓝条里的纯波形 */
@@ -501,20 +565,20 @@
   justify-content: center;
   translate: none;
   width: 100%;
-  height: 30px;
+  height: 26px;
   opacity: 1;
   pointer-events: none;
 }
 
 .holdWaveClip span {
   width: 2px;
-  background-color: rgba(255, 255, 255, 0.92) !important;
+  background-color: rgba(255, 255, 255, 0.96) !important;
 }
 
 @keyframes holdLineIn {
   from {
     opacity: 0;
-    transform: translateY(3px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -522,14 +586,32 @@
   }
 }
 
+@keyframes holdWaveIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scaleY(0.72);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+/* 录音时只在输入卡周围加一层很弱的蓝色环境光，不铺满屏幕 */
+.recording {
+  box-shadow:
+    0 0 0 1px rgba(86, 130, 255, 0.22),
+    0 16px 44px rgba(44, 92, 230, 0.18);
+}
+
 @media not all and (min-width: 440px) {
   .holdButton {
-    min-height: 50px;
+    min-height: 62px;
     font-size: 16px;
   }
 
   .holdButtonActive {
-    min-height: 86px;
+    min-height: 92px;
   }
 }
 
@@ -615,12 +697,12 @@
   backdrop-filter: blur(26px) saturate(1.7);
   -webkit-backdrop-filter: blur(26px) saturate(1.7);
 
-  .holdButton {
+  .holdButtonActive {
     background:
-      radial-gradient(120% 180% at 16% -20%, rgba(255, 255, 255, 0.48), transparent 46%),
-      linear-gradient(135deg, rgba(108, 155, 255, 0.94), rgba(50, 96, 240, 0.94));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+      radial-gradient(75% 180% at 14% -24%, rgba(255, 255, 255, 0.3), transparent 58%),
+      linear-gradient(90deg, rgba(105, 155, 255, 0.96), rgba(42, 82, 226, 0.96));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 }
 

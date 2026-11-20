@@ -18,9 +18,11 @@ declare const styles: {
   readonly "toggle": string;
   readonly "selected": string;
   readonly "right": string;
+  readonly "roundButton": string;
   readonly "sendButton": string;
   readonly "disabled": string;
   readonly "modeButton": string;
+  readonly "outlinedMode": string;
   readonly "holdButton": string;
   readonly "holdIdleText": string;
   readonly "holdButtonActive": string;
@@ -32,5 +34,6 @@ declare const styles: {
   readonly "holdTimer": string;
   readonly "holdWaveClip": string;
   readonly "voiceMode": string;
+  readonly "recording": string;
 };
 export = styles;

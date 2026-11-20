@@ -16,7 +16,7 @@ import {
   IconKeyboardOutline16,
   IconMicFill16,
   IconMicOutline16,
-  IconNewChatOutline20,
+  IconPlusOutline20,
   IconSendOutline16,
   IconStickerOutline16,
   IconStopFill16,
@@ -36,7 +36,6 @@ import {
   useDrafts,
 } from '../../services/chat/drafts.js'
 import { primeReadAloud, stopReadAloud } from '../../services/speech/readAloud.js'
-import { IconButton } from '../base/IconButton.js'
 import { Menu } from '../base/Menu.js'
 import { Tooltip } from '../base/Tooltip.js'
 import { ensureApiKey } from '../settings/settingsDialogState.js'
@@ -76,6 +75,8 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
   const search = useSettings((state) => state.search)
   const [mode, setMode] = useState<InputMode>('text')
   const [cancelArmed, setCancelArmed] = useState(false)
+  // 手指按下就立即展开录音卡，不等麦克风权限/录音器初始化完成
+  const [pressing, setPressing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -164,6 +165,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
   )
 
   const voiceBusy = voice.status !== 'idle'
+  const holdActive = pressing || voiceBusy
 
   // 排队、上传中或上传失败的附件都留在输入框，全部上传成功后才能发送
   const canSend =
@@ -215,6 +217,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
     setCancelArmed(false)
     cancelArmedRef.current = false
     holdActiveRef.current = true
+    setPressing(true)
     haptic('light')
     void voice.start()
   }
@@ -239,6 +242,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
       return
     }
     holdActiveRef.current = false
+    setPressing(false)
     if (cancelled || cancelArmedRef.current) {
       setCancelArmed(false)
       cancelArmedRef.current = false
@@ -258,6 +262,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
       voice.cancel()
     }
     setCancelArmed(false)
+    setPressing(false)
     cancelArmedRef.current = false
     setMode(next)
     if (next === 'voice') {
@@ -290,7 +295,8 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
       className={clsx(
         styles.wrapper,
         sessionId === null ? styles.home : styles.session,
-        mode === 'voice' && styles.voiceMode
+        mode === 'voice' && styles.voiceMode,
+        holdActive && styles.recording
       )}
       data-chat-theme={chatTheme}
       onClick={(event) => {
@@ -305,12 +311,12 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
           type="button"
           className={clsx(
             styles.holdButton,
-            voiceBusy && styles.holdButtonActive,
+            holdActive && styles.holdButtonActive,
             cancelArmed && styles.holdButtonCancel,
             voice.status === 'transcribing' && styles.holdButtonTranscribing
           )}
           aria-label={cancelArmed ? t('voiceInputCancelHint') : t('voiceInputHold')}
-          aria-pressed={voiceBusy}
+          aria-pressed={holdActive}
           disabled={importingHistory || streaming}
           onPointerDown={holdStart}
           onPointerMove={holdMove}
@@ -318,7 +324,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
           onPointerCancel={() => holdEnd(true)}
           onContextMenu={(event) => event.preventDefault()}
         >
-          {voiceBusy ? (
+          {holdActive ? (
             <>
               <div className={styles.holdTopLine}>
                 <span className={styles.holdMic}>
@@ -421,20 +427,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
                 <IconKeyboardOutline16 />
               </button>
             </Tooltip>
-          ) : (
-            <Tooltip content={t('chatInputVoiceMode')}>
-              <button
-                type="button"
-                className={styles.modeButton}
-                aria-label={t('chatInputVoiceMode')}
-                disabled={!voice.available || streaming || importingHistory}
-                onClick={() => switchMode('voice')}
-              >
-                <IconMicOutline16 />
-              </button>
-            </Tooltip>
-          )}
-          {chatTheme === 'instagram' ? (
+          ) : chatTheme === 'instagram' ? (
             <Menu
               options={[
                 {
@@ -469,14 +462,17 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
               )}
             </Menu>
           ) : (
-            <IconButton
-              size="m"
-              tone="primary"
-              icon={<IconNewChatOutline20 />}
-              tooltip={t('uploadFile')}
-              disabled={importingHistory}
-              onClick={() => ensureApiKey() && fileInputRef.current?.click()}
-            />
+            <Tooltip content={t('uploadFile')}>
+              <button
+                type="button"
+                className={styles.roundButton}
+                aria-label={t('uploadFile')}
+                disabled={importingHistory}
+                onClick={() => ensureApiKey() && fileInputRef.current?.click()}
+              >
+                <IconPlusOutline20 />
+              </button>
+            </Tooltip>
           )}
           <input
             ref={fileInputRef}
@@ -500,6 +496,31 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
               event.target.value = ''
             }}
           />
+          {mode === 'text' ? (
+            <Tooltip content={t('chatInputVoiceMode')}>
+              <button
+                type="button"
+                className={clsx(styles.modeButton, styles.outlinedMode)}
+                aria-label={t('chatInputVoiceMode')}
+                disabled={!voice.available || streaming || importingHistory}
+                onClick={() => switchMode('voice')}
+              >
+                <IconMicOutline16 />
+              </button>
+            </Tooltip>
+          ) : (
+            <Tooltip content={t('uploadFile')}>
+              <button
+                type="button"
+                className={styles.roundButton}
+                aria-label={t('uploadFile')}
+                disabled={importingHistory}
+                onClick={() => ensureApiKey() && fileInputRef.current?.click()}
+              >
+                <IconPlusOutline20 />
+              </button>
+            </Tooltip>
+          )}
           {streaming && sessionId ? (
             <button
               type="button"
