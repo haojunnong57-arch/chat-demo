@@ -77,34 +77,32 @@ jobs:
       - name: Package unsigned IPA
         run: |
           cd ios
-          rm -rf build/Payload build/DeepSeek-iOS-3.1.0-unsigned.ipa
+          rm -rf build/Payload build/DeepSeek-iOS-3.1.1-unsigned.ipa
           mkdir -p build/Payload
           cp -R build/DeepSeek.xcarchive/Products/Applications/DeepSeek.app build/Payload/
           cd build
-          zip -qr DeepSeek-iOS-3.1.0-unsigned.ipa Payload
+          zip -qr DeepSeek-iOS-3.1.1-unsigned.ipa Payload
 
       - uses: actions/upload-artifact@v4
         with:
-          name: DeepSeek-iOS-3.1.0
-          path: ios/build/DeepSeek-iOS-3.1.0-unsigned.ipa
+          name: DeepSeek-iOS-3.1.1
+          path: ios/build/DeepSeek-iOS-3.1.1-unsigned.ipa
           if-no-files-found: error
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v3.1.0
-          name: DeepSeek iOS 3.1.0 · UI 设计 + 交互动画优化版
+          tag_name: v3.1.1
+          name: DeepSeek iOS 3.1.1 · UI 细节与玻璃可读性修复
           body: |
-            DeepSeek iOS 3.1.0（未签名 IPA / arm64）
+            DeepSeek iOS 3.1.1（未签名 IPA / arm64）
 
-            - Instagram 皮肤文字与气泡改为多层径向渐变，去掉小尾巴拼接痕迹
-            - 液态玻璃输入区改为真实透明材质（背景模糊 + 环境色 + 边缘高光），通透度可调
-            - 弹层、菜单、抽屉加入可打断的 Spring 进场动画；胶囊到面板做 Fluid Morph
-            - 卡片跟随触摸做 3D 透视倾斜与径向流光，松手 Spring 回正
-            - 消息列表交错入场；按住说话立即打断 AI 播报
-            - 支持自定义系统提示词（不追加任何内置说明）与双向头像（未设置则不显示）
-            - 修复聊天背景浅色泛白、深色发黑的蒙层问题
+            - 头像改为微信式常驻列，手机屏幕内完整可见，不再需要横向滑动
+            - 聊天页标题栏新增「更多 → 删除」，不必回侧栏也能删除当前对话
+            - 浅色模式补回极薄雾层，既保留照片层次又保证文字可读
+            - 液态玻璃拉至最透明时保留细白边 + 薄白膜，输入框与文字仍然可读
+            - 设置、菜单、抽屉等弹层统一为磨砂玻璃；通透度设置仅在液态玻璃主题显示
 
             未签名包，请使用 Sideloadly / AltStore 自签后安装。
-          files: ios/build/DeepSeek-iOS-3.1.0-unsigned.ipa
+          files: ios/build/DeepSeek-iOS-3.1.1-unsigned.ipa
           make_latest: true

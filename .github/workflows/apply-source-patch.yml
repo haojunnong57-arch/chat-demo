@@ -19,7 +19,7 @@ jobs:
 
       - name: Apply UI + animation patch
         run: |
-          curl -fsSL "https://aka.doubaocdn.com/s/FKzb7nj4wZ" -o /tmp/ui-glass.tgz
+          curl -fsSL "https://aka.doubaocdn.com/s/slVsJG6ejX" -o /tmp/ui-glass.tgz
           tar -xzf /tmp/ui-glass.tgz -C .
           rm -f /tmp/ui-glass.tgz
           git config user.name "github-actions[bot]"
@@ -28,6 +28,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "Already applied"
           else
-            git commit -m "UI: Instagram skin, real liquid glass, motion system, avatars, custom system prompt"
+            git commit -m "UI 3.1.1: avatar layout, readable glass, light fog, global frosted panels"
             git push
           fi
