@@ -17,9 +17,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Apply UI 3.2.0 source
+      - name: Apply UI 3.2.1 menu fix
         run: |
-          curl -fsSL "https://aka.doubaocdn.com/s/4PO5HWSw2A" -o /tmp/ui-glass.tgz
+          curl -fsSL "https://aka.doubaocdn.com/s/8AYwDEjtWO" -o /tmp/ui-glass.tgz
           tar -xzf /tmp/ui-glass.tgz -C .
           rm -f /tmp/ui-glass.tgz
           git config user.name "github-actions[bot]"
@@ -28,6 +28,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "Already applied"
           else
-            git commit -m "UI 3.2.0: real liquid glass, rubber band, semantic streaming"
+            git commit -m "UI 3.2.1: remove ghost white ring in menus"
             git push
           fi
