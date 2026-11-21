@@ -4,7 +4,8 @@
 
 .menu {
   position: fixed;
-  z-index: 900;
+  z-index: 1000;
+  isolation: isolate;
   box-sizing: border-box;
   min-width: 124px;
   padding: 4px;
@@ -16,6 +17,7 @@
     0 0 4px rgba(0, 0, 0, 0.02),
     0 12px 32px rgba(0, 0, 0, 0.08);
   overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
   transform-origin: 50% 0;
   will-change: transform, opacity;
 }
@@ -45,16 +47,30 @@
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
+  border: 0;
   border-radius: 8px;
+  outline: none;
+  box-shadow: none;
   font-size: 14px;
   line-height: 24px;
   color: var(--dsw-alias-label-primary);
   cursor: pointer;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
   animation: optionIn 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: calc(var(--option-index, 0) * 30ms);
 
+  &:focus,
+  &:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
   &:hover {
+    background-color: var(--dsw-alias-interactive-bg-hover);
+  }
+
+  &:active {
     background-color: var(--dsw-alias-interactive-bg-hover);
   }
 }

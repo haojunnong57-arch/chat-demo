@@ -38,6 +38,24 @@
   pointer-events: none !important;
 }
 
+/*
+ * rdev 包还会在 backdrop 顶层再挂两圈“白色渐变内描边”，尺寸取首次
+ * getBoundingClientRect；菜单从触发胶囊展开时被缓存成 50×70 左右，
+ * 于是菜单中心出现幽灵白圈/白胶囊。它们不是真实折射，直接删掉。
+ */
+.backdrop > span:not(.tint) {
+  display: none !important;
+}
+
+.backdrop :global(.glass) > span:not([class~='glass__warp']) {
+  display: none !important;
+}
+
+/* 包自带的纯黑承托层同样会按旧尺寸残留，直接移除，避免暗斑穿模 */
+.backdrop > :global(div.bg-black) {
+  display: none !important;
+}
+
 [data-ds-dark-theme] .backdrop {
   --glass-tint: rgba(8, 14, 26, 0.2);
 }
