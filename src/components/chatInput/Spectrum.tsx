@@ -21,7 +21,13 @@ const TILT_DB_PER_OCTAVE = 4
  * 录音中的实时频谱：从左到右依次是低频到高频，按对数分段。
  * 每帧直接改 transform，不触发 React 渲染。
  */
-export const Spectrum = ({ getAnalyser }: { getAnalyser: () => AnalyserNode | null }) => {
+export const Spectrum = ({
+  getAnalyser,
+  tone = 'blue',
+}: {
+  getAnalyser: () => AnalyserNode | null
+  tone?: 'blue' | 'red'
+}) => {
   const rootRef = useRef<HTMLDivElement>(null)
   const [count, setCount] = useState(0)
 
@@ -107,7 +113,7 @@ export const Spectrum = ({ getAnalyser }: { getAnalyser: () => AnalyserNode | nu
   }, [count, getAnalyser])
 
   return (
-    <div ref={rootRef} className={styles.spectrum} aria-hidden>
+    <div ref={rootRef} className={styles.spectrum} data-tone={tone} aria-hidden>
       {Array.from({ length: count }, (_, index) => (
         <span key={index} className={styles.bar} />
       ))}

@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { useTranslate } from '../../i18n/index.js'
 import { IconCloseOutline16 } from './icons.js'
 import { IconButton } from './IconButton.js'
+import { LiquidGlassSurface } from './LiquidGlassSurface.js'
 import styles from './Modal.module.css'
 
 /** 当前打开的弹窗，后打开的在末尾；叠放时 Esc 只关闭最上层 */
@@ -31,6 +32,7 @@ export const Modal = ({
 }) => {
   const t = useTranslate()
   const titleId = useId()
+  const contentRef = useRef<HTMLDivElement>(null)
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
   useEffect(() => {
@@ -54,11 +56,19 @@ export const Modal = ({
       onMouseDown={(event) => event.target === event.currentTarget && onClose()}
     >
       <div
+        ref={contentRef}
         className={clsx(styles.content, className)}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
       >
+        <LiquidGlassSurface
+          radius={24}
+          strength="strong"
+          elasticity={0.04}
+          mouseContainer={contentRef}
+          tint="color-mix(in srgb, var(--dsw-alias-bg-layer-2) 54%, transparent)"
+        />
         <div className={styles.header}>
           <div id={titleId} className={styles.title}>
             {title}

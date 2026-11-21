@@ -265,6 +265,8 @@ export const en = {
   settingsGlassOpacity: 'Liquid glass clarity',
   settingsGlassOpacityDescription: 'Slide right for more clarity, left for more frost. Applies to the input, bubbles and glass panels.',
   settingsGlassOpacityValue: 'clarity',
+  settingsEnhancedMotion: 'Enhanced motion',
+  settingsEnhancedMotionDescription: 'Card tilt, fluid morphs and semantic block reveals. Turn off to keep only essential state transitions.',
   settingsSystemPrompt: 'System prompt',
   settingsSystemPromptDescription: 'Leave empty to send no system prompt at all. The text is sent verbatim with nothing added.',
   settingsSystemPromptPlaceholder: 'e.g. You are my personal assistant. Be concise and direct.',

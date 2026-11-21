@@ -27,10 +27,10 @@
   font-size: 14px;
   line-height: 22px;
   color: var(--dsw-alias-label-primary);
-  /* 磨砂玻璃面板：透出下面的聊天背景，而不是一块实色板 */
-  background-color: color-mix(in srgb, var(--dsw-alias-bg-layer-2) 82%, transparent);
-  backdrop-filter: blur(32px) saturate(180%);
-  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  /* 材质由 LiquidGlassSurface 提供；这里只保留排版、圆角与投影 */
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow:
     inset 0 0 0 1px var(--dsw-alias-border-inverted),
     0 0 1px 0 rgba(0, 0, 0, 0.2),
@@ -75,6 +75,8 @@
 }
 
 .header {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -98,10 +100,14 @@
 }
 
 .main {
+  position: relative;
+  z-index: 1;
   color: var(--dsw-alias-label-secondary);
 }
 
 .footer {
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: flex-end;
   gap: 8px;

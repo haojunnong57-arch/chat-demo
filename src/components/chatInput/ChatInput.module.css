@@ -2,6 +2,7 @@
   --line-height: 24px;
   --input-padding-top: 12px;
   position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -22,6 +23,52 @@
 .session {
   box-shadow: var(--chat-input-shadow, 0 4px 10px rgba(0, 0, 0, 0.02), 0 2px 4px rgba(0, 0, 0, 0.04));
 }
+
+.glassBackdrop {
+  --glass-tint: rgba(255, 255, 255, 0.15);
+}
+
+[data-ds-dark-theme] .glassBackdrop {
+  --glass-tint: rgba(8, 14, 26, 0.3);
+}
+
+/* 按住说话：蓝色液态光从输入区向下扩散，上滑取消时整片收束为红色 */
+.voiceAura {
+  position: absolute;
+  z-index: 0;
+  top: -22px;
+  right: -22px;
+  bottom: -82px;
+  left: -22px;
+  border-radius: 48px 48px 40px 40px;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 92% at 50% 4%, rgba(92, 132, 255, 0.46) 0%, rgba(77, 107, 254, 0.2) 42%, transparent 72%),
+    linear-gradient(180deg, rgba(77, 107, 254, 0.2) 0%, rgba(77, 107, 254, 0.05) 48%, transparent 86%);
+  filter: blur(22px) saturate(1.25);
+  transform: translate3d(0, 10px, 0) scale(0.97);
+  transition:
+    opacity 220ms ease-out,
+    transform 460ms cubic-bezier(0.2, 0.95, 0.22, 1.12),
+    background 240ms ease-out;
+}
+
+.recording {
+  overflow: visible;
+}
+
+.recording .voiceAura {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.voiceAura[data-cancel='true'] {
+  background:
+    radial-gradient(120% 92% at 50% 4%, rgba(255, 96, 106, 0.5) 0%, rgba(255, 59, 76, 0.2) 42%, transparent 72%),
+    linear-gradient(180deg, rgba(255, 59, 76, 0.22) 0%, rgba(255, 59, 76, 0.05) 48%, transparent 86%);
+}
+
 
 .wrapper::before {
   position: absolute;
@@ -426,7 +473,7 @@
   min-height: 64px;
   padding: 0;
   border: none;
-  border-radius: 0;
+  border-radius: calc(var(--chat-input-radius, 24px) - 2px) calc(var(--chat-input-radius, 24px) - 2px) 0 0;
   color: var(--dsw-alias-label-primary);
   font: inherit;
   font-size: 17px;
@@ -494,7 +541,8 @@
   color: #fff;
   background:
     radial-gradient(75% 180% at 14% -24%, rgba(255, 255, 255, 0.18), transparent 58%),
-    linear-gradient(90deg, #9aa5ba 0%, #8994aa 36%, #778297 68%, #667086 100%);
+    linear-gradient(90deg, #ff7a83 0%, #fb5661 36%, #f23845 68%, #dc202e 100%);
+  box-shadow: 0 10px 28px rgba(224, 32, 48, 0.24);
 }
 
 .holdButtonTranscribing {
@@ -575,7 +623,6 @@
 
 .holdWaveClip span {
   width: 2px;
-  background-color: rgba(255, 255, 255, 0.96) !important;
 }
 
 @keyframes holdLineIn {
@@ -690,15 +737,18 @@
   }
 }
 
-/* 液态玻璃：主体完全依赖变量里的真实透明度 + 背景模糊，不再有白色边框贴图 */
+/* 液态玻璃：材质完全交给 LiquidGlassSurface，容器本身只保留排版与极淡的文字承托 */
 .wrapper[data-chat-theme='glass'] {
-  border-color: rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.8 + 0.1));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 1.6)),
-    inset 0 -1px 0 rgba(120, 170, 255, 0.12),
-    0 14px 34px rgba(20, 45, 90, 0.14);
-  backdrop-filter: blur(var(--glass-blur, 30px)) saturate(1.9);
-  -webkit-backdrop-filter: blur(var(--glass-blur, 30px)) saturate(1.9);
+  border-color: transparent;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+
+  &::before {
+    display: none;
+  }
 
   .holdButtonActive {
     background:
@@ -706,6 +756,33 @@
       linear-gradient(90deg, rgba(105, 155, 255, 0.96), rgba(42, 82, 226, 0.96));
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+  }
+
+  .holdButtonCancel {
+    background:
+      radial-gradient(75% 180% at 14% -24%, rgba(255, 255, 255, 0.2), transparent 58%),
+      linear-gradient(90deg, #ff7a83 0%, #fb5661 36%, #f23845 68%, #dc202e 100%);
+  }
+
+  .textarea {
+    text-shadow:
+      0 1px 2px rgba(255, 255, 255, 0.4),
+      0 0 12px rgba(255, 255, 255, 0.28);
+  }
+
+  .textarea::placeholder {
+    color: var(--dsw-alias-label-caption);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.26);
+  }
+}
+
+[data-ds-dark-theme] .wrapper[data-chat-theme='glass'] .textarea {
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.55),
+    0 0 12px rgba(0, 0, 0, 0.32);
+
+  &::placeholder {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
   }
 }
 
@@ -722,19 +799,4 @@
   }
 }
 
-/* Liquid Glass 的折射边缘：只用极淡的顶缘镜面与底部环境色，避免「画上去的玻璃」 */
-.wrapper[data-chat-theme='glass']::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 16%),
-    radial-gradient(130% 64% at 50% 118%, rgba(96, 152, 255, 0.16), transparent 68%);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.32);
-  pointer-events: none;
-  opacity: calc(0.35 + var(--glass-fill, 0.2) * 1.1);
-}
+/* 旧版白色边框 + 贴图式玻璃已删除，统一使用 LiquidGlassSurface 的位移折射 */

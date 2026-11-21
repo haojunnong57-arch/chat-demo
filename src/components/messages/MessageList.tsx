@@ -11,6 +11,7 @@ import { closeSearchPanel } from '../search/searchPanelState.js'
 import { AssistantMessage } from './AssistantMessage.js'
 import { ScrollToBottomContext } from './scrollContext.js'
 import { UserMessage } from './UserMessage.js'
+import { useRubberBand } from './useRubberBand.js'
 import type { Message } from '../../services/chat/types.js'
 
 /**
@@ -45,6 +46,7 @@ export const MessageList = ({
   const isMobile = useIsMobile()
   const scrollRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
+  useRubberBand(scrollRef, contentRef, isMobile)
   const stickyRef = useRef(true)
   const scrollTopRef = useRef(0)
   const restoreScrollRef = useRef<{ messageId: string; top: number } | null>(null)

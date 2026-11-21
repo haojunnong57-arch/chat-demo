@@ -1,0 +1,62 @@
+.backdrop {
+  --glass-tint: rgba(255, 255, 255, 0.08);
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  contain: paint;
+}
+
+.tint {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-tint, transparent);
+  pointer-events: none;
+}
+
+.empty {
+  display: block;
+  width: 1px;
+  height: 1px;
+}
+
+/* rdev 的组件把折射层、描边层都绝对定位在父级里，这里强制铺满并裁到容器圆角 */
+.backdrop :global(.glass) {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  pointer-events: none !important;
+}
+
+.backdrop :global(.glass__warp) {
+  pointer-events: none !important;
+}
+
+[data-ds-dark-theme] .backdrop {
+  --glass-tint: rgba(8, 14, 26, 0.2);
+}
+
+/* Safari / Firefox 的折射可能缺失；至少保留一层磨砂底，不能让面板消失 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .backdrop {
+    background: var(--glass-fallback-bg, rgba(255, 255, 255, 0.72));
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  [data-ds-dark-theme] .backdrop {
+    background: var(--glass-fallback-bg, rgba(18, 24, 36, 0.78));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop :global(.glass) {
+    transition: none !important;
+  }
+}

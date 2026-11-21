@@ -256,6 +256,8 @@ export const zh = {
   settingsGlassOpacity: '液态玻璃通透度',
   settingsGlassOpacityDescription: '向右更通透，向左更磨砂；同时作用于输入区、气泡与设置等弹层的玻璃材质。',
   settingsGlassOpacityValue: '通透',
+  settingsEnhancedMotion: '增强动画',
+  settingsEnhancedMotionDescription: '保留卡片倾斜、柔性形变与语义块浮现；关闭后只保留必要状态过渡。',
   settingsSystemPrompt: '系统提示词',
   settingsSystemPromptDescription: '留空表示不发送任何系统提示。内容会原样发送，不追加任何内置说明。',
   settingsSystemPromptPlaceholder: '例如：你是我的私人助理，回答简洁直接。',

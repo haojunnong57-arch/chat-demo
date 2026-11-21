@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useAnchoredPosition, useDismiss } from './anchored.js'
+import { LiquidGlassSurface } from './LiquidGlassSurface.js'
 import { prefersReducedMotion, SPRING } from '../../utils/motion.js'
 import styles from './Menu.module.css'
 
@@ -119,6 +120,12 @@ export const Menu = ({
               style={position ?? undefined}
               role="menu"
             >
+              <LiquidGlassSurface
+                radius={12}
+                elasticity={0.15}
+                mouseContainer={floatingRef}
+                tint="color-mix(in srgb, var(--dsw-specific-menu) 44%, transparent)"
+              />
               {options.map((option, index) => (
                 <div
                   key={option.key}

@@ -38,6 +38,7 @@ import {
 import { primeReadAloud, stopReadAloud } from '../../services/speech/readAloud.js'
 import { Menu } from '../base/Menu.js'
 import { Tooltip } from '../base/Tooltip.js'
+import { LiquidGlassSurface } from '../base/LiquidGlassSurface.js'
 import { ensureApiKey } from '../settings/settingsDialogState.js'
 import { DragMask, useFileDrop } from './DragMask.js'
 import { showToast } from '../base/toastState.js'
@@ -80,6 +81,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
   const holdActiveRef = useRef(false)
   const pointerStartYRef = useRef(0)
   const cancelArmedRef = useRef(false)
@@ -296,6 +298,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
 
   return (
     <div
+      ref={wrapperRef}
       className={clsx(
         styles.wrapper,
         sessionId === null ? styles.home : styles.session,
@@ -309,6 +312,15 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
         }
       }}
     >
+      {chatTheme === 'glass' ? (
+        <LiquidGlassSurface
+          className={styles.glassBackdrop}
+          radius={26}
+          mouseContainer={wrapperRef}
+          elasticity={0.05}
+        />
+      ) : null}
+      <span className={styles.voiceAura} data-cancel={cancelArmed} aria-hidden />
       <DraftAttachments items={attachments} onRetry={retryFile} onRemove={removeFile} />
       {mode === 'voice' ? (
         <button
@@ -346,7 +358,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
                 ) : null}
               </div>
               <div className={styles.holdWaveClip} aria-hidden>
-                <Spectrum getAnalyser={voice.getAnalyser} />
+                <Spectrum getAnalyser={voice.getAnalyser} tone={cancelArmed ? 'red' : 'blue'} />
               </div>
             </>
           ) : (

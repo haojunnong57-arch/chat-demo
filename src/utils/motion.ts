@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useSettings } from '../services/settings.js'
 
 /** 是否要求减少装饰性动效（系统「减弱动态效果」或省电模式） */
 export const prefersReducedMotion = (): boolean => {
@@ -99,4 +100,40 @@ export const useTiltCard = <T extends HTMLElement = HTMLDivElement>({
   }, [lift, max])
 
   return ref
+}
+
+/**
+ * 把「减弱动态效果 / 省电模式 / 用户关闭增强动画」统一写到根节点，
+ * CSS 只保留 80ms 的必要状态过渡，倾斜、流光、语义块和呼吸动效全部停用。
+ */
+export const setupMotionPreference = () => {
+  const root = document.documentElement
+  const apply = () => {
+    const reduced = prefersReducedMotion() || !useSettings.getState().enhancedMotion
+    if (reduced) {
+      root.dataset.motion = 'reduced'
+    } else {
+      delete root.dataset.motion
+    }
+  }
+  apply()
+  const media = window.matchMedia?.('(prefers-reduced-motion: reduce)')
+  media?.addEventListener('change', apply)
+  useSettings.subscribe(apply)
+
+  const batteryApi = navigator as Navigator & {
+    getBattery?: () => Promise<{ level: number; charging: boolean; addEventListener: Function }>
+  }
+  batteryApi.getBattery?.().then((battery) => {
+    const sync = () => {
+      if ((battery.level <= 0.2 && !battery.charging) || !useSettings.getState().enhancedMotion) {
+        root.dataset.motion = 'reduced'
+      } else {
+        delete root.dataset.motion
+      }
+    }
+    sync()
+    battery.addEventListener('levelchange', sync)
+    battery.addEventListener('chargingchange', sync)
+  }).catch(() => undefined)
 }

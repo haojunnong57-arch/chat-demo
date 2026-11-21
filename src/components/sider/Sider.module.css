@@ -1,4 +1,6 @@
 .sider {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -11,6 +13,8 @@
 }
 
 .top {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -36,6 +40,7 @@
 
 .newChat {
   position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -81,6 +86,7 @@
 
 .listWrap {
   position: relative;
+  z-index: 1;
   flex: 1;
   min-height: 0;
   margin-top: 24px;
@@ -118,6 +124,8 @@
 }
 
 .bottom {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-shrink: 0;
   height: 64px;
@@ -180,18 +188,24 @@
 }
 
 .collapsedGroup {
+  position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   gap: 2px;
+  box-sizing: border-box;
   height: 40px;
   padding: 0 2px;
-  box-sizing: border-box;
+  overflow: hidden;
   border-radius: 100px;
-  border: 1px solid var(--dsw-alias-border-l2);
-  background: color-mix(in srgb, var(--dsw-alias-bg-layer-3) 74%, transparent);
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-border-l2) 56%, transparent);
+  background: transparent;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.collapsedGroup > :global(button) {
+  position: relative;
+  z-index: 1;
 }
 
 .drawer {
@@ -243,6 +257,8 @@
 .mobile {
   width: 300px;
   max-width: calc(100vw - 48px);
+  background-color: transparent;
+  border-right-color: transparent;
 
   .listWrap {
     margin-top: 16px;

@@ -52,3 +52,12 @@ body.change-theme *::after {
     overscroll-behavior-y: none;
   }
 }
+
+/* 减弱动态效果 / 低电量 / 用户关闭增强动画：只留必要状态过渡 */
+html[data-motion='reduced'] * {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 80ms !important;
+  scroll-behavior: auto !important;
+}

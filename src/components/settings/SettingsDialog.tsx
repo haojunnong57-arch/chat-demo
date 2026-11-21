@@ -26,6 +26,7 @@ import {
   setLocation,
   setModel,
   setAiAvatar,
+  setEnhancedMotion,
   setGlassOpacity,
   setSystemPrompt,
   setThemePreference,
@@ -118,6 +119,7 @@ const SettingsContent = () => {
               <ThemeSetting />
               <BackgroundSetting />
               {chatTheme === 'glass' ? <GlassOpacitySetting /> : null}
+              <MotionSetting />
               <AvatarSetting />
               <SystemPromptSetting />
               <LocaleSetting />
@@ -683,6 +685,32 @@ const GlassOpacitySetting = () => {
         }
       >
         <span />
+      </div>
+    </div>
+  )
+}
+
+/** 关闭后停用装饰动效；系统减弱动态效果时自动降级，无需手动关闭 */
+const MotionSetting = () => {
+  const t = useTranslate()
+  const enhancedMotion = useSettings((state) => state.enhancedMotion)
+  return (
+    <div className={styles.settingBlock}>
+      <div className={styles.motionRow}>
+        <div className={styles.text}>
+          <div className={styles.blockTitle}>{t('settingsEnhancedMotion')}</div>
+          <div className={styles.blockDescription}>{t('settingsEnhancedMotionDescription')}</div>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={enhancedMotion}
+          aria-label={t('settingsEnhancedMotion')}
+          className={clsx(styles.motionSwitch, enhancedMotion && styles.motionSwitchOn)}
+          onClick={() => setEnhancedMotion(!enhancedMotion)}
+        >
+          <span className={styles.motionThumb} />
+        </button>
       </div>
     </div>
   )

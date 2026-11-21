@@ -1,4 +1,4 @@
-import { createElement, memo, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react'
+import { createElement, Fragment, memo, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react'
 import clsx from 'clsx'
 import type {
   BlockContent,
@@ -159,55 +159,77 @@ const MarkdownBlockContentOrDefinitionContent = memo(
   function MarkdownBlockContentOrDefinitionContent({
     nodes,
     loading,
+    reveal = false,
   }: {
     nodes: Array<BlockContent | DefinitionContent>
     loading: boolean
+    /** 顶层语义块包一层容器，用于流式输出时按块浮现；嵌套块不重复动画 */
+    reveal?: boolean
   }) {
     return nodes.map((node, index) => {
+      let rendered: ReactNode
       switch (node.type) {
         case 'math':
-          return <MathBlock key={index} value={node.value} />
+          rendered = <MathBlock value={node.value} />
+          break
         case 'thematicBreak':
-          return <hr key={index} />
+          rendered = <hr />
+          break
         case 'blockquote':
-          return (
-            <blockquote key={index}>
+          rendered = (
+            <blockquote>
               <MarkdownBlockContentOrDefinitionContent nodes={node.children} loading={loading} />
             </blockquote>
           )
+          break
         case 'html':
-          return <Html key={index} value={node.value} />
+          rendered = <Html value={node.value} />
+          break
         case 'heading':
-          return node.children.length === 0
-            ? null
-            : createElement(
-                `h${node.depth}`,
-                { key: index },
-                <MarkdownPhrasingContent nodes={node.children} />
-              )
+          rendered =
+            node.children.length === 0
+              ? null
+              : createElement(
+                  `h${node.depth}`,
+                  null,
+                  <MarkdownPhrasingContent nodes={node.children} />
+                )
+          break
         case 'paragraph':
-          return (
-            <p key={index} className="ds-markdown-paragraph">
+          rendered = (
+            <p className="ds-markdown-paragraph">
               <MarkdownPhrasingContent nodes={node.children} />
             </p>
           )
+          break
         case 'code':
-          return (
-            <CodeBlock
-              key={index}
-              code={node.value}
-              infostring={node.lang || 'text'}
-              loading={loading}
-            />
+          rendered = (
+            <CodeBlock code={node.value} infostring={node.lang || 'text'} loading={loading} />
           )
+          break
         case 'table':
-          return <Table node={node} key={index} />
+          rendered = <Table node={node} />
+          break
         case 'list':
-          return <List key={index} node={node} loading={loading} />
+          rendered = <List node={node} loading={loading} />
+          break
         default:
           // 脚注与定义已在解析时换成段落
-          return null
+          rendered = null
       }
+      if (!reveal) {
+        return createElement(Fragment, { key: index }, rendered)
+      }
+      return (
+        <div
+          key={index}
+          className="ds-reveal-block"
+          data-kind={node.type}
+          style={{ ['--reveal-delay' as string]: `${Math.min(index, 2) * 52}ms` }}
+        >
+          {rendered}
+        </div>
+      )
     })
   }
 )
@@ -234,12 +256,14 @@ export const MarkdownAstRenderer = memo(function MarkdownAstRenderer({
 
   return useMemo(
     () => (
-      <div className={clsx('ds-markdown', className)}>
+      <div className={clsx('ds-markdown', className, loading && 'ds-markdown-streaming')}>
         {/* 解析器在根节点下产出块级内容。 */}
         <MarkdownBlockContentOrDefinitionContent
           nodes={ast.children as Array<BlockContent | DefinitionContent>}
           loading={loading}
+          reveal
         />
+        {loading ? <span className="ds-liquid-caret" aria-hidden /> : null}
       </div>
     ),
     [className, ast.children, loading]

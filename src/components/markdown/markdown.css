@@ -378,3 +378,134 @@
   color: var(--dsw-alias-label-secondary);
   font-size: 14px;
 }
+
+/* 流式回复：按语义块成块浮现，已有块保持 DOM，不重排、不逐字硬跳 */
+.ds-reveal-block {
+  display: block;
+}
+
+.ds-markdown-streaming .ds-reveal-block {
+  animation: dsBlockIn 560ms cubic-bezier(0.22, 1.08, 0.36, 1) both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+.ds-markdown-streaming .ds-reveal-block[data-kind='heading'] {
+  animation-duration: 440ms;
+}
+
+.ds-markdown-streaming .ds-reveal-block[data-kind='list'] {
+  animation-duration: 600ms;
+  animation-name: dsListIn;
+}
+
+.ds-markdown-streaming .ds-reveal-block[data-kind='code'],
+.ds-markdown-streaming .ds-reveal-block[data-kind='table'] {
+  animation-duration: 640ms;
+  animation-name: dsPanelIn;
+}
+
+@keyframes dsBlockIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0);
+    filter: blur(5px);
+  }
+  68% {
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+
+@keyframes dsListIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+
+@keyframes dsPanelIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 7px, 0) scale(0.988);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* 流式尾部：液态小圆点，柔和呼吸而不是刺眼方块 */
+.ds-markdown {
+  position: relative;
+}
+
+.ds-liquid-caret {
+  position: absolute;
+  right: 3px;
+  bottom: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8ab4ff 0%, #4d6bfe 58%, #2f4ee0 100%);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, #4d6bfe 18%, transparent),
+    0 0 12px rgba(77, 107, 254, 0.38);
+  pointer-events: none;
+  user-select: none;
+  animation: dsCaretBreath 1.55s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes dsCaretBreath {
+  0%,
+  100% {
+    transform: scale(0.72, 0.86);
+    opacity: 0.55;
+  }
+  45% {
+    transform: scale(1.08, 0.94);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(0.92, 1.06);
+    opacity: 0.78;
+  }
+}
+
+/* 回复完成后极轻的明暗呼吸，幅度控制在 2% 以内 */
+.ds-latest-answer .ds-markdown:not(.ds-markdown-streaming) {
+  animation: dsTextBreath 5.4s ease-in-out 1.2s infinite;
+}
+
+@keyframes dsTextBreath {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.982;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-markdown-streaming .ds-reveal-block,
+  .ds-liquid-caret,
+  .ds-latest-answer .ds-markdown:not(.ds-markdown-streaming) {
+    animation: none;
+  }
+
+  .ds-liquid-caret {
+    opacity: 0.75;
+  }
+}

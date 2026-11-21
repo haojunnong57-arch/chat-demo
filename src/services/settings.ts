@@ -34,6 +34,8 @@ type Settings = {
   systemPrompt: string
   /** 液态玻璃通透度：0.08 最磨砂，1 最通透 */
   glassOpacity: number
+  /** 增强动画：关闭后保留必要状态过渡，去掉倾斜、流光、语义块与呼吸动效 */
+  enhancedMotion: boolean
   /** AI 回复完成后自动朗读 */
   autoRead: boolean
   thinking: boolean
@@ -55,6 +57,7 @@ const KEYS = {
   aiAvatar: 'chat-demo:ai-avatar',
   systemPrompt: 'chat-demo:system-prompt',
   glassOpacity: 'chat-demo:glass-opacity',
+  enhancedMotion: 'chat-demo:enhanced-motion',
   autoRead: 'chat-demo:auto-read',
   thinking: 'chat-demo:thinking',
   search: 'chat-demo:search',
@@ -145,6 +148,7 @@ export const useSettings = create<Settings>(() => ({
   aiAvatar: read(KEYS.aiAvatar),
   systemPrompt: read(KEYS.systemPrompt) ?? '',
   glassOpacity: initialGlassOpacity(),
+  enhancedMotion: read(KEYS.enhancedMotion) !== 'false',
   autoRead: read(KEYS.autoRead) === 'true',
   thinking: read(KEYS.thinking) === 'true',
   search: read(KEYS.search) === 'true',
@@ -202,6 +206,11 @@ export const setGlassOpacity = (glassOpacity: number) => {
   const value = Math.min(1, Math.max(0.08, glassOpacity))
   write(KEYS.glassOpacity, String(value))
   useSettings.setState({ glassOpacity: value })
+}
+
+export const setEnhancedMotion = (enhancedMotion: boolean) => {
+  write(KEYS.enhancedMotion, String(enhancedMotion))
+  useSettings.setState({ enhancedMotion })
 }
 
 export const setAutoRead = (autoRead: boolean) => {

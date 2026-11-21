@@ -97,7 +97,10 @@ export const AssistantMessage = memo(function AssistantMessage({
       <McpToolCalls message={message} />
       {answer ? (
         <Markdown
-          className="ds-assistant-message-main-content"
+          className={clsx(
+            'ds-assistant-message-main-content',
+            isLast && 'ds-latest-answer'
+          )}
           content={answer.markdown}
           loading={streaming}
           cacheKey={message.id}

@@ -37,4 +37,15 @@
   max-width: calc(100% - 40px);
   margin: 0 auto;
   padding-bottom: 24px;
+  transform-origin: 50% 0;
 }
+
+/* 内容不足一屏：禁用原生滚动链，由 useRubberBand 接管纵向拖拽 */
+.scroll[data-rubber-enabled='true'] {
+  touch-action: none;
+}
+
+.column[data-rubber='true'] {
+  will-change: transform;
+}
+
