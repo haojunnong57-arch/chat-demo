@@ -1,4 +1,5 @@
 import { IconMenuOutline20, IconNewChatOutline20 } from '../base/icons.js'
+import type { ReactNode } from 'react'
 import { AutoReadButton } from './AutoReadButton.js'
 import { useTranslate } from '../../i18n/index.js'
 import { newChat } from '../../services/chat/store.js'
@@ -12,10 +13,13 @@ export const MobileHeader = ({
   title,
   streaming = false,
   chatTheme = 'default',
+  actions,
 }: {
   title?: string
   streaming?: boolean
   chatTheme?: string
+  /** 标题栏右侧额外操作（例如删除当前对话） */
+  actions?: ReactNode
 }) => {
   const t = useTranslate()
   return (
@@ -63,6 +67,7 @@ export const MobileHeader = ({
             onClick={newChat}
           />
           <div className={styles.actions}>
+            {actions}
             <AutoReadButton />
           </div>
         </>

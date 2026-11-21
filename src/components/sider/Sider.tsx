@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslate } from '../../i18n/index.js'
 import { IconPanelLeftOutline16, IconSettingsOutline16, NewChatIcon } from '../base/icons.js'
 import { setSiderCollapsed } from '../../services/settings.js'
+import { stopReadAloud } from '../../services/speech/readAloud.js'
 import { groupSessions } from '../../services/chat/sessionGroups.js'
 import { newChat, removeSession, useChatStore } from '../../services/chat/store.js'
 import type { SessionSummary } from '../../services/chat/types.js'
@@ -92,7 +93,17 @@ export const Sider = ({ mobile = false }: { mobile?: boolean }) => {
         </div>
       </div>
       <div className={styles.bottom}>
-        <button type="button" className={styles.settings} onClick={() => openSettings('general')}>
+        <button
+          type="button"
+          className={styles.settings}
+          onClick={() => {
+            openSettings('general')
+            // 移动端从抽屉里打开设置时先收起抽屉，避免磨砂面板后面一半是抽屉白底
+            if (mobile) {
+              closeMobileSider()
+            }
+          }}
+        >
           <span className={styles.settingsIcon}>
             <IconSettingsOutline16 />
           </span>
@@ -117,6 +128,7 @@ export const Sider = ({ mobile = false }: { mobile?: boolean }) => {
                 disabled={deletePending}
                 onClick={async () => {
                   setDeletePending(true)
+                  stopReadAloud()
                   try {
                     if (await removeSession(deleting.id)) {
                       setDeleting(null)
@@ -128,7 +140,7 @@ export const Sider = ({ mobile = false }: { mobile?: boolean }) => {
                   }
                 }}
               >
-                {t('delete')}
+                {deletePending ? t('historyDeleting') : t('delete')}
               </Button>
             </>
           }

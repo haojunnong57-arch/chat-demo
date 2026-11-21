@@ -3,6 +3,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  box-sizing: border-box;
   padding-bottom: 16px;
 
   &.isFirst {
@@ -12,6 +13,11 @@
   &:hover .actions {
     opacity: 1;
   }
+}
+
+/* 头像占用消息行自己的右侧留白，不再挤压整列宽度，手机上也完整可见 */
+.hasAvatar {
+  padding-right: 38px;
 }
 
 .files {
@@ -36,6 +42,7 @@
   font-size: var(--chat-bubble-font-size, 16px);
   line-height: var(--chat-bubble-line-height, 24px);
   color: var(--chat-user-text, var(--dsw-alias-label-primary));
+  text-shadow: var(--chat-bubble-text-shadow, none);
   background: var(--chat-user-bubble, var(--dsw-specific-bubble));
   box-shadow: var(--chat-user-shadow, none);
   backdrop-filter: var(--chat-bubble-backdrop, none);
@@ -127,7 +134,7 @@
 .avatar {
   position: absolute;
   top: 0;
-  right: -38px;
+  right: 0;
   width: 30px;
   height: 30px;
   border-radius: 10px;
@@ -142,8 +149,12 @@
 }
 
 @media not all and (min-width: 768px) {
+  .hasAvatar {
+    padding-right: 34px;
+  }
+
   .avatar {
-    right: -34px;
+    right: 0;
     width: 28px;
     height: 28px;
     border-radius: 9px;

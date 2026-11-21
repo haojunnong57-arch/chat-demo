@@ -27,7 +27,9 @@
   --chat-assistant-padding: 0;
   --chat-assistant-max-width: none;
   --chat-caveat-color: var(--dsw-alias-label-tertiary);
-  --chat-image-veil: transparent;
+  --chat-image-veil:
+    radial-gradient(140% 100% at 50% 42%, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 26%, rgba(255, 255, 255, 0.10) 70%, rgba(255, 255, 255, 0.24) 100%);
   --chat-input-scrim: var(--dsw-alias-bg-base);
   --chat-bubble-font-size: 16px;
   --chat-bubble-line-height: 24px;
@@ -61,7 +63,9 @@
   --chat-assistant-shadow: none;
 
   --chat-caveat-color: #8a8a8a;
-  --chat-image-veil: transparent;
+  --chat-image-veil:
+    radial-gradient(140% 100% at 50% 42%, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 26%, rgba(255, 255, 255, 0.10) 70%, rgba(255, 255, 255, 0.24) 100%);
   --chat-input-scrim: #ededed;
   --chat-bubble-font-size: 16px;
   --chat-bubble-line-height: 24px;
@@ -111,7 +115,9 @@
   --chat-assistant-shadow: none;
 
   --chat-caveat-color: #8e8e93;
-  --chat-image-veil: transparent;
+  --chat-image-veil:
+    radial-gradient(140% 100% at 50% 42%, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 26%, rgba(255, 255, 255, 0.10) 70%, rgba(255, 255, 255, 0.24) 100%);
   --chat-input-scrim: #ffffff;
   --chat-bubble-font-size: 16px;
   --chat-bubble-line-height: 22px;
@@ -174,7 +180,9 @@
   --chat-assistant-shadow: 0 2px 8px rgba(17, 17, 17, 0.05);
 
   --chat-caveat-color: #8e8e93;
-  --chat-image-veil: transparent;
+  --chat-image-veil:
+    radial-gradient(140% 100% at 50% 42%, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 26%, rgba(255, 255, 255, 0.10) 70%, rgba(255, 255, 255, 0.24) 100%);
   --chat-bubble-font-size: 16px;
   --chat-bubble-line-height: 23px;
 
@@ -207,8 +215,13 @@
   --chat-header-backdrop: saturate(180%) blur(24px);
 
   /* 真实液态玻璃：极低不透明度的填充 + 背景模糊 + 边缘镜面；不再是白色贴图 */
-  --chat-input-bg: rgba(255, 255, 255, var(--glass-fill, 0.2));
-  --chat-input-border: 1px solid rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.9 + 0.12));
+  --chat-input-bg: rgba(255, 255, 255, var(--glass-fill, 0.32));
+  /* 始终留一道极细白边，拉到最透明也能看清输入框边界 */
+  --chat-input-border: 1px solid rgba(255, 255, 255, 0.42);
+  /* 一层很薄的白膜，避免透明到底后文字失去可读性 */
+  --chat-input-film: linear-gradient(180deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.06) 46%, rgba(255, 255, 255, 0.12) 100%);
+  --chat-input-text-shadow: 0 1px 2px rgba(255, 255, 255, 0.35);
+  --chat-bubble-text-shadow: 0 1px 2px rgba(255, 255, 255, 0.30);
   --chat-input-radius: 26px;
   --chat-input-shadow:
     0 18px 44px rgba(23, 48, 92, 0.13),
@@ -238,15 +251,17 @@
   --chat-bubble-backdrop: saturate(190%) blur(var(--glass-blur, 30px));
 
   --chat-caveat-color: #637083;
-  --chat-image-veil: transparent;
+  --chat-image-veil:
+    radial-gradient(140% 100% at 50% 42%, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 26%, rgba(255, 255, 255, 0.10) 70%, rgba(255, 255, 255, 0.24) 100%);
   --chat-bubble-font-size: 16px;
   --chat-bubble-line-height: 24px;
 
   --dsw-alias-bg-base: #eff5ff;
   --dsw-alias-label-primary: #14203a;
   --dsw-alias-label-secondary: #59677d;
-  --dsw-alias-label-tertiary: #637083;
-  --dsw-alias-label-caption: #8c98aa;
+  --dsw-alias-label-tertiary: #4a5a70;
+  --dsw-alias-label-caption: #3f4e63;
   --dsw-alias-brand-primary: #007aff;
   --dsw-alias-brand-text: #0066d6;
   --dsw-alias-button-primary-fill: #007aff;
@@ -353,8 +368,12 @@ body[data-ds-dark-theme] .chat-theme-glass {
     linear-gradient(145deg, #0b1220 0%, #131a2a 48%, #1c1422 100%);
   --chat-header-bg: rgba(255, 255, 255, 0.06);
   --chat-header-border: 0;
-  --chat-input-bg: rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.55));
-  --chat-input-border: 1px solid rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.6 + 0.06));
+  /* 深色玻璃用一层深色膜承托白字，避免拉到最透明后字幕直接压在照片上 */
+  --chat-input-bg: rgba(10, 16, 28, calc(var(--glass-fill, 0.32) * 0.95));
+  --chat-input-border: 1px solid rgba(255, 255, 255, 0.32);
+  --chat-input-film: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 46%, rgba(255, 255, 255, 0.06) 100%);
+  --chat-input-text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  --chat-bubble-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
   --chat-input-shadow:
     0 18px 48px rgba(0, 0, 0, 0.38),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);

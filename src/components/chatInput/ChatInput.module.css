@@ -11,7 +11,8 @@
   line-height: var(--line-height);
   border-radius: var(--chat-input-radius, 24px);
   border: var(--chat-input-border, 1px solid var(--dsw-alias-border-l2-darkmode-thin));
-  background: var(--chat-input-bg, var(--dsw-specific-input-major));
+  background-color: var(--chat-input-bg, var(--dsw-specific-input-major));
+  background-image: var(--chat-input-film, none);
   box-shadow: var(--chat-input-shadow, none);
   backdrop-filter: var(--chat-input-backdrop, none);
   -webkit-backdrop-filter: var(--chat-input-backdrop, none);
@@ -207,9 +208,11 @@
   background-color: transparent;
   color: var(--dsw-alias-label-primary);
   caret-color: var(--dsw-alias-brand-text);
+  text-shadow: var(--chat-input-text-shadow, none);
 
   &::placeholder {
     color: var(--dsw-alias-label-caption);
+    text-shadow: none;
     user-select: none;
   }
 }

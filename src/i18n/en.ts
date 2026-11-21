@@ -263,7 +263,7 @@ export const en = {
   settingsAvatarRemoved: 'Avatar removed',
   settingsAvatarFailed: 'Could not read the image',
   settingsGlassOpacity: 'Liquid glass clarity',
-  settingsGlassOpacityDescription: 'Slide right for more clarity, left for more frost. Affects the chat input and bubbles only.',
+  settingsGlassOpacityDescription: 'Slide right for more clarity, left for more frost. Applies to the input, bubbles and glass panels.',
   settingsGlassOpacityValue: 'clarity',
   settingsSystemPrompt: 'System prompt',
   settingsSystemPromptDescription: 'Leave empty to send no system prompt at all. The text is sent verbatim with nothing added.',

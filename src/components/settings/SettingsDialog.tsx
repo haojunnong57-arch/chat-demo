@@ -82,6 +82,8 @@ const SettingsContent = () => {
   const historyDelete = useHistoryDelete()
   const replacingHistory = useChatStore((state) => state.importingHistory)
   const historyBusy = historyImport.busy || historyDelete.busy || replacingHistory
+  // 通透度只对液态玻璃主题有意义，其他主题下不展示该设置
+  const chatTheme = useSettings((state) => state.chatTheme)
   return (
     <>
       <Modal
@@ -115,7 +117,7 @@ const SettingsContent = () => {
             <>
               <ThemeSetting />
               <BackgroundSetting />
-              <GlassOpacitySetting />
+              {chatTheme === 'glass' ? <GlassOpacitySetting /> : null}
               <AvatarSetting />
               <SystemPromptSetting />
               <LocaleSetting />
@@ -675,8 +677,8 @@ const GlassOpacitySetting = () => {
         className={styles.glassPreview}
         style={
           {
-            '--glass-fill': `${(0.42 - glassOpacity * 0.34).toFixed(3)}`,
-            '--glass-blur': `${Math.round(12 + (1 - glassOpacity) * 24)}px`,
+            '--glass-fill': `${(0.44 - glassOpacity * 0.18).toFixed(3)}`,
+            '--glass-blur': `${Math.round(18 + (1 - glassOpacity) * 20)}px`,
           } as React.CSSProperties
         }
       >

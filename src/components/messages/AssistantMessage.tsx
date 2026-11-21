@@ -75,7 +75,7 @@ export const AssistantMessage = memo(function AssistantMessage({
   const summaryEntry = `${message.id}-summary`
   return (
     <div
-      className={clsx(styles.message, styles.enter)}
+      className={clsx(styles.message, aiAvatar && styles.hasAvatar, styles.enter)}
       style={{ animationDelay: `${enterIndex * 45}ms` }}
     >
       {aiAvatar ? <img className={styles.avatar} src={aiAvatar} alt="" draggable={false} /> : null}

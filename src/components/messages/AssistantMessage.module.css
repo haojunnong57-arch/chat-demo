@@ -1,6 +1,7 @@
 .message {
   position: relative;
   display: var(--chat-assistant-layout, block);
+  box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
 
@@ -14,6 +15,11 @@
   }
 }
 
+/* AI 头像占用消息行自身的左侧留白，不额外加宽整列 */
+.hasAvatar {
+  padding-left: 38px;
+}
+
 .body {
   display: var(--chat-assistant-display, contents);
   box-sizing: border-box;
@@ -21,6 +27,7 @@
   padding: var(--chat-assistant-padding, 0);
   border-radius: var(--chat-assistant-radius, 0);
   color: var(--chat-assistant-text, var(--dsw-alias-label-primary));
+  text-shadow: var(--chat-bubble-text-shadow, none);
   background: var(--chat-assistant-bg, transparent);
   box-shadow: var(--chat-assistant-shadow, none);
   backdrop-filter: var(--chat-bubble-backdrop, none);
@@ -178,7 +185,7 @@
 .avatar {
   position: absolute;
   top: 2px;
-  left: -38px;
+  left: 0;
   width: 30px;
   height: 30px;
   border-radius: 10px;
@@ -189,8 +196,12 @@
 }
 
 @media not all and (min-width: 768px) {
+  .hasAvatar {
+    padding-left: 34px;
+  }
+
   .avatar {
-    left: -34px;
+    left: 0;
     width: 28px;
     height: 28px;
     border-radius: 9px;

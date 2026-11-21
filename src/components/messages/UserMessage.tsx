@@ -68,7 +68,12 @@ export const UserMessage = memo(function UserMessage({
 
   return (
     <div
-      className={clsx(styles.container, isFirst && styles.isFirst, styles.enter)}
+      className={clsx(
+        styles.container,
+        isFirst && styles.isFirst,
+        userAvatar && styles.hasAvatar,
+        styles.enter
+      )}
       style={{ animationDelay: `${enterIndex * 45}ms` }}
     >
       {userAvatar ? (

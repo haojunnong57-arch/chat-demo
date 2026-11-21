@@ -523,8 +523,12 @@ const removeSessionData = async (id: string): Promise<boolean> => {
   deletingSessions.add(id)
   try {
     getStreamController(id)?.abort()
-    // 等本会话的流收尾，避免删除之后又被收尾保存写回来。
-    await waitForIdle(id)
+    // 等本会话的流收尾，避免删除之后又被收尾保存写回来；
+    // 但最多等 2.5s，避免网络挂起时删除按钮永久卡在「删除中」。
+    await Promise.race([
+      waitForIdle(id),
+      new Promise<void>((resolve) => setTimeout(resolve, 2500)),
+    ])
     if (epoch !== historyEpoch) {
       return false
     }

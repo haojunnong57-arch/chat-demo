@@ -254,7 +254,7 @@ export const zh = {
   settingsAvatarRemoved: '头像已移除',
   settingsAvatarFailed: '头像读取失败',
   settingsGlassOpacity: '液态玻璃通透度',
-  settingsGlassOpacityDescription: '向右更通透，向左更磨砂；只影响聊天输入区和气泡材质。',
+  settingsGlassOpacityDescription: '向右更通透，向左更磨砂；同时作用于输入区、气泡与设置等弹层的玻璃材质。',
   settingsGlassOpacityValue: '通透',
   settingsSystemPrompt: '系统提示词',
   settingsSystemPromptDescription: '留空表示不发送任何系统提示。内容会原样发送，不追加任何内置说明。',

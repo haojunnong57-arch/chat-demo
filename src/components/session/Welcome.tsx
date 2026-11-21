@@ -24,8 +24,8 @@ export const Welcome = () => {
       style={
         {
           ...(chatBackground ? { backgroundImage: `url(${chatBackground})` } : null),
-          '--glass-fill': `${(0.42 - glassOpacity * 0.34).toFixed(3)}`,
-          '--glass-blur': `${Math.round(12 + (1 - glassOpacity) * 24)}px`,
+          '--glass-fill': `${(0.44 - glassOpacity * 0.18).toFixed(3)}`,
+          '--glass-blur': `${Math.round(18 + (1 - glassOpacity) * 20)}px`,
         } as CSSProperties
       }
     >
