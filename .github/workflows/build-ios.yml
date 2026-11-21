@@ -77,26 +77,34 @@ jobs:
       - name: Package unsigned IPA
         run: |
           cd ios
-          rm -rf build/Payload build/DeepSeek-iOS.ipa
+          rm -rf build/Payload build/DeepSeek-iOS-3.1.0-unsigned.ipa
           mkdir -p build/Payload
           cp -R build/DeepSeek.xcarchive/Products/Applications/DeepSeek.app build/Payload/
           cd build
-          zip -qr DeepSeek-iOS.ipa Payload
+          zip -qr DeepSeek-iOS-3.1.0-unsigned.ipa Payload
 
       - uses: actions/upload-artifact@v4
         with:
-          name: DeepSeek-iOS-IPA
-          path: ios/build/DeepSeek-iOS.ipa
+          name: DeepSeek-iOS-3.1.0
+          path: ios/build/DeepSeek-iOS-3.1.0-unsigned.ipa
           if-no-files-found: error
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: build
-          name: DeepSeek iOS build
+          tag_name: v3.1.0
+          name: DeepSeek iOS 3.1.0 · UI 设计 + 交互动画优化版
           body: |
-            基于 DeepSeek 官方开源 chat-demo 前端打包的 iOS App。
-            包含 API Key / 自定义 API 地址、MCP 连接与工具调用、官方语音输入和 TTS。
-            这是未签名 IPA，请使用 Sideloadly / AltStore 自签安装。
-          files: ios/build/DeepSeek-iOS.ipa
+            DeepSeek iOS 3.1.0（未签名 IPA / arm64）
+
+            - Instagram 皮肤文字与气泡改为多层径向渐变，去掉小尾巴拼接痕迹
+            - 液态玻璃输入区改为真实透明材质（背景模糊 + 环境色 + 边缘高光），通透度可调
+            - 弹层、菜单、抽屉加入可打断的 Spring 进场动画；胶囊到面板做 Fluid Morph
+            - 卡片跟随触摸做 3D 透视倾斜与径向流光，松手 Spring 回正
+            - 消息列表交错入场；按住说话立即打断 AI 播报
+            - 支持自定义系统提示词（不追加任何内置说明）与双向头像（未设置则不显示）
+            - 修复聊天背景浅色泛白、深色发黑的蒙层问题
+
+            未签名包，请使用 Sideloadly / AltStore 自签后安装。
+          files: ios/build/DeepSeek-iOS-3.1.0-unsigned.ipa
           make_latest: true
