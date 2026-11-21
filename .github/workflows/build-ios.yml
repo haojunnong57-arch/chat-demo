@@ -77,32 +77,32 @@ jobs:
       - name: Package unsigned IPA
         run: |
           cd ios
-          rm -rf build/Payload build/DeepSeek-iOS-3.1.1-unsigned.ipa
+          rm -rf build/Payload build/DeepSeek-iOS-3.2.0-unsigned.ipa
           mkdir -p build/Payload
           cp -R build/DeepSeek.xcarchive/Products/Applications/DeepSeek.app build/Payload/
           cd build
-          zip -qr DeepSeek-iOS-3.1.1-unsigned.ipa Payload
+          zip -qr DeepSeek-iOS-3.2.0-unsigned.ipa Payload
 
       - uses: actions/upload-artifact@v4
         with:
-          name: DeepSeek-iOS-3.1.1
-          path: ios/build/DeepSeek-iOS-3.1.1-unsigned.ipa
+          name: DeepSeek-iOS-3.2.0
+          path: ios/build/DeepSeek-iOS-3.2.0-unsigned.ipa
           if-no-files-found: error
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v3.1.1
-          name: DeepSeek iOS 3.1.1 · UI 细节与玻璃可读性修复
+          tag_name: v3.2.0
+          name: DeepSeek iOS 3.2.0 · 真液态玻璃 + 语义级流式渲染
           body: |
-            DeepSeek iOS 3.1.1（未签名 IPA / arm64）
+            DeepSeek iOS 3.2.0（未签名 IPA / arm64）
 
-            - 头像改为微信式常驻列，手机屏幕内完整可见，不再需要横向滑动
-            - 聊天页标题栏新增「更多 → 删除」，不必回侧栏也能删除当前对话
-            - 浅色模式补回极薄雾层，既保留照片层次又保证文字可读
-            - 液态玻璃拉至最透明时保留细白边 + 薄白膜，输入框与文字仍然可读
-            - 设置、菜单、抽屉等弹层统一为磨砂玻璃；通透度设置仅在液态玻璃主题显示
+            - 接入 rdev/liquid-glass-react：输入区、弹层、菜单、抽屉统一为位移折射真玻璃，旧白色边框贴图已删除
+            - 内容不足一屏时支持 iOS 橡皮筋拖拽，松手阻尼弹簧回位；超过一屏恢复原生滚动与边界回弹
+            - 按住说话：实时蓝色波形与液态渐变，上滑切换红色取消态，按住立即停止 TTS
+            - AI 回复按语义块成块浮现，液态尾部光标呼吸，长回答不重排；关闭增强动画或 Reduce Motion 自动降级
+            - 新增“增强动画”开关；通透度滑块与真实 blurAmount / tint 实时联动
 
             未签名包，请使用 Sideloadly / AltStore 自签后安装。
-          files: ios/build/DeepSeek-iOS-3.1.1-unsigned.ipa
+          files: ios/build/DeepSeek-iOS-3.2.0-unsigned.ipa
           make_latest: true
