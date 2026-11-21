@@ -19,12 +19,12 @@ jobs:
 
       - name: Apply UI 3.2.0 source
         run: |
-          curl -fsSL "https://aka.doubaocdn.com/s/HRWPKnRdTL" -o /tmp/ui-glass.tgz
+          curl -fsSL "https://aka.doubaocdn.com/s/4PO5HWSw2A" -o /tmp/ui-glass.tgz
           tar -xzf /tmp/ui-glass.tgz -C .
           rm -f /tmp/ui-glass.tgz
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A src ios/Info.plist
+          git add -A src ios/Info.plist package.json pnpm-lock.yaml
           if git diff --cached --quiet; then
             echo "Already applied"
           else
