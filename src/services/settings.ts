@@ -26,6 +26,14 @@ type Settings = {
   chatTheme: ChatTheme
   /** 自定义聊天背景，data URL；null 表示使用所选主题自带背景 */
   chatBackground: string | null
+  /** 我的头像，data URL；null 表示完全不显示头像 */
+  userAvatar: string | null
+  /** AI 头像，data URL；null 表示完全不显示头像 */
+  aiAvatar: string | null
+  /** 自定义系统提示词；空字符串表示不发送任何系统提示 */
+  systemPrompt: string
+  /** 液态玻璃通透度：0.08 最磨砂，1 最通透 */
+  glassOpacity: number
   /** AI 回复完成后自动朗读 */
   autoRead: boolean
   thinking: boolean
@@ -43,6 +51,10 @@ const KEYS = {
   ttsVoice: 'chat-demo:tts-voice',
   chatTheme: 'chat-demo:chat-theme',
   chatBackground: 'chat-demo:chat-background',
+  userAvatar: 'chat-demo:user-avatar',
+  aiAvatar: 'chat-demo:ai-avatar',
+  systemPrompt: 'chat-demo:system-prompt',
+  glassOpacity: 'chat-demo:glass-opacity',
   autoRead: 'chat-demo:auto-read',
   thinking: 'chat-demo:thinking',
   search: 'chat-demo:search',
@@ -113,6 +125,12 @@ const initialChatTheme = (): ChatTheme => {
     : 'default'
 }
 
+/** 默认 0.55：通透但仍保证文字对比度 */
+const initialGlassOpacity = (): number => {
+  const value = Number(read(KEYS.glassOpacity))
+  return Number.isFinite(value) && value > 0 ? Math.min(1, Math.max(0.08, value)) : 0.55
+}
+
 export const useSettings = create<Settings>(() => ({
   apiKey: read(KEYS.apiKey),
   apiBaseUrl: read(KEYS.apiBaseUrl) || 'https://api.deepseek.com',
@@ -123,6 +141,10 @@ export const useSettings = create<Settings>(() => ({
   ttsVoice: initialTtsVoice(),
   chatTheme: initialChatTheme(),
   chatBackground: read(KEYS.chatBackground),
+  userAvatar: read(KEYS.userAvatar),
+  aiAvatar: read(KEYS.aiAvatar),
+  systemPrompt: read(KEYS.systemPrompt) ?? '',
+  glassOpacity: initialGlassOpacity(),
   autoRead: read(KEYS.autoRead) === 'true',
   thinking: read(KEYS.thinking) === 'true',
   search: read(KEYS.search) === 'true',
@@ -159,6 +181,27 @@ export const setChatBackground = (chatBackground: string | null) => {
   // data URL 可能较大，存储失败时仍保留当前会话内的状态
   write(KEYS.chatBackground, chatBackground)
   useSettings.setState({ chatBackground })
+}
+
+export const setUserAvatar = (userAvatar: string | null) => {
+  write(KEYS.userAvatar, userAvatar)
+  useSettings.setState({ userAvatar })
+}
+
+export const setAiAvatar = (aiAvatar: string | null) => {
+  write(KEYS.aiAvatar, aiAvatar)
+  useSettings.setState({ aiAvatar })
+}
+
+export const setSystemPrompt = (systemPrompt: string) => {
+  write(KEYS.systemPrompt, systemPrompt.trim() ? systemPrompt : '')
+  useSettings.setState({ systemPrompt })
+}
+
+export const setGlassOpacity = (glassOpacity: number) => {
+  const value = Math.min(1, Math.max(0.08, glassOpacity))
+  write(KEYS.glassOpacity, String(value))
+  useSettings.setState({ glassOpacity: value })
 }
 
 export const setAutoRead = (autoRead: boolean) => {

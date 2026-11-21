@@ -792,3 +792,176 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* ---------- 新增：通透度 / 头像 / 系统提示词 ---------- */
+.settingBlock {
+  margin-top: 28px;
+}
+
+.blockTitle {
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+}
+
+.blockDescription {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.slider {
+  flex: 1;
+  height: 28px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  cursor: pointer;
+
+  &::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(140, 150, 170, 0.55), rgba(90, 150, 255, 0.55));
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    margin-top: -8px;
+    border: none;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.08),
+      0 4px 10px rgba(20, 45, 90, 0.18);
+  }
+
+  &::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(140, 150, 170, 0.5);
+  }
+
+  &::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(20, 45, 90, 0.18);
+  }
+}
+
+.sliderValue {
+  flex-shrink: 0;
+  min-width: 92px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--dsw-alias-label-secondary);
+  text-align: right;
+}
+
+/* 实时预览：一块真正靠背景模糊成型的玻璃，而不是画出来的白底 */
+.glassPreview {
+  position: relative;
+  height: 56px;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 18px;
+  background:
+    radial-gradient(120% 160% at 12% 10%, rgba(90, 150, 255, 0.35), transparent 60%),
+    radial-gradient(120% 160% at 92% 90%, rgba(225, 48, 108, 0.28), transparent 62%),
+    linear-gradient(140deg, #eef3fb, #f7ecf4);
+}
+
+.glassPreview > span {
+  position: absolute;
+  inset: 12px 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, var(--glass-fill, 0.2));
+  border: 1px solid rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.9 + 0.1));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 10px 24px rgba(20, 45, 90, 0.12);
+  backdrop-filter: blur(var(--glass-blur, 30px)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur, 30px)) saturate(180%);
+}
+
+.avatarRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.avatarLabel {
+  width: 76px;
+  flex-shrink: 0;
+  font-size: 13px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.avatarPreview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--dsw-alias-bg-layer-3);
+  box-shadow: inset 0 0 0 1px var(--dsw-alias-border-l2);
+  font-size: 10px;
+  color: var(--dsw-alias-label-caption);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.avatarActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.promptTextarea {
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-3);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  resize: vertical;
+  outline: none;
+
+  &:focus {
+    border-color: var(--dsw-alias-brand-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--dsw-alias-brand-primary) 18%, transparent);
+  }
+}
+
+.promptActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}

@@ -25,8 +25,12 @@ import {
   setLocale,
   setLocation,
   setModel,
+  setAiAvatar,
+  setGlassOpacity,
+  setSystemPrompt,
   setThemePreference,
   setTtsVoice,
+  setUserAvatar,
   useSettings,
   type ThemePreference,
 } from '../../services/settings.js'
@@ -37,6 +41,7 @@ import { Select } from '../base/Select.js'
 import { showToast } from '../base/toastState.js'
 import { ApiKeyConfirm, ApiKeyField, useApiKeyEditor } from './ApiKeyField.js'
 import { BackgroundSetting } from './BackgroundSetting.js'
+import { imageFileToAvatar } from '../../utils/image.js'
 import { McpSettings } from './McpSettings.js'
 import { SupportSettings } from './SupportSettings.js'
 import { closeSettings, useSettingsDialog, type SettingsSection } from './settingsDialogState.js'
@@ -110,6 +115,9 @@ const SettingsContent = () => {
             <>
               <ThemeSetting />
               <BackgroundSetting />
+              <GlassOpacitySetting />
+              <AvatarSetting />
+              <SystemPromptSetting />
               <LocaleSetting />
               <TtsVoiceSetting />
               <LocationSetting />
@@ -636,5 +644,171 @@ const ExportHistory = ({ disabled }: { disabled: boolean }) => {
         </Button>
       }
     />
+  )
+}
+
+/** 液态玻璃通透度：拖动时实时写入设置，聊天页立即预览 */
+const GlassOpacitySetting = () => {
+  const t = useTranslate()
+  const glassOpacity = useSettings((state) => state.glassOpacity)
+  const percent = Math.round(glassOpacity * 100)
+  return (
+    <div className={styles.settingBlock}>
+      <div className={styles.blockTitle}>{t('settingsGlassOpacity')}</div>
+      <div className={styles.blockDescription}>{t('settingsGlassOpacityDescription')}</div>
+      <div className={styles.sliderRow}>
+        <input
+          type="range"
+          min={8}
+          max={100}
+          step={1}
+          value={percent}
+          aria-label={t('settingsGlassOpacity')}
+          className={styles.slider}
+          onChange={(event) => setGlassOpacity(Number(event.target.value) / 100)}
+        />
+        <span className={styles.sliderValue}>
+          {percent}% {t('settingsGlassOpacityValue')}
+        </span>
+      </div>
+      <div
+        className={styles.glassPreview}
+        style={
+          {
+            '--glass-fill': `${(0.42 - glassOpacity * 0.34).toFixed(3)}`,
+            '--glass-blur': `${Math.round(12 + (1 - glassOpacity) * 24)}px`,
+          } as React.CSSProperties
+        }
+      >
+        <span />
+      </div>
+    </div>
+  )
+}
+
+/** 头像：上传后聊天里显示；未上传时完全不渲染头像与占位框 */
+const AvatarSetting = () => {
+  const t = useTranslate()
+  const userAvatar = useSettings((state) => state.userAvatar)
+  const aiAvatar = useSettings((state) => state.aiAvatar)
+  return (
+    <div className={styles.settingBlock}>
+      <div className={styles.blockTitle}>{t('settingsAvatar')}</div>
+      <div className={styles.blockDescription}>{t('settingsAvatarDescription')}</div>
+      <AvatarRow
+        label={t('settingsUserAvatar')}
+        value={userAvatar}
+        onChange={setUserAvatar}
+        emptyLabel={t('settingsAvatarEmpty')}
+      />
+      <AvatarRow
+        label={t('settingsAiAvatar')}
+        value={aiAvatar}
+        onChange={setAiAvatar}
+        emptyLabel={t('settingsAvatarEmpty')}
+      />
+    </div>
+  )
+}
+
+const AvatarRow = ({
+  label,
+  value,
+  onChange,
+  emptyLabel,
+}: {
+  label: string
+  value: string | null
+  onChange: (value: string | null) => void
+  emptyLabel: string
+}) => {
+  const t = useTranslate()
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [busy, setBusy] = useState(false)
+
+  const load = async (file: File | undefined) => {
+    if (!file || busy) {
+      return
+    }
+    setBusy(true)
+    try {
+      onChange(await imageFileToAvatar(file))
+      showToast({ key: 'settingsAvatarSaved' })
+    } catch {
+      showToast({ key: 'settingsAvatarFailed', type: 'error' })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className={styles.avatarRow}>
+      <span className={styles.avatarLabel}>{label}</span>
+      <span className={styles.avatarPreview}>
+        {value ? <img src={value} alt="" /> : <span>{emptyLabel}</span>}
+      </span>
+      <div className={styles.avatarActions}>
+        <Button variant="outlined" size="m" disabled={busy} onClick={() => inputRef.current?.click()}>
+          {t(value ? 'settingsAvatarChange' : 'settingsAvatarChoose')}
+        </Button>
+        {value ? (
+          <Button
+            variant="outlined"
+            size="m"
+            disabled={busy}
+            onClick={() => {
+              onChange(null)
+              showToast({ key: 'settingsAvatarRemoved' })
+            }}
+          >
+            {t('settingsAvatarRemove')}
+          </Button>
+        ) : null}
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(event) => {
+          void load(event.target.files?.[0])
+          event.target.value = ''
+        }}
+      />
+    </div>
+  )
+}
+
+/** 系统提示词：原样发送，不追加任何内置说明；留空则完全不发送 system */
+const SystemPromptSetting = () => {
+  const t = useTranslate()
+  const saved = useSettings((state) => state.systemPrompt)
+  const [draft, setDraft] = useState(saved)
+  return (
+    <div className={styles.settingBlock}>
+      <div className={styles.blockTitle}>{t('settingsSystemPrompt')}</div>
+      <div className={styles.blockDescription}>{t('settingsSystemPromptDescription')}</div>
+      <textarea
+        className={styles.promptTextarea}
+        rows={3}
+        value={draft}
+        placeholder={t('settingsSystemPromptPlaceholder')}
+        onChange={(event) => setDraft(event.target.value)}
+        aria-label={t('settingsSystemPrompt')}
+      />
+      <div className={styles.promptActions}>
+        <Button
+          variant="outlined"
+          size="m"
+          disabled={draft === saved}
+          onClick={() => {
+            setSystemPrompt(draft)
+            showToast({ key: 'settingsSystemPromptSaved' })
+          }}
+        >
+          {t('settingsMcpSave')}
+        </Button>
+      </div>
+    </div>
   )
 }

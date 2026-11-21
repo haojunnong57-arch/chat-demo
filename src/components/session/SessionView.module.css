@@ -18,7 +18,8 @@
   inset: 0;
   z-index: 0;
   content: '';
-  background: var(--chat-image-veil, color-mix(in srgb, var(--dsw-alias-bg-base) 58%, transparent));
+  /* 不再整屏压一层主题底色：浅色会成白雾、深色会成黑纱 */
+  background: var(--chat-image-veil, transparent);
   pointer-events: none;
 }
 
@@ -93,12 +94,13 @@
   width: calc(var(--message-list-max-width) - 64px);
   max-width: calc(100% - 32px);
   margin: auto auto 0;
+  /* 液态玻璃主题不铺底色，让消息真正从玻璃后面透出来 */
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    transparent 30%,
-    var(--dsw-alias-bg-base) 30%,
-    var(--dsw-alias-bg-base) 100%
+    transparent 26%,
+    var(--chat-input-scrim, var(--dsw-alias-bg-base)) 26%,
+    var(--chat-input-scrim, var(--dsw-alias-bg-base)) 100%
   );
 }
 

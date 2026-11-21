@@ -10,6 +10,7 @@ import type { UserMessage as UserMessageType } from '../../services/chat/types.j
 import { Button } from '../base/Button.js'
 import { IconButton } from '../base/IconButton.js'
 import { ensureApiKey } from '../settings/settingsDialogState.js'
+import { useSettings } from '../../services/settings.js'
 import {
   BranchSwitcher,
   type MessageVersions,
@@ -24,6 +25,7 @@ export const UserMessage = memo(function UserMessage({
   message,
   retryUploadId,
   isFirst,
+  enterIndex,
   isLast,
   busy,
   versions,
@@ -34,12 +36,15 @@ export const UserMessage = memo(function UserMessage({
   /** 回答因补传附件失败可重试时为该回答 id */
   retryUploadId: string | null
   isFirst: boolean
+  /** 交错入场序号，用于 Stagger Delay */
+  enterIndex: number
   isLast: boolean
   busy: boolean
   versions: MessageVersions
   onSelectVersion: SelectMessageVersion
 }) {
   const t = useTranslate()
+  const userAvatar = useSettings((state) => state.userAvatar)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(message.content)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -62,7 +67,13 @@ export const UserMessage = memo(function UserMessage({
   }
 
   return (
-    <div className={clsx(styles.container, isFirst && styles.isFirst)}>
+    <div
+      className={clsx(styles.container, isFirst && styles.isFirst, styles.enter)}
+      style={{ animationDelay: `${enterIndex * 45}ms` }}
+    >
+      {userAvatar ? (
+        <img className={styles.avatar} src={userAvatar} alt="" draggable={false} />
+      ) : null}
       {message.files.length > 0 ? (
         <div
           className={clsx(

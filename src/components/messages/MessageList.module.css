@@ -35,3 +35,16 @@
   margin: 0 auto;
   padding-bottom: 24px;
 }
+
+/* 上传头像后为两侧头像预留固定列宽，未上传则完全不留空 */
+.withAvatars {
+  padding-left: 38px;
+  padding-right: 38px;
+}
+
+@media not all and (min-width: 768px) {
+  .withAvatars {
+    padding-left: 34px;
+    padding-right: 34px;
+  }
+}

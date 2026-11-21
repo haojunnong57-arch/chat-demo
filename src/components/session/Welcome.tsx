@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import type { CSSProperties } from 'react'
 import { useIsMobile } from '../../app/viewport.js'
 import { useSettings } from '../../services/settings.js'
 import { useTranslate } from '../../i18n/index.js'
@@ -12,6 +13,7 @@ export const Welcome = () => {
   const isMobile = useIsMobile()
   const chatTheme = useSettings((state) => state.chatTheme)
   const chatBackground = useSettings((state) => state.chatBackground)
+  const glassOpacity = useSettings((state) => state.glassOpacity)
   return (
     <div
       className={clsx(
@@ -19,13 +21,18 @@ export const Welcome = () => {
         `chat-theme-${chatTheme}`,
         chatBackground && styles.withBackground
       )}
-      style={chatBackground ? { backgroundImage: `url(${chatBackground})` } : undefined}
+      style={
+        {
+          ...(chatBackground ? { backgroundImage: `url(${chatBackground})` } : null),
+          '--glass-fill': `${(0.42 - glassOpacity * 0.34).toFixed(3)}`,
+          '--glass-blur': `${Math.round(12 + (1 - glassOpacity) * 24)}px`,
+        } as CSSProperties
+      }
     >
       {isMobile ? <MobileHeader /> : null}
       <div className={styles.welcome}>
         <div className={styles.greeting}>{t('welcomeMessageChat250808')}</div>
         <ChatInput sessionId={null} />
-        {isMobile ? <div className={styles.caveat}>{t('contentCaveat')}</div> : null}
       </div>
     </div>
   )

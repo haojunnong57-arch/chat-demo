@@ -1,0 +1,48 @@
+.tilt {
+  position: relative;
+  transform:
+    perspective(760px)
+    rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg))
+    scale(var(--lift, 1));
+  transform-style: preserve-3d;
+  transition: transform 460ms cubic-bezier(0.22, 1.18, 0.36, 1);
+  will-change: transform;
+  isolation: isolate;
+}
+
+/* 按住跟随时去掉过渡，保证 1:1 跟手；松手后由上面的 Spring 曲线回正 */
+.tilt[data-tilting='true'] {
+  transition: transform 120ms ease-out;
+}
+
+.tilt::after {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  content: '';
+  border-radius: inherit;
+  background: radial-gradient(
+    120% 120% at var(--sheen-x, 50%) var(--sheen-y, 0%),
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.08) 28%,
+    transparent 62%
+  );
+  opacity: 0;
+  transition: opacity 220ms ease-out;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+}
+
+.tilt[data-tilting='true']::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tilt,
+  .tilt::after {
+    transition: none;
+    transform: none;
+    opacity: 0;
+  }
+}

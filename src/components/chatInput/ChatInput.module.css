@@ -687,15 +687,15 @@
   }
 }
 
-/* 液态玻璃：输入框是折射材质，蓝条也带一点透明高光 */
+/* 液态玻璃：主体完全依赖变量里的真实透明度 + 背景模糊，不再有白色边框贴图 */
 .wrapper[data-chat-theme='glass'] {
-  border-color: rgba(255, 255, 255, 0.32);
+  border-color: rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.8 + 0.1));
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.6) inset,
-    0 -1px 0 rgba(255, 255, 255, 0.12) inset,
-    0 12px 32px rgba(0, 0, 0, 0.16);
-  backdrop-filter: blur(26px) saturate(1.7);
-  -webkit-backdrop-filter: blur(26px) saturate(1.7);
+    inset 0 1px 0 rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 1.6)),
+    inset 0 -1px 0 rgba(120, 170, 255, 0.12),
+    0 14px 34px rgba(20, 45, 90, 0.14);
+  backdrop-filter: blur(var(--glass-blur, 30px)) saturate(1.9);
+  -webkit-backdrop-filter: blur(var(--glass-blur, 30px)) saturate(1.9);
 
   .holdButtonActive {
     background:
@@ -719,7 +719,7 @@
   }
 }
 
-/* Liquid Glass 的额外边缘：顶缘镜面 + 四周折射亮边 + 底部环境色回弹 */
+/* Liquid Glass 的折射边缘：只用极淡的顶缘镜面与底部环境色，避免「画上去的玻璃」 */
 .wrapper[data-chat-theme='glass']::after {
   content: '';
   position: absolute;
@@ -727,12 +727,11 @@
   z-index: 0;
   border-radius: inherit;
   background:
-    linear-gradient(112deg, rgba(255, 255, 255, 0.3) 0%, transparent 16%, transparent 76%, rgba(150, 195, 255, 0.22) 100%),
-    radial-gradient(120% 70% at 50% -20%, rgba(255, 255, 255, 0.52), transparent 58%),
-    radial-gradient(90% 80% at 50% 118%, rgba(66, 126, 255, 0.22), transparent 64%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 16%),
+    radial-gradient(130% 64% at 50% 118%, rgba(96, 152, 255, 0.16), transparent 68%);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.4),
-    inset 0 2px 1px rgba(255, 255, 255, 0.62),
-    inset 0 -1px 1px rgba(110, 160, 255, 0.22);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
   pointer-events: none;
+  opacity: calc(0.35 + var(--glass-fill, 0.2) * 1.1);
 }

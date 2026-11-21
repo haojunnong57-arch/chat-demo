@@ -10,6 +10,7 @@ import {
   type ChatTheme,
 } from '../../services/settings.js'
 import { imageFileToBackground } from '../../utils/image.js'
+import { TiltCard } from '../base/TiltCard.js'
 import styles from './Settings.module.css'
 
 const chatThemes: { value: ChatTheme; label: TranslationKey }[] = [
@@ -64,9 +65,8 @@ export const BackgroundSetting = () => {
         {chatThemes.map((theme) => {
           const selected = chatTheme === theme.value
           return (
-            <button
+            <TiltCard
               key={theme.value}
-              type="button"
               role="radio"
               aria-checked={selected}
               className={clsx(styles.chatThemeCard, selected && styles.chatThemeCardSelected)}
@@ -79,7 +79,7 @@ export const BackgroundSetting = () => {
               </span>
               <span className={styles.chatThemeName}>{t(theme.label)}</span>
               {selected ? <span className={styles.chatThemeCheck}>✓</span> : null}
-            </button>
+            </TiltCard>
           )
         })}
       </div>

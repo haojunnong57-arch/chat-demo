@@ -190,7 +190,8 @@ export type ClientTool = {
 
 export type CreateMessageRequest = {
   model: ChatModel
-  system: string
+  /** 完全由用户自定义；为空时客户端不发送该字段 */
+  system?: string
   messages: MessageParam[]
   thinking: { type: 'enabled' | 'disabled' }
   tools: (DeepseekWebSearchTool | DeepseekReadUrlTool | ClientTool)[]

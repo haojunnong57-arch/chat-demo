@@ -219,6 +219,8 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
     holdActiveRef.current = true
     setPressing(true)
     haptic('light')
+    // 按住说话立刻打断 AI 正在进行的朗读/播报
+    stopReadAloud()
     void voice.start()
   }
 
@@ -266,6 +268,8 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
     cancelArmedRef.current = false
     setMode(next)
     if (next === 'voice') {
+      // 切到按住说话时同样停止播报，避免两个声音叠在一起
+      stopReadAloud()
       textareaRef.current?.blur()
     } else {
       window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 0)

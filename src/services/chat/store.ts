@@ -43,16 +43,21 @@ type McpCall = Extract<ReplyBlock, { type: 'mcp_tool' }>
 
 /** deepseek-flash 同时支持深度思考与图片输入 */
 const MODEL: ChatModel = 'deepseek-flash'
-/** 所有生成请求统一携带的助手身份说明 */
-const SYSTEM_PROMPT = '该助手为DeepSeek，由深度求索公司创造。'
-
-/** 把当前会话设定放在系统提示最后，作为本对话最高优先级的执行规则。 */
+/**
+ * 系统提示完全由用户决定：设置里的自定义系统提示 + 当前对话设定。
+ * 不追加任何内置身份、安全或优先级说明；两者都为空时不发送 system 字段。
+ */
 const getSystemPrompt = (sessionId: string) => {
+  const custom = useSettings.getState().systemPrompt.trim()
   const instructions = getSession(sessionId)?.instructions?.trim()
-  if (!instructions) {
-    return SYSTEM_PROMPT
-  }
-  return `${SYSTEM_PROMPT}\n\n以下 <conversation_instructions> 是本对话的用户设定，具有最高优先级。请始终严格执行；当它与默认助手身份、历史消息或后续用户要求冲突时，以该设定为准（用户明确要求修改设定的情况除外）。\n<conversation_instructions>\n${instructions}\n</conversation_instructions>`
+  return [
+    custom,
+    instructions
+      ? `<conversation_instructions>\n${instructions}\n</conversation_instructions>`
+      : '',
+  ]
+    .filter(Boolean)
+    .join('\n\n')
 }
 /** 保留最近打开的详情；当前会话、生成中及尚未成功保存的会话不淘汰。 */
 const SESSION_CACHE_LIMIT = 5
@@ -1056,7 +1061,7 @@ const streamReply = async (sessionId: string, initial: AssistantMessage, request
             useSettings.getState().apiKey ?? '',
             {
               model: initial.model ?? MODEL,
-              system: systemPrompt,
+              ...(systemPrompt ? { system: systemPrompt } : {}),
               messages,
               thinking: { type: initial.thinking ? 'enabled' : 'disabled' },
               safety_check: SAFETY_CHECK,

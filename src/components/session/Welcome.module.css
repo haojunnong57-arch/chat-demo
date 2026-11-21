@@ -16,7 +16,7 @@
   position: absolute;
   inset: 0;
   content: '';
-  background: var(--chat-image-veil, color-mix(in srgb, var(--dsw-alias-bg-base) 58%, transparent));
+  background: var(--chat-image-veil, transparent);
   pointer-events: none;
 }
 

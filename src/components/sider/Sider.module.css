@@ -198,12 +198,44 @@
   bottom: 0;
   left: 0;
   z-index: 800;
+  /* 从左侧带一点回弹滑入，关闭时同曲线反向滑出 */
+  transform: translate3d(-102%, 0, 0) scale(0.985);
+  transform-origin: left center;
+  transition:
+    transform 300ms cubic-bezier(0.22, 1.14, 0.36, 1),
+    box-shadow 300ms ease-out;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0);
+  will-change: transform;
+}
+
+.drawerVisible {
+  transform: translate3d(0, 0, 0) scale(1);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+}
+
+.drawerClosing {
+  transform: translate3d(-104%, 0, 0) scale(0.985);
 }
 
 .drawerMask {
   position: absolute;
   inset: 0;
   z-index: 799;
+  background: rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  transition: opacity 230ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.drawerMaskVisible {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawerMask,
+  .drawer {
+    transition: none;
+  }
 }
 
 .mobile {

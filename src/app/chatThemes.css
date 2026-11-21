@@ -27,7 +27,8 @@
   --chat-assistant-padding: 0;
   --chat-assistant-max-width: none;
   --chat-caveat-color: var(--dsw-alias-label-tertiary);
-  --chat-image-veil: color-mix(in srgb, var(--dsw-alias-bg-base) 58%, transparent);
+  --chat-image-veil: transparent;
+  --chat-input-scrim: var(--dsw-alias-bg-base);
   --chat-bubble-font-size: 16px;
   --chat-bubble-line-height: 24px;
 }
@@ -60,7 +61,8 @@
   --chat-assistant-shadow: none;
 
   --chat-caveat-color: #8a8a8a;
-  --chat-image-veil: color-mix(in srgb, #ededed 55%, transparent);
+  --chat-image-veil: transparent;
+  --chat-input-scrim: #ededed;
   --chat-bubble-font-size: 16px;
   --chat-bubble-line-height: 24px;
 
@@ -109,7 +111,8 @@
   --chat-assistant-shadow: none;
 
   --chat-caveat-color: #8e8e93;
-  --chat-image-veil: color-mix(in srgb, #ffffff 52%, transparent);
+  --chat-image-veil: transparent;
+  --chat-input-scrim: #ffffff;
   --chat-bubble-font-size: 16px;
   --chat-bubble-line-height: 22px;
 
@@ -131,33 +134,47 @@
 
 /* ---------- Instagram ---------- */
 .chat-theme-instagram {
-  --chat-page-bg: linear-gradient(180deg, #ffffff 0%, #ffffff 58%, #fafafa 100%);
-  --chat-header-bg: rgba(255, 255, 255, 0.9);
-  --chat-header-border: 0.5px solid #efefef;
-  --chat-header-backdrop: saturate(180%) blur(18px);
+  /* 页面底色用大面积径向渐变过渡，避免分段线性渐变出现「接缝」 */
+  --chat-page-bg:
+    radial-gradient(120% 90% at 50% -18%, #ffffff 0%, rgba(255, 255, 255, 0) 62%),
+    radial-gradient(90% 70% at 100% 100%, #fbf9fb 0%, rgba(251, 249, 251, 0) 58%),
+    linear-gradient(180deg, #fefefe 0%, #fcfbfc 52%, #f9f8f9 100%);
+  --chat-header-bg: color-mix(in srgb, #ffffff 82%, transparent);
+  --chat-header-border: 0.5px solid color-mix(in srgb, #111111 6%, transparent);
+  --chat-header-backdrop: saturate(170%) blur(20px);
 
-  --chat-input-bg: #ffffff;
-  --chat-input-border: 1px solid #efefef;
+  --chat-input-bg: color-mix(in srgb, #ffffff 92%, transparent);
+  --chat-input-border: 1px solid color-mix(in srgb, #111111 5%, transparent);
   --chat-input-radius: 22px;
-  --chat-input-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-  --chat-input-backdrop: none;
+  --chat-input-shadow:
+    0 10px 28px rgba(17, 17, 17, 0.05),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  --chat-input-backdrop: saturate(160%) blur(16px);
+  --chat-input-scrim: #fdfdfd;
 
-  --chat-user-bubble: linear-gradient(135deg, #405de6 0%, #5851db 22%, #833ab4 48%, #c13584 66%, #e1306c 82%, #fd1d1d 100%);
+  /* 用户气泡：多层径向渐变叠加，全角度柔和过渡，不再有生硬色带 */
+  --chat-user-bubble:
+    radial-gradient(135% 150% at 6% -8%, #4a53c9 0%, rgba(74, 83, 201, 0) 64%),
+    radial-gradient(140% 160% at 102% 6%, #8c3fb8 0%, rgba(140, 63, 184, 0) 62%),
+    radial-gradient(150% 170% at 96% 104%, #e2618f 0%, rgba(226, 97, 143, 0) 58%),
+    linear-gradient(150deg, #5a5ad6 0%, #7f45b8 46%, #c23f88 100%);
   --chat-user-text: #ffffff;
-  --chat-user-radius: 18px;
+  --chat-user-radius: 20px;
   --chat-user-max-width: calc(100% - 68px);
-  --chat-user-shadow: 0 3px 12px rgba(225, 48, 108, 0.18);
+  --chat-user-shadow:
+    0 6px 18px rgba(198, 51, 122, 0.16),
+    0 1px 0 rgba(255, 255, 255, 0.34) inset;
   --chat-assistant-layout: flex;
   --chat-assistant-display: block;
-  --chat-assistant-bg: #ffffff;
-  --chat-assistant-text: #111111;
-  --chat-assistant-radius: 18px;
+  --chat-assistant-bg: color-mix(in srgb, #ffffff 88%, #f3f3f5);
+  --chat-assistant-text: #1c1c1e;
+  --chat-assistant-radius: 20px;
   --chat-assistant-padding: 10px 14px;
   --chat-assistant-max-width: calc(100% - 48px);
-  --chat-assistant-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  --chat-assistant-shadow: 0 2px 8px rgba(17, 17, 17, 0.05);
 
   --chat-caveat-color: #8e8e93;
-  --chat-image-veil: color-mix(in srgb, #ffffff 56%, transparent);
+  --chat-image-veil: transparent;
   --chat-bubble-font-size: 16px;
   --chat-bubble-line-height: 23px;
 
@@ -185,30 +202,32 @@
     radial-gradient(800px 620px at 50% 100%, rgba(52, 199, 89, 0.16), transparent 68%),
     linear-gradient(145deg, #eff5ff 0%, #dfe8f5 48%, #f5ecf7 100%);
 
-  --chat-header-bg: rgba(255, 255, 255, 0.42);
-  --chat-header-border: 0.5px solid rgba(255, 255, 255, 0.55);
-  --chat-header-backdrop: saturate(180%) blur(26px);
+  --chat-header-bg: color-mix(in srgb, #ffffff 34%, transparent);
+  --chat-header-border: 0;
+  --chat-header-backdrop: saturate(180%) blur(24px);
 
-  --chat-input-bg: rgba(255, 255, 255, 0.46);
-  --chat-input-border: 1px solid rgba(255, 255, 255, 0.72);
+  /* 真实液态玻璃：极低不透明度的填充 + 背景模糊 + 边缘镜面；不再是白色贴图 */
+  --chat-input-bg: rgba(255, 255, 255, var(--glass-fill, 0.2));
+  --chat-input-border: 1px solid rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.9 + 0.12));
   --chat-input-radius: 26px;
   --chat-input-shadow:
-    0 16px 42px rgba(30, 55, 100, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.92),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.35);
-  --chat-input-backdrop: saturate(180%) blur(28px);
-  --chat-input-sheen: 0.68;
+    0 18px 44px rgba(23, 48, 92, 0.13),
+    0 -10px 26px rgba(70, 120, 220, 0.07) inset,
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  --chat-input-backdrop: saturate(190%) blur(var(--glass-blur, 30px));
+  --chat-input-sheen: 0.14;
+  --chat-input-scrim: transparent;
 
-  --chat-user-bubble: linear-gradient(145deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.22));
+  --chat-user-bubble: linear-gradient(145deg, rgba(255, 255, 255, calc(var(--glass-fill, 0.2) + 0.12)), rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.7)));
   --chat-user-text: #14203a;
   --chat-user-radius: 24px;
   --chat-user-max-width: calc(100% - 68px);
   --chat-user-shadow:
-    0 10px 28px rgba(25, 50, 95, 0.13),
-    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+    0 10px 28px rgba(25, 50, 95, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
   --chat-assistant-layout: flex;
   --chat-assistant-display: block;
-  --chat-assistant-bg: rgba(255, 255, 255, 0.34);
+  --chat-assistant-bg: rgba(255, 255, 255, calc(var(--glass-fill, 0.2) + 0.04));
   --chat-assistant-text: #14203a;
   --chat-assistant-radius: 24px;
   --chat-assistant-padding: 12px 16px;
@@ -216,10 +235,10 @@
   --chat-assistant-shadow:
     0 12px 32px rgba(25, 50, 95, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.82);
-  --chat-bubble-backdrop: saturate(180%) blur(22px);
+  --chat-bubble-backdrop: saturate(190%) blur(var(--glass-blur, 30px));
 
   --chat-caveat-color: #637083;
-  --chat-image-veil: color-mix(in srgb, #eff5ff 34%, transparent);
+  --chat-image-veil: transparent;
   --chat-bubble-font-size: 16px;
   --chat-bubble-line-height: 24px;
 
@@ -251,7 +270,7 @@ body[data-ds-dark-theme] .chat-theme-wechat {
   --chat-assistant-bg: #2a2a2a;
   --chat-assistant-text: #ededed;
   --chat-caveat-color: #8b8b8b;
-  --chat-image-veil: color-mix(in srgb, #111111 62%, transparent);
+  --chat-image-veil: transparent;
   --dsw-alias-bg-base: #111111;
   --dsw-alias-label-primary: #ededed;
   --dsw-alias-label-secondary: #b0b0b0;
@@ -276,7 +295,7 @@ body[data-ds-dark-theme] .chat-theme-imessage {
   --chat-assistant-bg: #26262a;
   --chat-assistant-text: #f5f5f7;
   --chat-caveat-color: #8e8e93;
-  --chat-image-veil: color-mix(in srgb, #000000 62%, transparent);
+  --chat-image-veil: transparent;
   --dsw-alias-bg-base: #000000;
   --dsw-alias-label-primary: #f5f5f7;
   --dsw-alias-label-secondary: #aeaeb2;
@@ -290,18 +309,30 @@ body[data-ds-dark-theme] .chat-theme-imessage {
 }
 
 body[data-ds-dark-theme] .chat-theme-instagram {
-  --chat-page-bg: linear-gradient(180deg, #000000 0%, #09090b 100%);
-  --chat-header-bg: rgba(18, 18, 18, 0.9);
-  --chat-header-border: 0.5px solid #2c2c2e;
-  --chat-input-bg: #1c1c1e;
-  --chat-input-border: 1px solid #2c2c2e;
-  --chat-input-shadow: 0 2px 10px rgba(0, 0, 0, 0.32);
-  --chat-user-bubble: linear-gradient(135deg, #405de6 0%, #833ab4 48%, #e1306c 82%, #fd1d1d 100%);
+  --chat-page-bg:
+    radial-gradient(120% 90% at 50% -18%, #17171a 0%, rgba(23, 23, 26, 0) 60%),
+    radial-gradient(90% 70% at 100% 100%, #101014 0%, rgba(16, 16, 20, 0) 58%),
+    linear-gradient(180deg, #0b0b0d 0%, #09090b 100%);
+  --chat-header-bg: color-mix(in srgb, #141416 86%, transparent);
+  --chat-header-border: 0.5px solid #262628;
+  --chat-input-bg: color-mix(in srgb, #232326 88%, transparent);
+  --chat-input-border: 1px solid #303033;
+  --chat-input-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+  --chat-input-backdrop: saturate(150%) blur(14px);
+  --chat-input-scrim: #0b0b0c;
+  --chat-user-bubble:
+    radial-gradient(135% 150% at 6% -8%, #3c49b8 0%, rgba(60, 73, 184, 0) 64%),
+    radial-gradient(140% 160% at 102% 6%, #7a3aa6 0%, rgba(122, 58, 166, 0) 62%),
+    radial-gradient(150% 170% at 96% 104%, #b84077 0%, rgba(184, 64, 119, 0) 58%),
+    linear-gradient(150deg, #3f4bbd 0%, #6f3aa2 46%, #a83a76 100%);
   --chat-user-text: #ffffff;
-  --chat-assistant-bg: #262626;
+  --chat-user-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.34),
+    0 1px 0 rgba(255, 255, 255, 0.18) inset;
+  --chat-assistant-bg: #232326;
   --chat-assistant-text: #f5f5f7;
   --chat-caveat-color: #8e8e93;
-  --chat-image-veil: color-mix(in srgb, #000000 62%, transparent);
+  --chat-image-veil: transparent;
   --dsw-alias-bg-base: #000000;
   --dsw-alias-label-primary: #f5f5f7;
   --dsw-alias-label-secondary: #a8a8a8;
@@ -320,27 +351,28 @@ body[data-ds-dark-theme] .chat-theme-glass {
     radial-gradient(900px 700px at 96% 12%, rgba(255, 55, 95, 0.22), transparent 65%),
     radial-gradient(800px 620px at 50% 100%, rgba(48, 209, 88, 0.14), transparent 68%),
     linear-gradient(145deg, #0b1220 0%, #131a2a 48%, #1c1422 100%);
-  --chat-header-bg: rgba(22, 29, 44, 0.5);
-  --chat-header-border: 0.5px solid rgba(255, 255, 255, 0.18);
-  --chat-input-bg: rgba(30, 39, 58, 0.54);
-  --chat-input-border: 1px solid rgba(255, 255, 255, 0.24);
+  --chat-header-bg: rgba(255, 255, 255, 0.06);
+  --chat-header-border: 0;
+  --chat-input-bg: rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.55));
+  --chat-input-border: 1px solid rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.6 + 0.06));
   --chat-input-shadow:
-    0 18px 48px rgba(0, 0, 0, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.08);
-  --chat-input-sheen: 0.36;
-  --chat-user-bubble: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.07));
+    0 18px 48px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  --chat-input-sheen: 0.1;
+  --chat-input-scrim: transparent;
+  --chat-input-backdrop: saturate(190%) blur(var(--glass-blur, 30px));
+  --chat-user-bubble: linear-gradient(145deg, rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.7)), rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.3)));
   --chat-user-text: #f5f8ff;
   --chat-user-shadow:
-    0 12px 32px rgba(0, 0, 0, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.32);
-  --chat-assistant-bg: rgba(255, 255, 255, 0.11);
+    0 12px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  --chat-assistant-bg: rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.42));
   --chat-assistant-text: #f5f8ff;
   --chat-assistant-shadow:
     0 14px 36px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
   --chat-caveat-color: rgba(245, 248, 255, 0.72);
-  --chat-image-veil: color-mix(in srgb, #0b1220 44%, transparent);
+  --chat-image-veil: transparent;
   --dsw-alias-bg-base: #0b1220;
   --dsw-alias-label-primary: #f5f8ff;
   --dsw-alias-label-secondary: #b9c4d8;
@@ -360,6 +392,7 @@ body[data-ds-dark-theme] .chat-theme-glass {
 /* 没有 backdrop-filter 时，玻璃仍使用不透明表面，保证可读性 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .chat-theme-glass {
+    --chat-input-scrim: #eff5ff;
     --chat-header-bg: rgba(255, 255, 255, 0.9);
     --chat-input-bg: rgba(255, 255, 255, 0.94);
     --chat-user-bubble: linear-gradient(145deg, #ffffff, #e9f0fb);
@@ -367,6 +400,7 @@ body[data-ds-dark-theme] .chat-theme-glass {
   }
 
   body[data-ds-dark-theme] .chat-theme-glass {
+    --chat-input-scrim: #0b1220;
     --chat-header-bg: #1c2536;
     --chat-input-bg: #1c2536;
     --chat-user-bubble: linear-gradient(145deg, #2b3547, #202a3b);
@@ -377,6 +411,7 @@ body[data-ds-dark-theme] .chat-theme-glass {
 /* 尊重系统“降低透明度”设置 */
 @media (prefers-reduced-transparency: reduce) {
   .chat-theme-glass {
+    --chat-input-scrim: #eff5ff;
     --chat-header-bg: rgba(255, 255, 255, 0.92);
     --chat-input-bg: rgba(255, 255, 255, 0.96);
     --chat-user-bubble: linear-gradient(145deg, #ffffff, #eef3fb);
@@ -387,6 +422,7 @@ body[data-ds-dark-theme] .chat-theme-glass {
   }
 
   body[data-ds-dark-theme] .chat-theme-glass {
+    --chat-input-scrim: #0b1220;
     --chat-header-bg: #1c2536;
     --chat-input-bg: #1c2536;
     --chat-user-bubble: linear-gradient(145deg, #2b3547, #202a3b);
@@ -473,3 +509,15 @@ body[data-ds-dark-theme] .chat-theme-glass {
 .chat-theme-instagram .ds-user-message-bubble {
   box-shadow: var(--chat-user-shadow);
 }
+
+/* Instagram 气泡不使用尾巴：渐变气泡上的独立小三角会露出拼接痕迹 */
+.chat-theme-instagram .ds-user-message-bubble::after,
+.chat-theme-instagram .ds-assistant-message-body::after {
+  content: none;
+}
+
+.chat-theme-instagram .ds-user-message-bubble,
+.chat-theme-instagram .ds-assistant-message-body {
+  border-radius: var(--chat-user-radius, 20px);
+}
+

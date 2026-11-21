@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type CSSProperties } from 'react'
 import { useIsMobile } from '../../app/viewport.js'
 import { useTranslate } from '../../i18n/index.js'
 import type { Session } from '../../services/chat/types.js'
@@ -29,6 +29,7 @@ export const SessionView = ({
   const title = session.title || t('untitledChat')
   const chatBackground = useSettings((state) => state.chatBackground)
   const chatTheme = useSettings((state) => state.chatTheme)
+  const glassOpacity = useSettings((state) => state.glassOpacity)
   const autoRead = useSettings((state) => state.autoRead)
   const previousStreaming = useRef(streaming)
 
@@ -57,7 +58,14 @@ export const SessionView = ({
         chatBackground && styles.withBackground
       )}
       data-chat-theme={chatTheme}
-      style={chatBackground ? { backgroundImage: `url(${chatBackground})` } : undefined}
+      style={
+        {
+          ...(chatBackground ? { backgroundImage: `url(${chatBackground})` } : null),
+          // 通透度滑块：越大越通透，填充更少、模糊更轻
+          '--glass-fill': `${(0.42 - glassOpacity * 0.34).toFixed(3)}`,
+          '--glass-blur': `${Math.round(12 + (1 - glassOpacity) * 24)}px`,
+        } as CSSProperties
+      }
     >
       {isMobile ? (
         <MobileHeader title={title} streaming={streaming} chatTheme={chatTheme} />
@@ -77,7 +85,6 @@ export const SessionView = ({
         footer={
           <div className={styles.inputContainer}>
             <ChatInput sessionId={session.id} />
-            <div className={styles.caveat}>{t('contentCaveat')}</div>
           </div>
         }
       />

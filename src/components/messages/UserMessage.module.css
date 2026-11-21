@@ -1,4 +1,5 @@
 .container {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -104,4 +105,53 @@
   justify-content: flex-end;
   gap: 8px;
   margin: 6px 10px 10px;
+}
+
+/* 交错入场：每个子项微弱弹性上浮，延迟由列表按序号分配（最多 6 档） */
+.enter {
+  animation: msgEnter 380ms cubic-bezier(0.22, 1.06, 0.36, 1) both;
+}
+
+@keyframes msgEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* 我的头像：只有上传后才出现，未上传时没有占位框 */
+.avatar {
+  position: absolute;
+  top: 0;
+  right: -38px;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  user-select: none;
+  pointer-events: none;
+}
+
+.isFirst .avatar {
+  top: 34px;
+}
+
+@media not all and (min-width: 768px) {
+  .avatar {
+    right: -34px;
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter {
+    animation: none;
+  }
 }

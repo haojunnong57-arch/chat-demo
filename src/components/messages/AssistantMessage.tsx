@@ -33,6 +33,7 @@ export const AssistantMessage = memo(function AssistantMessage({
   sessionId,
   message,
   isLast,
+  enterIndex,
   streaming,
   busy,
   versions,
@@ -41,6 +42,8 @@ export const AssistantMessage = memo(function AssistantMessage({
   sessionId: string
   message: AssistantMessageType
   isLast: boolean
+  /** 交错入场序号 */
+  enterIndex: number
   streaming: boolean
   busy: boolean
   versions: MessageVersions
@@ -48,6 +51,7 @@ export const AssistantMessage = memo(function AssistantMessage({
 }) {
   const t = useTranslate()
   const chatTheme = useSettings((state) => state.chatTheme)
+  const aiAvatar = useSettings((state) => state.aiAvatar)
   const wasStreamingRef = useRef(streaming)
   const view = useReplyView(message, streaming)
 
@@ -70,7 +74,11 @@ export const AssistantMessage = memo(function AssistantMessage({
   const waiting = streaming && view.steps.length === 0 && !view.answer && !message.thinking
   const summaryEntry = `${message.id}-summary`
   return (
-    <div className={styles.message}>
+    <div
+      className={clsx(styles.message, styles.enter)}
+      style={{ animationDelay: `${enterIndex * 45}ms` }}
+    >
+      {aiAvatar ? <img className={styles.avatar} src={aiAvatar} alt="" draggable={false} /> : null}
       <div
         className={clsx(
           styles.body,
