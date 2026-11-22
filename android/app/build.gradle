@@ -1,0 +1,49 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.haojunnong.deepseek'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.haojunnong.deepseek"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "3.2.1"
+    }
+
+    // 未签名 debug APK 走 CI 上传；release 不配置签名，避免任何密钥入库。
+    buildTypes {
+        debug {
+            applicationIdSuffix ""
+            versionNameSuffix ""
+        }
+        release {
+            minifyEnabled false
+            shrinkResources false
+            signingConfig null
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging false
+        }
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}

@@ -1,0 +1,5 @@
+// Android 壳：纯框架 WebView，无 AndroidX、无第三方依赖，只把 pnpm build 产出的
+// dist/ 装进 assets/web，由内置本地 AssetServer 在 127.0.0.1 提供 SPA 资源。
+plugins {
+    id 'com.android.application' version '8.1.4' apply false
+}

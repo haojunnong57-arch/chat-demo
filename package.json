@@ -13,7 +13,8 @@
     "format": "oxfmt --write .",
     "test:sse": "node --experimental-strip-types --test tests/sse.test.ts",
     "test:mcp": "node --experimental-strip-types --test tests/mcp.test.ts",
-    "test:providers": "node --experimental-strip-types --test tests/providers.test.ts"
+    "test:providers": "node --experimental-strip-types --test tests/providers.test.ts",
+    "android:build": "mkdir -p android/app/src/main/assets/web && cp -R dist/. android/app/src/main/assets/web/ && android/gradlew -p android assembleDebug"
   },
   "dependencies": {
     "@types/katex": "^0.16.5",

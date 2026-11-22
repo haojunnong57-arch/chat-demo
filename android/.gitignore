@@ -1,0 +1,17 @@
+# 本机 SDK 路径，禁止入库（CI 由 ANDROID_HOME 提供）
+local.properties
+
+# Gradle 与构建产物
+.gradle/
+build/
+app/build/
+
+# 密钥（本壳不使用签名）
+keystore.properties
+keystore/
+*.jks
+*.keystore
+
+# CI 每次把 pnpm build 的 dist/ 重新拷进 assets/web，不入库
+app/src/main/assets/web/*
+!app/src/main/assets/web/.gitkeep
