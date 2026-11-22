@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslate } from '../i18n/index.js'
 import { useSettings } from '../services/settings.js'
 import { useIsMobile, useMobileViewport, usePreventPageScroll } from './viewport.js'
@@ -18,6 +18,8 @@ import { SessionInstructionsDialog } from '../components/session/SessionInstruct
 import { ensureApiKey } from '../components/settings/settingsDialogState.js'
 import { SettingsDialog } from '../components/settings/SettingsDialog.js'
 import { Onboarding } from '../components/onboarding/Onboarding.js'
+import { Activate } from '../components/activate/Activate.js'
+import { license } from '../services/license.js'
 import { Toast } from '../components/base/Toast.js'
 import { showToast } from '../components/base/toastState.js'
 import { onUploadNotice } from '../services/attachments.js'
@@ -161,6 +163,13 @@ export const App = () => {
   const t = useTranslate()
   const isMobile = useIsMobile()
   const locale = useSettings((state) => state.locale)
+  // 激活门：未激活时只显示激活页，挡住聊天主界面
+  const [activated, setActivated] = useState(() => license.isActivated())
+  useEffect(() => {
+    const onChange = () => setActivated(license.isActivated())
+    window.addEventListener('chat-demo:license-activated', onChange)
+    return () => window.removeEventListener('chat-demo:license-activated', onChange)
+  }, [])
   // 移动端侧边栏以独立抽屉管理开合状态
   const siderCollapsed = useSettings((state) => state.siderCollapsed) && !isMobile
   const ready = useChatStore((state) => state.ready)
@@ -205,6 +214,10 @@ export const App = () => {
     // 首次打开先在设置里输入 API Key
     ensureApiKey()
   }, [])
+
+  if (!activated) {
+    return <Activate />
+  }
 
   return (
     <>
