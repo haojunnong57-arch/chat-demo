@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>激活码签发工具</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; min-height: 100vh; padding: 24px 18px calc(24px + env(safe-area-inset-bottom));
+    background: #0e1116; color: #e8ecf1;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 460px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 6px; letter-spacing: -.02em; }
+  .sub { color: #8b95a3; font-size: 13px; margin-bottom: 20px; }
+  .card { background: #171c24; border: 1px solid #262e3a; border-radius: 18px; padding: 18px; margin-bottom: 16px; }
+  .card h2 { font-size: 15px; margin: 0 0 12px; color: #cdd6e0; }
+  textarea, input {
+    width: 100%; background: #0f141b; color: #e8ecf1; border: 1px solid #2a3341;
+    border-radius: 12px; padding: 12px; font: inherit; font-size: 14px;
+  }
+  textarea { min-height: 84px; resize: vertical; }
+  label { display: block; font-size: 12px; color: #8b95a3; margin: 10px 0 6px; }
+  button {
+    width: 100%; border: 0; border-radius: 14px; padding: 14px; font: inherit; font-size: 15px;
+    font-weight: 600; cursor: pointer; background: #4d6bfe; color: #fff; margin-top: 12px;
+  }
+  button.ghost { background: #222a36; color: #cdd6e0; }
+  button:disabled { opacity: .5; }
+  .row { display: flex; gap: 10px; }
+  .row button { margin-top: 0; }
+  .out {
+    margin-top: 12px; padding: 12px; border-radius: 12px; background: #0f141b;
+    border: 1px dashed #334052; font-size: 13px; word-break: break-all; color: #a9e0b8;
+    min-height: 20px;
+  }
+  .muted { color: #8b95a3; font-size: 12px; }
+  .warn { color: #f0b35e; }
+  .ok { color: #6fd38a; }
+  .steps { font-size: 13px; color: #aeb8c4; }
+  .steps li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>激活码签发工具</h1>
+  <div class="sub">纯本地运行，不联网。私钥请妥善保存，不要发给任何人。</div>
+
+  <div class="card">
+    <h2>① 钥匙（只做一次）</h2>
+    <div class="muted">点「生成钥匙」会得到一对钥匙：私钥留存在本机/复制保存，公钥发给开发者写进 App。</div>
+    <div class="row" style="margin-top:12px">
+      <button id="genKey">生成钥匙</button>
+      <button id="copyPub" class="ghost">复制公钥</button>
+    </div>
+    <label>公钥（复制给开发者）</label>
+    <textarea id="pubOut" readonly placeholder="生成后显示在这里"></textarea>
+    <label>私钥（自己保存，勿外泄）</label>
+    <textarea id="privOut" readonly placeholder="生成后显示在这里，建议复制存备忘录"></textarea>
+  </div>
+
+  <div class="card">
+    <h2>② 生成激活码</h2>
+    <label>私钥（粘贴上方保存的私钥 JSON）</label>
+    <textarea id="privInput" placeholder='{"kty":"EC",...}'></textarea>
+    <label>备注 / 买家标识（可选，仅自己记录用）</label>
+    <input id="tid" placeholder="例如 买家昵称 / 订单号">
+    <button id="signBtn">生成激活码</button>
+    <div class="out" id="tokenOut">生成后，复制这串码发给买家</div>
+    <div class="row" style="margin-top:10px">
+      <button id="copyToken" class="ghost">复制激活码</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>③ 自测（可选）</h2>
+    <label>公钥</label>
+    <textarea id="verifyPub" placeholder="粘贴公钥 JSON"></textarea>
+    <label>激活码</label>
+    <textarea id="verifyToken" placeholder="粘贴要验证的码"></textarea>
+    <button id="verifyBtn">验证</button>
+    <div class="out" id="verifyOut">结果显示在这里</div>
+  </div>
+
+  <div class="card">
+    <h2>添加到桌面</h2>
+    <ol class="steps">
+      <li><b>iPhone：</b>用 Safari 打开本页 → 点底部分享按钮 → 选「添加到主屏幕」。</li>
+      <li><b>安卓：</b>浏览器菜单（三个点）→「添加到主屏幕 / 安装应用」。</li>
+    </ol>
+    <p class="muted">添加后桌面会出现图标，点开直接进入本工具。</p>
+  </div>
+</div>
+
+<script type="module">
+const enc = new TextEncoder()
+const dec = new TextDecoder()
+const ALG = { name: 'ECDSA', namedCurve: 'P-256', hash: 'SHA-256' }
+
+function b64url(buf) {
+  const b = new Uint8Array(buf); let s = ''
+  for (const x of b) s += String.fromCharCode(x)
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/,'')
+}
+function unb64url(str) {
+  const pad = str.length % 4 === 0 ? '' : '='.repeat(4 - (str.length % 4))
+  const bin = atob(str.replace(/-/g, '+').replace(/_/g, '/') + pad)
+  const u = new Uint8Array(bin.length)
+  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i)
+  return u.buffer
+}
+
+const $ = (id) => document.getElementById(id)
+const copy = async (text) => {
+  try { await navigator.clipboard.writeText(text); return true }
+  catch {
+    const ta = document.createElement('textarea'); ta.value = text
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove()
+    return true
+  }
+}
+
+let privKey = null
+
+$('genKey').onclick = async () => {
+  const pair = await crypto.subtle.generateKey(ALG, true, ['sign', 'verify'])
+  const pubJwk = await crypto.subtle.exportKey('jwk', pair.publicKey)
+  const privJwk = await crypto.subtle.exportKey('jwk', pair.privateKey)
+  $('pubOut').value = JSON.stringify(pubJwk)
+  $('privOut').value = JSON.stringify(privJwk)
+  privKey = pair.privateKey
+  $('privInput').value = JSON.stringify(privJwk)
+  alert('钥匙已生成。请复制私钥妥善保存，公钥发给开发者。')
+}
+
+$('copyPub').onclick = async () => { await copy($('pubOut').value); alert('公钥已复制') }
+
+$('signBtn').onclick = async () => {
+  try {
+    const jwk = JSON.parse($('privInput').value)
+    privKey = await crypto.subtle.importKey('jwk', jwk, ALG, false, ['sign'])
+  } catch { alert('私钥格式不对，请粘贴完整私钥 JSON'); return }
+  const payload = { sub: 'mobile', iat: Date.now(), tid: $('tid').value.trim() || 'buyer' }
+  const payloadB64 = b64url(enc.encode(JSON.stringify(payload)))
+  const sig = await crypto.subtle.sign(ALG, privKey, enc.encode(JSON.stringify(payload)))
+  const token = payloadB64 + '.' + b64url(sig)
+  $('tokenOut').textContent = token
+}
+
+$('copyToken').onclick = async () => { await copy($('tokenOut').textContent); alert('激活码已复制，发给买家即可') }
+
+$('verifyBtn').onclick = async () => {
+  try {
+    const pubJwk = JSON.parse($('verifyPub').value)
+    const pub = await crypto.subtle.importKey('jwk', pubJwk, ALG, false, ['verify'])
+    const token = $('verifyToken').value.trim()
+    const [pb, sb] = token.split('.')
+    const payload = dec.decode(unb64url(pb))
+    const ok = await crypto.subtle.verify(ALG, pub, unb64url(sb), enc.encode(payload))
+    $('verifyOut').textContent = ok ? '✅ 有效：' + payload : '❌ 无效或被篡改'
+    $('verifyOut').className = 'out ' + (ok ? 'ok' : 'warn')
+  } catch { $('verifyOut').textContent = '❌ 校验失败，检查输入'; $('verifyOut').className = 'out warn' }
+}
+</script>
+</body>
+</html>
