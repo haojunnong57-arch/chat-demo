@@ -138,7 +138,7 @@ $('verifyBtn').onclick = async () => {
     const ok = await crypto.subtle.verify(ALG, pub, unb64url(sb), enc.encode(payload))
     $('verifyOut').textContent = ok ? '✅ 有效：' + payload : '❌ 无效或被篡改'
     $('verifyOut').className = 'out ' + (ok ? 'ok' : 'warn')
-  } { $('verifyOut').textContent = '❌ 校验失败，检查输入'; $('verifyOut').className = 'out warn' }
+  } catch { $('verifyOut').textContent = '❌ 校验失败，检查输入'; $('verifyOut').className = 'out warn' }
 }
 </script>
 </body>
