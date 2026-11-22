@@ -48,16 +48,19 @@ export const Activate = () => {
 
           <div className={styles.card}>
             <div className={styles.cardLabel}>{t('activateCodeLabel')}</div>
-            <input
+            <textarea
               className={styles.input}
-              type="text"
+              rows={3}
               autoComplete="off"
               spellCheck={false}
               placeholder={t('activateCodePlaceholder')}
               value={token}
               onChange={(e) => setToken(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.nativeEvent.isComposing) void submit()
+                if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                  e.preventDefault()
+                  void submit()
+                }
               }}
             />
             {error ? <div className={styles.error}>{error}</div> : null}
