@@ -43,7 +43,7 @@ export const Activate = () => {
           <p className={styles.lead}>{t('activateDesc')}</p>
 
           <button type="button" className={styles.buyButton} onClick={openBuy}>
-            {t('activateBuy')} · ¥4.5
+            {t('activateBuy')} · ¥3.5
           </button>
 
           <div className={styles.card}>
