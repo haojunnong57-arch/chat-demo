@@ -1,0 +1,163 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(77, 107, 254, 0.12), transparent 34%),
+    radial-gradient(circle at 88% 92%, rgba(77, 107, 254, 0.08), transparent 38%),
+    var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+}
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 460px;
+  min-height: min(680px, calc(100vh - 48px));
+}
+
+.brand {
+  flex-shrink: 0;
+  color: var(--dsw-alias-brand-primary);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 0 24px;
+}
+
+.eyebrow {
+  margin-bottom: 10px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(28px, 7vw, 38px);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.18;
+}
+
+.lead {
+  margin: 14px 0 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.buyButton {
+  margin-top: 28px;
+  min-height: 52px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--dsw-alias-button-primary-fill);
+  color: var(--dsw-alias-label-primary-foreground);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(77, 107, 254, 0.24);
+}
+
+.buyButton:active {
+  background: var(--dsw-alias-button-primary-hover);
+}
+
+.card {
+  margin-top: 24px;
+  padding: 22px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 20px;
+  background: var(--dsw-alias-bg-layer-2);
+}
+
+.cardLabel {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+}
+
+.input {
+  width: 100%;
+  margin-top: 10px;
+  padding: 13px 14px;
+  border: 1px solid var(--dsw-alias-border-l3);
+  border-radius: 14px;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 15px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--dsw-alias-brand-primary);
+}
+
+.error {
+  margin-top: 12px;
+  color: #f06a6a;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.startButton {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 18px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--dsw-alias-button-primary-fill);
+  color: var(--dsw-alias-label-primary-foreground);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(77, 107, 254, 0.24);
+}
+
+.startButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.note {
+  margin-top: 20px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+@media (max-width: 420px) {
+  .overlay {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .page {
+    padding-top: 28px;
+  }
+
+  .card {
+    padding: 18px;
+    margin-top: 22px;
+  }
+}
