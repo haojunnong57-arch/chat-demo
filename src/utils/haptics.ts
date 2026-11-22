@@ -12,10 +12,21 @@ const bridge = (): WebkitBridge | undefined =>
   (window as unknown as { webkit?: WebkitBridge }).webkit
 
 /**
- * iOS 原生触感。WKWebView 里走 App 注入的 haptic bridge；
- * 普通浏览器没有 bridge 时退回 navigator.vibrate，不影响任何逻辑。
+ * 原生触感：Android 壳走注入的 `DeepSeekAndroid.haptic`，iOS 壳走 WKWebView
+ * 注入的 haptic bridge；普通浏览器没有 bridge 时退回 navigator.vibrate，
+ * 桥接异常一律静默忽略，不影响任何逻辑。
  */
 export const haptic = (style: HapticStyle = 'light') => {
+  const android = (window as unknown as { DeepSeekAndroid?: { haptic?: (s: string) => void } })
+    .DeepSeekAndroid
+  if (android?.haptic) {
+    try {
+      android.haptic(style)
+      return
+    } catch {
+      // 桥接异常时继续走浏览器回退
+    }
+  }
   const handler = bridge()?.messageHandlers?.haptic
   if (handler && typeof handler.postMessage === 'function') {
     try {
