@@ -11,8 +11,8 @@ const PUBLIC_JWK: JsonWebKey | null = {
   ext: true,
   key_ops: ['verify'],
   kty: 'EC',
-  x: 'WcaqLFLaM7XUkGYkrvA41yNCCAyLsozasR3DvLKFE88',
-  y: 'Xe3XgWeQ0tVRGf90gZCkpGKbLCROEhwqIKv1GjrS-q0',
+  x: 'apEl5nXUK0QcUfa_GmlfQmAcK3Y8H9HgWFsU3ZCRI7Q',
+  y: 'fjwyYhbKTpl9n-jdusUBekz0jP9v1oSdK2xLrn4rR_k',
 }
 
 const ALG = { name: 'ECDSA', namedCurve: 'P-256', hash: 'SHA-256' }
