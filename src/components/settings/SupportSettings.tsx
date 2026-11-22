@@ -6,7 +6,7 @@ import styles from './Settings.module.css'
 
 const GROUP_NUMBER = '753838300482'
 
-/** 设置里的交流群与赞赏码，内容与首次启动引导保持一致。 */
+/** 设置里的交流群，内容与首次启动引导保持一致。 */
 export const SupportSettings = () => {
   const t = useTranslate()
   const [copied, setCopied] = useState(false)
@@ -31,15 +31,6 @@ export const SupportSettings = () => {
           <IconCopyOutline16 />
           {copied ? t('settingsCommunityCopied') : t('settingsCommunityCopy')}
         </Button>
-      </section>
-
-      <section className={styles.supportCard}>
-        <div className={styles.supportLabel}>{t('settingsRewardTitle')}</div>
-        <p className={styles.supportHint}>{t('settingsRewardDesc')}</p>
-        <div className={styles.rewardLayout}>
-          <img className={styles.rewardQr} src="https://aka.doubaocdn.com/s/tcpjQTriVN" alt={t('settingsRewardTitle')} />
-          <p className={styles.rewardNote}>{t('settingsRewardNote')}</p>
-        </div>
       </section>
     </div>
   )
