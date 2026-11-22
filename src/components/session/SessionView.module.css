@@ -83,6 +83,8 @@
   margin-left: 113px;
 }
 
+/* 输入区承托层：整屏铺满主题底色，避免两侧和底部安全区透出白边；
+   输入框自身在内部居中并保留原来的左右边距。 */
 .inputContainer {
   position: sticky;
   bottom: 0;
@@ -91,9 +93,9 @@
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  width: calc(var(--message-list-max-width) - 64px);
-  max-width: calc(100% - 32px);
-  margin: auto auto 0;
+  width: 100%;
+  margin: auto 0 0;
+  padding-bottom: env(safe-area-inset-bottom);
   /* 液态玻璃主题不铺底色，让消息真正从玻璃后面透出来 */
   background: linear-gradient(
     to bottom,
@@ -102,6 +104,15 @@
     var(--chat-input-scrim, var(--dsw-alias-bg-base)) 26%,
     var(--chat-input-scrim, var(--dsw-alias-bg-base)) 100%
   );
+}
+
+.inputInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  width: calc(var(--message-list-max-width) - 64px);
+  max-width: calc(100% - 32px);
 }
 
 .caveat {
@@ -119,7 +130,6 @@
     position: relative;
     bottom: auto;
     flex-shrink: 0;
-    margin: 0 auto;
-    padding-bottom: env(safe-area-inset-bottom);
+    margin: 0;
   }
 }
