@@ -9,6 +9,7 @@ on:
       - "ios/**"
       - "package.json"
       - "pnpm-lock.yaml"
+      - ".github/workflows/build-ios.yml"
   workflow_run:
     workflows: ["Apply source patch"]
     types: [completed]
