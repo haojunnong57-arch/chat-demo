@@ -14,6 +14,11 @@ on:
     workflows: ["Apply source patch"]
     types: [completed]
 
+# 连续 push 时串行排队，避免新运行被旧运行取消导致包停留在旧快照
+concurrency:
+  group: build-ios-v330
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
