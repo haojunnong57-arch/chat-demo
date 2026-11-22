@@ -137,7 +137,9 @@ export const SessionView = ({
         streaming={streaming}
         footer={
           <div className={styles.inputContainer}>
-            <ChatInput sessionId={session.id} />
+            <div className={styles.inputInner}>
+              <ChatInput sessionId={session.id} />
+            </div>
           </div>
         }
       />
