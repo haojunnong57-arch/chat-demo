@@ -5,9 +5,15 @@ const ACTIVATED_KEY = 'chat-demo:license-activated'
 const USED_TOKENS_KEY = 'chat-demo:license-used-tokens'
 const ACTIVATED_EVENT = 'chat-demo:license-activated'
 
-// 卖家公钥（ECDSA P-256 JWK）。等卖家在签码网页生成钥匙后填入。
-// 占位：正式公钥替换下方 PUBLIC_JWK。
-const PUBLIC_JWK: JsonWebKey | null = null
+// 卖家公钥（ECDSA P-256 JWK）。
+const PUBLIC_JWK: JsonWebKey | null = {
+  crv: 'P-256',
+  ext: true,
+  key_ops: ['verify'],
+  kty: 'EC',
+  x: 'WcaqLFLaM7XUkGYkrvA41yNCCAyLsozasR3DvLKFE88',
+  y: 'Xe3XgWeQ0tVRGf90gZCkpGKbLCROEhwqIKv1GjrS-q0',
+}
 
 const ALG = { name: 'ECDSA', namedCurve: 'P-256', hash: 'SHA-256' }
 
