@@ -3,6 +3,7 @@
 
 const ACTIVATED_KEY = 'chat-demo:license-activated'
 const USED_TOKENS_KEY = 'chat-demo:license-used-tokens'
+const ACTIVATED_EVENT = 'chat-demo:license-activated'
 
 // 卖家公钥（ECDSA P-256 JWK）。等卖家在签码网页生成钥匙后填入。
 // 占位：正式公钥替换下方 PUBLIC_JWK。
@@ -38,6 +39,7 @@ function markActivated(token: string) {
   } catch {
     // 存储不可用时仅本次生效
   }
+  window.dispatchEvent(new CustomEvent(ACTIVATED_EVENT))
 }
 
 function alreadyUsedLocally(token: string): boolean {
