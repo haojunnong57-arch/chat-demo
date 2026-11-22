@@ -361,4 +361,19 @@ export const en = {
   sessionInstructionsSaved: 'Conversation instructions saved',
   sessionInstructionsUnsaved: 'Not set',
   sessionInstructionsBadge: 'Set',
+
+  // ---------- Activation ----------
+  activateEyebrow: 'Activate',
+  activateTitle: 'Enter your activation code after purchase',
+  activateDesc: 'Complete the purchase on Xianyu first, then paste the code below to unlock permanently.',
+  activateBuy: 'Buy on Xianyu',
+  activateCodeLabel: 'Activation code',
+  activateCodePlaceholder: 'Paste the code you received',
+  activateSubmit: 'Activate & unlock',
+  activateVerifying: 'Verifying...',
+  activateSuccess: 'Activated. Unlocked permanently.',
+  activateInvalid: 'Invalid activation code. Please check and retry.',
+  activateUsed: 'This activation code has already been used.',
+  activateNoKey: 'Activation is not configured yet. Please contact the seller.',
+  activateNote: 'Once activated, this device stays unlocked. No need to enter the code again.',
 } satisfies Record<keyof typeof zh, string>
