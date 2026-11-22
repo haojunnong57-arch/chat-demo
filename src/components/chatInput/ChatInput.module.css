@@ -357,6 +357,28 @@
   }
 }
 
+/* 非玻璃主题：工具条「深度思考 / 智能搜索」使用 DeepSeek 原生蓝。
+   未激活：蓝色文字 + 图标；hover：浅蓝底衬；选中：实心蓝底 + 白字。
+   玻璃主题被 :not() 排除，保持现有配色；语音圆钮按需求 1 单独处理为黑色。 */
+.wrapper:not([data-chat-theme='glass']) .toggle {
+  color: var(--ds-native-blue);
+  border-color: var(--ds-native-blue-border);
+
+  &:hover:not(:disabled) {
+    background-color: var(--ds-native-blue-soft);
+  }
+
+  &.selected {
+    background-color: var(--ds-native-blue-fill);
+    color: #fff;
+    border-color: var(--ds-native-blue-fill);
+
+    &:hover {
+      background-color: var(--ds-native-blue-fill-hover);
+    }
+  }
+}
+
 .right {
   display: flex;
   flex-shrink: 0;
@@ -422,7 +444,7 @@
 }
 
 
-/* 输入模式按钮：键盘图标无描边，麦克风用圆形描边，和官方底栏一致 */
+/* 输入模式按钮：微信式深色实心圆 + 白图标，无描边；深浅背景、各皮肤与玻璃主题下一致 */
 .modeButton {
   display: flex;
   flex-shrink: 0;
@@ -434,13 +456,13 @@
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: transparent;
-  color: var(--dsw-alias-label-primary);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
   cursor: pointer;
   transition: background 0.18s ease, color 0.18s ease, transform 0.12s ease;
 
   &:hover:not(:disabled) {
-    background: var(--dsw-alias-interactive-bg-hover);
+    background: rgba(0, 0, 0, 0.7);
   }
 
   &:active:not(:disabled) {
@@ -449,13 +471,15 @@
 
   &:disabled {
     cursor: not-allowed;
-    color: var(--dsw-alias-label-caption);
-    opacity: 0.55;
+    background: rgba(0, 0, 0, 0.28);
+    color: rgba(255, 255, 255, 0.6);
+    opacity: 0.7;
   }
 }
 
+/* 浅色背景上深色实心圆同样成立，麦克风按钮不再需要描边补偿对比度 */
 .outlinedMode {
-  border: 1.5px solid var(--dsw-alias-label-primary);
+  border: none;
 }
 
 /* 按住说话：官方语音模式最上方是一整条「按住说话」；
@@ -678,7 +702,7 @@
   }
 
   .modeButton {
-    color: #111;
+    color: #fff;
   }
 }
 

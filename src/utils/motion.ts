@@ -122,7 +122,7 @@ export const setupMotionPreference = () => {
   useSettings.subscribe(apply)
 
   const batteryApi = navigator as Navigator & {
-    getBattery?: () => Promise<{ level: number; charging: boolean; addEventListener: Function }>
+    getBattery?: () => Promise<{ level: number; charging: boolean; addEventListener: (type: string, listener: () => void) => void }>
   }
   batteryApi.getBattery?.().then((battery) => {
     const sync = () => {

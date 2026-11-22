@@ -3,7 +3,12 @@
  *
  * 浏览器里直接 fetch；在 iOS 壳内由 Swift 原生 URLSession 代发，绕过 MCP 服务端
  * 常见的 CORS 限制，并把响应原样回传给 JS。两条路径对上层暴露同一接口。
+ *
+ * 测试或定制场景可以通过 `McpSession` 构造参数注入自己的 HTTP 实现；不传时保持
+ * 原有浏览器 / 原生桥接行为不变。本模块加载时把默认实现注册回 client。
  */
+
+import { registerDefaultHttpRequester } from './client.js'
 
 export type HttpRequestInput = {
   url: string
@@ -18,6 +23,9 @@ export type HttpResult = {
   headers: Record<string, string>
   body: string
 }
+
+/** 可注入的 HTTP 实现；默认走浏览器 fetch 或 iOS 原生桥接。 */
+export type HttpRequester = (input: HttpRequestInput) => Promise<HttpResult>
 
 type BridgeResult = HttpResult & { id: number; error?: string }
 
@@ -88,15 +96,31 @@ const bridgeRequest = (input: HttpRequestInput): Promise<HttpResult> =>
     }
   })
 
-const fetchRequest = async (input: HttpRequestInput): Promise<HttpResult> => {
-  const response = await fetch(input.url, {
-    method: input.method,
-    headers: input.headers,
-    body: input.body,
-    signal: input.signal,
-    credentials: 'omit',
-    cache: 'no-store',
-  })
+/** 把浏览器 fetch 抛回的网络异常（CORS、DNS、连接拒绝等）包装成可读错误。 */
+const toNetworkError = (error: unknown): Error => {
+  const reason = error instanceof Error ? error.message : String(error)
+  return new Error(
+    `无法连接到 MCP 服务端（网络错误：${reason}）。浏览器内最常见的原因是服务端未开放 CORS 跨域；请在 iOS 原生壳内使用，或通过允许跨域的代理访问后再试。`
+  )
+}
+
+const fetchRequest: HttpRequester = async (input: HttpRequestInput): Promise<HttpResult> => {
+  let response: Response
+  try {
+    response = await fetch(input.url, {
+      method: input.method,
+      headers: input.headers,
+      body: input.body,
+      signal: input.signal,
+      credentials: 'omit',
+      cache: 'no-store',
+    })
+  } catch (error) {
+    if (input.signal?.aborted) {
+      throw error instanceof Error ? error : new Error('MCP 请求已中止')
+    }
+    throw toNetworkError(error)
+  }
   const headers: Record<string, string> = {}
   response.headers.forEach((value, key) => {
     headers[key.toLowerCase()] = value
@@ -104,5 +128,11 @@ const fetchRequest = async (input: HttpRequestInput): Promise<HttpResult> => {
   return { status: response.status, headers, body: await response.text() }
 }
 
-export const mcpHttpRequest = (input: HttpRequestInput): Promise<HttpResult> =>
-  hasNativeMcpBridge() ? bridgeRequest(input) : fetchRequest(input)
+export const mcpHttpRequest = (
+  input: HttpRequestInput,
+  requester?: HttpRequester
+): Promise<HttpResult> =>
+  requester ? requester(input) : hasNativeMcpBridge() ? bridgeRequest(input) : fetchRequest(input)
+
+// 把浏览器 / 原生桥接默认实现注册回 client；测试场景可在构造会话时另行注入。
+registerDefaultHttpRequester(mcpHttpRequest)

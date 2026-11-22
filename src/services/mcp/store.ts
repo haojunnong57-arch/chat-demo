@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { createId } from '../../utils/id.js'
+import './http.js'
 import { McpSession, stringifyToolResult, testMcpServer } from './client.js'
 import type {
   McpConnectionStatus,

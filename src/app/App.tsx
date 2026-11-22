@@ -25,9 +25,137 @@ import { loadMcp } from '../services/mcp/store.js'
 import { Button } from '../components/base/Button.js'
 import { stopReadAloud } from '../services/speech/readAloud.js'
 import { CollapsedSider } from '../components/sider/CollapsedSider.js'
-import { closeMobileSider } from '../components/sider/mobileSiderState.js'
+import {
+  closeMobileSider,
+  openMobileSider,
+  setMobileSiderDrag,
+  useMobileSider,
+} from '../components/sider/mobileSiderState.js'
 import { MobileSider, Sider } from '../components/sider/Sider.js'
 import styles from './App.module.css'
+
+/** 左缘右滑打开抽屉；抽屉打开时在抽屉/遮罩区域左滑关闭。 */
+const EDGE_WIDTH = 24 // 起手识别的左缘宽度（px）
+const SNAP_RATIO = 0.5 // 位移超过抽屉行程一半即吸附到位
+const FLING_VELOCITY = 0.25 // px/ms，快速轻扫即使位移不足也吸附
+const AXIS_SLOP = 8 // 方向锁定前的轴向容差（px）
+
+/**
+ * 跟手横滑手势：抽屉随手指位移实时 translateX，遮罩透明度随进度渐变；
+ * 过阈值或快速 fling 吸附到位，未达阈值回弹。纵滑一律放弃，交回原生滚动。
+ * 监听全部 passive，不拦截聊天区长按语音等原生手势；仅移动端启用。
+ */
+const useEdgeSwipe = () => {
+  const isMobile = useIsMobile()
+
+  useEffect(() => {
+    if (!isMobile) {return}
+
+    let tracking = false
+    let locked: 'horizontal' | 'vertical' | null = null
+    let mode: 'open' | 'close' = 'open'
+    let startX = 0
+    let startY = 0
+    let lastX = 0
+    let lastTime = 0
+    let velocity = 0
+
+    // 抽屉宽度与 .mobile 一致：300px，窄屏留 48px 边距
+    const travel = () => Math.min(300, window.innerWidth - 48)
+
+    const onStart = (event: TouchEvent) => {
+      if (event.touches.length !== 1) {return}
+      const touch = event.touches[0]
+      const drawerOpen = useMobileSider.getState().open
+      // 抽屉关闭：只认左缘起手；抽屉打开：抽屉/遮罩内任意位置都可左滑关闭
+      if (!drawerOpen && touch.clientX > EDGE_WIDTH) {return}
+      tracking = true
+      locked = null
+      mode = drawerOpen ? 'close' : 'open'
+      startX = lastX = touch.clientX
+      startY = touch.clientY
+      lastTime = Date.now()
+      velocity = 0
+    }
+
+    const onMove = (event: TouchEvent) => {
+      if (!tracking) {return}
+      const touch = event.touches[0]
+      if (!touch) {return}
+      const dx = touch.clientX - startX
+      const dy = touch.clientY - startY
+
+      if (locked === null) {
+        // 先锁定轴向：纵滑交给原生滚动，本次手势直接放弃
+        if (Math.abs(dy) > Math.abs(dx) + AXIS_SLOP) {
+          tracking = false
+          return
+        }
+        if (Math.abs(dx) <= Math.abs(dy) + AXIS_SLOP) {return}
+        locked = 'horizontal'
+        // 进入横滑后挂载抽屉并写入初始进度（打开侧 0，关闭侧 1）
+        setMobileSiderDrag(mode === 'close' ? 1 : 0)
+      } else if (locked === 'vertical') {
+        return
+      }
+
+      const now = Date.now()
+      const dt = now - lastTime
+      if (dt > 0) {
+        velocity = (touch.clientX - lastX) / dt
+      }
+      lastX = touch.clientX
+      lastTime = now
+
+      const ratio = dx / travel()
+      const progress =
+        mode === 'close'
+          ? Math.min(1, Math.max(0, 1 + ratio))
+          : Math.min(1, Math.max(0, ratio))
+      setMobileSiderDrag(progress)
+    }
+
+    const finish = () => {
+      if (!tracking) {return}
+      tracking = false
+      if (locked !== 'horizontal') {
+        setMobileSiderDrag(null)
+        return
+      }
+      const dx = lastX - startX
+      const progress = useMobileSider.getState().dragProgress ?? (mode === 'close' ? 1 : 0)
+      // 打开侧：过半或快速右滑 → 展开，否则回弹关闭；关闭侧：不足一半或快速左滑 → 关闭，否则回弹展开
+      const snapOpen =
+        mode === 'open'
+          ? progress >= SNAP_RATIO || (dx > 0 && velocity > FLING_VELOCITY)
+          : !(progress <= SNAP_RATIO || (dx < 0 && velocity < -FLING_VELOCITY))
+      if (snapOpen) {
+        openMobileSider()
+      } else {
+        closeMobileSider()
+      }
+      // 下一帧再清跟手进度，交回 CSS 吸附动画，避免内联样式与类动画打架
+      requestAnimationFrame(() => setMobileSiderDrag(null))
+    }
+
+    const onCancel = () => {
+      tracking = false
+      locked = null
+      setMobileSiderDrag(null)
+    }
+
+    document.addEventListener('touchstart', onStart, { passive: true })
+    document.addEventListener('touchmove', onMove, { passive: true })
+    document.addEventListener('touchend', finish, { passive: true })
+    document.addEventListener('touchcancel', onCancel, { passive: true })
+    return () => {
+      document.removeEventListener('touchstart', onStart)
+      document.removeEventListener('touchmove', onMove)
+      document.removeEventListener('touchend', finish)
+      document.removeEventListener('touchcancel', onCancel)
+    }
+  }, [isMobile])
+}
 
 export const App = () => {
   const t = useTranslate()
@@ -54,6 +182,7 @@ export const App = () => {
   const activeId = useChatStore((state) => state.activeId)
 
   usePreventPageScroll(isMobile)
+  useEdgeSwipe()
 
   useEffect(() => {
     document.documentElement.lang = locale

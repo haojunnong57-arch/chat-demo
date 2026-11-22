@@ -1,9 +1,32 @@
-import { ApiError } from './client.js'
+import { translate, type TranslationMessage } from '../../i18n/index.js'
 
 /**
  * 接口失败的统一分类。各调用方按自己的场景给同一种情况配不同文案，
  * 例如余额不足在回答、上传、朗读里措辞不同，所以这里只归类，不生成文案。
  */
+
+/** 错误大类：非 2xx / 流中错误帧 / 请求未到达服务端 / 流提前结束 / 响应不符合协议 */
+export type ApiErrorKind =
+  | 'http'
+  | 'stream'
+  | 'network'
+  | 'interrupted'
+  | 'protocol'
+
+export class ApiError extends Error {
+  readonly localMessage?: TranslationMessage
+
+  constructor(
+    readonly kind: ApiErrorKind,
+    message: string | TranslationMessage,
+    readonly status?: number
+  ) {
+    super(typeof message === 'string' ? message : translate(message.key, message.params))
+    this.name = 'ApiError'
+    this.localMessage = typeof message === 'string' ? undefined : message
+  }
+}
+
 export type ApiErrorCondition =
   | 'unauthorized'
   | 'insufficientBalance'

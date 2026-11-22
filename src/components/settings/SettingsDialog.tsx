@@ -16,15 +16,12 @@ import {
   exportHistory,
   importHistory,
 } from '../../services/chat/backup.js'
-import { useIsMobile } from '../../app/viewport.js'
 import { useChatStore } from '../../services/chat/store.js'
 import { regionCodes, getRegionName, provinces } from '../../services/location.js'
 import {
   isChineseBrowser,
-  setApiBaseUrl,
   setLocale,
   setLocation,
-  setModel,
   setAiAvatar,
   setEnhancedMotion,
   setGlassOpacity,
@@ -40,8 +37,8 @@ import { Button } from '../base/Button.js'
 import { Modal } from '../base/Modal.js'
 import { Select } from '../base/Select.js'
 import { showToast } from '../base/toastState.js'
-import { ApiKeyConfirm, ApiKeyField, useApiKeyEditor } from './ApiKeyField.js'
 import { BackgroundSetting } from './BackgroundSetting.js'
+import { ProviderSettings } from './ProviderSettings.js'
 import { imageFileToAvatar } from '../../utils/image.js'
 import { McpSettings } from './McpSettings.js'
 import { SupportSettings } from './SupportSettings.js'
@@ -74,11 +71,9 @@ const sections: { value: SettingsSection; label: TranslationKey; icon: ReactNode
 
 const SettingsContent = () => {
   const t = useTranslate()
-  const isMobile = useIsMobile()
   // 打开时按调用方指定的分组选中，之后在弹窗内切换
   const [section, setSection] = useState(() => useSettingsDialog.getState().section)
-  // 切换分组不丢失正在输入的 API Key 与导入状态
-  const apiKeyEditor = useApiKeyEditor()
+  // 切换分组不丢失导入状态
   const historyImport = useHistoryImport()
   const historyDelete = useHistoryDelete()
   const replacingHistory = useChatStore((state) => state.importingHistory)
@@ -132,9 +127,7 @@ const SettingsContent = () => {
             <SupportSettings />
           ) : (
             <>
-              <ApiKeyField editor={apiKeyEditor} />
-              <ApiEndpointSetting />
-              <ModelSetting />
+              <ProviderSettings />
               <ImportHistory historyImport={historyImport} disabled={historyBusy} />
               <ExportHistory disabled={historyBusy} />
               <SettingCell
@@ -152,7 +145,6 @@ const SettingsContent = () => {
                   </Button>
                 }
               />
-              {isMobile ? <ApiKeyConfirm editor={apiKeyEditor} /> : null}
             </>
           )}
         </div>
@@ -421,68 +413,6 @@ const ThemeSetting = () => {
         ))}
       </div>
     </div>
-  )
-}
-
-/** API 地址：失焦或回车保存，留空恢复官方地址。 */
-const ApiEndpointSetting = () => {
-  const t = useTranslate()
-  const apiBaseUrl = useSettings((state) => state.apiBaseUrl)
-  const [value, setValue] = useState(apiBaseUrl)
-  const commit = () => {
-    setApiBaseUrl(value)
-    setValue(useSettings.getState().apiBaseUrl)
-  }
-  return (
-    <SettingCell
-      label={t('settingsApiBaseUrl')}
-      description={t('settingsApiBaseUrlDescription')}
-      status={null}
-      action={
-        <input
-          className={styles.endpointInput}
-          type="url"
-          inputMode="url"
-          autoCapitalize="off"
-          autoCorrect="off"
-          spellCheck={false}
-          value={value}
-          placeholder="https://api.deepseek.com"
-          onChange={(event) => setValue(event.target.value)}
-          onBlur={commit}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
-              commit()
-              event.currentTarget.blur()
-            }
-          }}
-        />
-      }
-    />
-  )
-}
-
-/** 对话模型：与官方 App 一致的 Flash / V4 Pro 两档。 */
-const ModelSetting = () => {
-  const t = useTranslate()
-  const model = useSettings((state) => state.model)
-  return (
-    <SettingCell
-      label={t('settingsModel')}
-      description={t('settingsModelDescription')}
-      status={null}
-      action={
-        <Select
-          ariaLabel={t('settingsModel')}
-          value={model}
-          options={[
-            { value: 'deepseek-flash', label: t('settingsModelFlash') },
-            { value: 'deepseek-v4-pro', label: t('settingsModelPro') },
-          ]}
-          onChange={(value) => setModel(value === 'deepseek-v4-pro' ? 'deepseek-v4-pro' : 'deepseek-flash')}
-        />
-      }
-    />
   )
 }
 

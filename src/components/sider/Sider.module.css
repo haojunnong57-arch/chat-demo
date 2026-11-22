@@ -233,6 +233,12 @@
   transform: translate3d(-104%, 0, 0) scale(0.985);
 }
 
+/* 跟手拖拽期间关闭过渡，transform/opacity 直接跟随手指；松手后交回上面的吸附动画 */
+.drawerDragging {
+  transition: none;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+}
+
 .drawerMask {
   position: absolute;
   inset: 0;
@@ -245,6 +251,10 @@
 
 .drawerMaskVisible {
   opacity: 1;
+}
+
+.drawerMaskDragging {
+  transition: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -12,6 +12,7 @@
 .tint {
   position: absolute;
   inset: 0;
+  z-index: 5;
   border-radius: inherit;
   background: var(--glass-tint, transparent);
   pointer-events: none;
@@ -21,6 +22,40 @@
   display: block;
   width: 1px;
   height: 1px;
+}
+
+/* 极慢的液态焦散光，只做材质氛围；幅度克制，减弱动态效果时停住 */
+.caustic {
+  position: absolute;
+  inset: -30%;
+  z-index: 2;
+  border-radius: 46%;
+  opacity: 0.42;
+  pointer-events: none;
+  background:
+    radial-gradient(42% 36% at 26% 34%, rgba(120, 190, 255, 0.25), transparent 70%),
+    radial-gradient(38% 30% at 76% 64%, rgba(255, 130, 180, 0.16), transparent 72%),
+    radial-gradient(46% 32% at 56% 94%, rgba(110, 235, 205, 0.16), transparent 74%);
+  filter: blur(18px) saturate(130%);
+  mix-blend-mode: soft-light;
+  animation: causticDrift 16s ease-in-out infinite alternate;
+}
+
+/* 边缘镜面 + 轻微 RGB 色散，静态高光，不做斜向划过动画 */
+.edge {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.42),
+    inset 1px 0 0 rgba(255, 90, 120, 0.2),
+    inset -1px 0 0 rgba(80, 200, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.46),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.18);
+  background: linear-gradient(128deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.08) 100%);
+  background-size: 100% 100%;
 }
 
 /* rdev 的组件把折射层、描边层都绝对定位在父级里，这里强制铺满并裁到容器圆角 */
@@ -39,11 +74,16 @@
 }
 
 /*
- * rdev 包还会在 backdrop 顶层再挂两圈“白色渐变内描边”，尺寸取首次
- * getBoundingClientRect；菜单从触发胶囊展开时被缓存成 50×70 左右，
- * 于是菜单中心出现幽灵白圈/白胶囊。它们不是真实折射，直接删掉。
+ * 包会在 backdrop 顶层挂两圈“白色渐变内描边”，尺寸取首次 getBoundingClientRect。
+ * 菜单从触发胶囊展开时被缓存成 50×70 左右，于是菜单中心出现幽灵白圈/白胶囊；
+ * 同一层还携带跟随鼠标偏移的斜向 linear-gradient，也就是被投诉的斜扫光泽。
+ *
+ * 这两层是包注入的裸 span，内联样式带 WebkitMask / maskComposite；用内联 mask
+ * 子串精确命中，不误伤本组件自己的 caustic / edge / tint（它们没有内联 mask），
+ * 也不误伤 canvas。宽选择器 .backdrop > span:not(.tint) 会把新层一起 display:none，
+ * 这里不再使用。
  */
-.backdrop > span:not(.tint) {
+.backdrop > span[style*='mask'] {
   display: none !important;
 }
 
@@ -59,6 +99,24 @@
 [data-ds-dark-theme] .backdrop {
   --glass-tint: rgba(8, 14, 26, 0.2);
 }
+
+@keyframes causticDrift {
+  0% {
+    transform: translate3d(-2%, -1.5%, 0) scale(1.03);
+  }
+  50% {
+    transform: translate3d(1.5%, 2%, 0) scale(1.06);
+  }
+  100% {
+    transform: translate3d(2%, -1%, 0) scale(1.03);
+  }
+}
+
+/*
+ * sheen 斜向划过的光泽动画已取消：包注入的斜扫层由上面的 mask 精确选择器移除，
+ * 本组件不挂载任何斜扫关键帧；默认（不看 enhancedMotion）也不会出现斜向高光，
+ * 只保留上面的静态边缘高光。
+ */
 
 /* Safari / Firefox 的折射可能缺失；至少保留一层磨砂底，不能让面板消失 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -77,4 +135,14 @@
   .backdrop :global(.glass) {
     transition: none !important;
   }
+
+  .caustic,
+  .edge {
+    animation: none !important;
+  }
+}
+
+[data-motion='reduced'] .caustic,
+[data-motion='reduced'] .edge {
+  animation: none !important;
 }

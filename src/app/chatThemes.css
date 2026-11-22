@@ -6,6 +6,25 @@
    重新挂载任何消息组件。
    ========================================================================== */
 
+/* ---------- 输入区工具条专用强调色：DeepSeek 原生蓝 ----------
+   仅用于底部工具条上的「深度思考 / 智能搜索」按钮（见 ChatInput.module.css），
+   不重定义 --dsw-alias-brand-* 皮肤品牌色，避免连带把发送按钮、气泡、链接、
+   选中态刷蓝。玻璃主题不消费这组变量，配色保持现状。 */
+:root {
+  --ds-native-blue: #4d6bfe;
+  --ds-native-blue-fill: #4d6bfe;
+  --ds-native-blue-fill-hover: #3d57e8;
+  --ds-native-blue-soft: rgba(77, 107, 254, 0.1);
+  --ds-native-blue-border: rgba(77, 107, 254, 0.32);
+}
+
+body[data-ds-dark-theme] {
+  /* 暗色背景下文字/图标提亮，保证可读性；选中实心底仍用原生蓝 + 白字 */
+  --ds-native-blue: #93a6ff;
+  --ds-native-blue-soft: rgba(126, 150, 255, 0.16);
+  --ds-native-blue-border: rgba(126, 150, 255, 0.36);
+}
+
 /* ---------- 默认 DeepSeek ---------- */
 .chat-theme-default {
   --chat-page-bg: var(--dsw-alias-bg-base);

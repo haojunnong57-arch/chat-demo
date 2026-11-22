@@ -1,7 +1,10 @@
-import { translate, type TranslationMessage } from '../../i18n/index.js'
 import { readMessageEvent } from './parseEvent.js'
-import { useSettings } from '../settings.js'
+import { getActiveInstance, useSettings } from '../settings.js'
 import { readServerSentEvents } from './sse.js'
+import { fetchModels } from '../providers/models.js'
+import { streamOpenAiMessage } from '../providers/adapters/openaiStream.js'
+import { streamGeminiMessage } from '../providers/adapters/geminiStream.js'
+import type { ProviderInstance } from '../providers/types.js'
 import type {
   ApiErrorBody,
   CreateMessageRequest,
@@ -10,43 +13,22 @@ import type {
   MessageStreamEvent,
 } from './types.js'
 
+import { ApiError } from './errors.js'
+
+/** ApiError 统一在 errors.ts 定义；此处再导出，保持既有 `api/client.js` 导入路径可用 */
+export { ApiError, type ApiErrorKind } from './errors.js'
+
 /** 构建期默认 API 地址；设置里可以改成任意 DeepSeek 兼容端点 */
 export const DEFAULT_API_ORIGIN = __API_ORIGIN__
 
-/** 当前生效的 API 地址（设置 → API 接入） */
+/** 当前生效的 API 地址（兼容旧调用方；取自当前激活实例） */
 export const getApiOrigin = (): string =>
   useSettings.getState().apiBaseUrl?.trim().replace(/\/+$/, '') || DEFAULT_API_ORIGIN
 
 /** Anthropic 兼容接口的前缀 */
-const anthropicBaseUrl = (): string => `${getApiOrigin()}/anthropic/v1`
+const anthropicBaseUrl = (baseUrl: string): string => `${baseUrl}/anthropic/v1`
 /** 引用 Files API 上传的图片、调用 Anthropic 兼容 Files API 时必须携带 */
 const FILES_BETA = 'files-api-2025-04-14'
-
-export type ApiErrorKind =
-  /** 非 2xx 响应 */
-  | 'http'
-  /** 流中返回的错误帧（如等待生成超时），随后连接关闭 */
-  | 'stream'
-  /** 请求没有到达服务端（断网、跨域被拦截等） */
-  | 'network'
-  /** 流在 message_stop 之前结束 */
-  | 'interrupted'
-  /** 响应不符合协议（如非 SSE 响应） */
-  | 'protocol'
-
-export class ApiError extends Error {
-  readonly localMessage?: TranslationMessage
-
-  constructor(
-    readonly kind: ApiErrorKind,
-    message: string | TranslationMessage,
-    readonly status?: number
-  ) {
-    super(typeof message === 'string' ? message : translate(message.key, message.params))
-    this.name = 'ApiError'
-    this.localMessage = typeof message === 'string' ? undefined : message
-  }
-}
 
 const isErrorBody = (value: unknown): value is ApiErrorBody =>
   typeof value === 'object' &&
@@ -95,13 +77,30 @@ const anthropicHeaders = (apiKey: string, beta: boolean): Record<string, string>
   ...(beta ? { 'anthropic-beta': FILES_BETA } : {}),
 })
 
-/** 用 GET /models 校验 API Key（不产生费用） */
+/** 校验 API Key：按当前实例协议拉取模型列表，失败统一抛 ApiError（不产生聊天费用） */
 export const verifyApiKey = async (apiKey: string, signal?: AbortSignal): Promise<void> => {
-  await request(`${getApiOrigin()}/models`, {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${apiKey}` },
-    signal,
-  })
+  const active = getActiveInstance()
+  const instance: ProviderInstance = active
+    ? { ...active, apiKey }
+    : {
+        id: 'legacy',
+        kind: 'deepseek',
+        label: 'DeepSeek',
+        protocol: 'anthropic-messages',
+        baseUrl: getApiOrigin(),
+        apiKey,
+        models: [],
+        model: '',
+      }
+  const result = await fetchModels(instance, signal)
+  if (!result.ok) {
+    const { kind, message, status } = result.failure
+    throw new ApiError(
+      kind === 'network' ? 'network' : kind === 'protocol' ? 'protocol' : 'http',
+      message,
+      status
+    )
+  }
 }
 
 /**
@@ -119,7 +118,7 @@ export const uploadFile = async (
     form.append('purpose', purpose)
   }
   form.append('file', file)
-  const response = await request(`${anthropicBaseUrl()}/files`, {
+  const response = await request(`${anthropicBaseUrl(currentBaseUrl())}/files`, {
     method: 'POST',
     headers: anthropicHeaders(apiKey, true),
     body: form,
@@ -130,11 +129,14 @@ export const uploadFile = async (
 
 /** DELETE /anthropic/v1/files/{file_id} */
 export const deleteFile = async (apiKey: string, fileId: string): Promise<void> => {
-  await request(`${anthropicBaseUrl()}/files/${encodeURIComponent(fileId)}`, {
+  await request(`${anthropicBaseUrl(currentBaseUrl())}/files/${encodeURIComponent(fileId)}`, {
     method: 'DELETE',
     headers: anthropicHeaders(apiKey, true),
   })
 }
+
+/** 当前激活实例的端点；未配置实例时回退构建期默认地址 */
+const currentBaseUrl = (): string => getActiveInstance()?.baseUrl || getApiOrigin()
 
 const hasFile = (body: CreateMessageRequest) =>
   body.messages.some(
@@ -152,14 +154,39 @@ export async function* streamMessage(
   body: CreateMessageRequest,
   signal: AbortSignal
 ): AsyncGenerator<MessageStreamEvent> {
-  const response = await request(`${anthropicBaseUrl()}/messages`, {
+  const active = getActiveInstance()
+  const instance: ProviderInstance = active
+    ? { ...active, apiKey: apiKey || active.apiKey }
+    : {
+        id: 'legacy',
+        kind: 'deepseek',
+        label: 'DeepSeek',
+        protocol: 'anthropic-messages',
+        baseUrl: getApiOrigin(),
+        apiKey,
+        models: [],
+        model: '',
+      }
+  const requestBody = instance.model ? { ...body, model: instance.model } : body
+
+  // 按实例协议路由：OpenAI Chat 兼容 / Gemini 走各自适配器；Anthropic Messages 沿用既有路径
+  if (instance.protocol === 'openai-chat') {
+    yield* streamOpenAiMessage(instance, requestBody, signal)
+    return
+  }
+  if (instance.protocol === 'gemini') {
+    yield* streamGeminiMessage(instance, requestBody, signal)
+    return
+  }
+
+  const response = await request(`${anthropicBaseUrl(instance.baseUrl)}/messages`, {
     method: 'POST',
     headers: {
-      ...anthropicHeaders(apiKey, hasFile(body)),
+      ...anthropicHeaders(instance.apiKey, hasFile(body)),
       'Content-Type': 'application/json',
       Accept: 'text/event-stream',
     },
-    body: JSON.stringify({ ...body, stream: true }),
+    body: JSON.stringify({ ...requestBody, stream: true }),
     signal,
   })
   const contentType = response.headers.get('Content-Type') ?? ''

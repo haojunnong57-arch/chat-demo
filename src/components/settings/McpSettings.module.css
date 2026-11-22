@@ -285,6 +285,13 @@
   line-height: 18px;
 }
 
+.note {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+  word-break: break-word;
+}
+
 .dialog {
   width: 480px;
   max-width: calc(100vw - 32px);

@@ -163,16 +163,18 @@ export const Sider = ({ mobile = false }: { mobile?: boolean }) => {
   )
 }
 
-/** 移动端抽屉：浮在页面上方，点空白区域关闭。 */
+/** 移动端抽屉：浮在页面上方，点空白区域关闭；横滑手势期间按跟手进度内联定位。 */
 export const MobileSider = () => {
   const open = useMobileSider((state) => state.open)
+  const dragProgress = useMobileSider((state) => state.dragProgress)
+  const dragging = dragProgress !== null
   // 关闭时先播反向动画再卸载，避免抽屉「闪一下消失」
   const [mounted, setMounted] = useState(open)
   const [visible, setVisible] = useState(false)
   const [closing, setClosing] = useState(false)
 
   useEffect(() => {
-    if (open) {
+    if (open || dragging) {
       setMounted(true)
       setClosing(false)
       const frame = requestAnimationFrame(() => setVisible(true))
@@ -188,19 +190,44 @@ export const MobileSider = () => {
       setClosing(false)
     }, 300)
     return () => clearTimeout(timer)
-  }, [open, mounted])
+  }, [open, dragging, mounted])
 
   if (!mounted) {
     return null
   }
+
+  const progress = dragProgress === null ? 0 : Math.min(1, Math.max(0, dragProgress))
+  const drawerStyle =
+    dragProgress === null
+      ? undefined
+      : {
+          transform: `translate3d(${(progress - 1) * 100}%, 0, 0) scale(${0.985 + 0.015 * progress})`,
+        }
+  const maskStyle = dragProgress === null ? undefined : { opacity: progress }
+
   return (
     <>
       <div
-        className={clsx(styles.drawerMask, visible && styles.drawerMaskVisible)}
-        onClick={closeMobileSider}
+        className={clsx(
+          styles.drawerMask,
+          visible && styles.drawerMaskVisible,
+          dragging && styles.drawerMaskDragging,
+        )}
+        style={maskStyle}
+        onClick={() => {
+          // 横滑手势刚结束时浏览器可能补发合成 click；跟手进度尚未清空前忽略，避免误关抽屉
+          if (useMobileSider.getState().dragProgress !== null) {return}
+          closeMobileSider()
+        }}
       />
       <div
-        className={clsx(styles.drawer, visible && styles.drawerVisible, closing && styles.drawerClosing)}
+        className={clsx(
+          styles.drawer,
+          visible && styles.drawerVisible,
+          closing && styles.drawerClosing,
+          dragging && styles.drawerDragging,
+        )}
+        style={drawerStyle}
         role="dialog"
         aria-modal="true"
       >

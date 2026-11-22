@@ -4,6 +4,7 @@ import { IconLinkOutline16 } from '../base/icons.js'
 import { Button } from '../base/Button.js'
 import { Modal } from '../base/Modal.js'
 import { useTranslate, type TranslationKey } from '../../i18n/index.js'
+import { useSettings, type Locale } from '../../services/settings.js'
 import {
   addServer,
   connectServer,
@@ -31,6 +32,14 @@ const STATUS_CLASS: Record<McpConnectionStatus, string> = {
   error: styles.statusError,
 }
 
+/** 跨域 / 原生桥接说明：i18n 文案归另一处维护，这里按当前语言内联展示。 */
+const CORS_NOTE: Record<Locale, string> = {
+  'zh-CN':
+    '提示：浏览器直连时，若 MCP 服务端未开放 CORS 跨域会被浏览器拦截；iOS 壳内由原生桥接代发请求以绕过跨域限制。',
+  'en-US':
+    'Note: a direct browser connection is blocked when the MCP server does not allow CORS; inside the iOS shell requests are sent through the native bridge to bypass cross-origin restrictions.',
+}
+
 type Draft = Pick<McpServerConfig, 'name' | 'url' | 'token'> & { id?: string }
 
 const emptyDraft: Draft = { name: '', url: '', token: '' }
@@ -38,6 +47,7 @@ const emptyDraft: Draft = { name: '', url: '', token: '' }
 /** 设置里的 MCP 连接管理：添加服务端、测试连接、查看工具并逐个启停。 */
 export const McpSettings = () => {
   const t = useTranslate()
+  const locale = useSettings((state) => state.locale)
   const servers = useMcp((state) => state.servers)
   const tools = useMcp((state) => state.tools)
   const statuses = useMcp((state) => state.statuses)
@@ -218,6 +228,7 @@ export const McpSettings = () => {
         <IconLinkOutline16 />
         {t('settingsMcpHint')}
       </div>
+      <div className={styles.note}>{CORS_NOTE[locale]}</div>
 
       {draft ? (
         <Modal

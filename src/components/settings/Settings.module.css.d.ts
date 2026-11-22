@@ -33,6 +33,26 @@ declare const styles: {
   readonly "importConfirmText": string;
   readonly "deleteConfirm": string;
   readonly "deleteActions": string;
+  readonly "providersBlock": string;
+  readonly "providerList": string;
+  readonly "providerCard": string;
+  readonly "providerCardActive": string;
+  readonly "providerMain": string;
+  readonly "providerName": string;
+  readonly "providerLabel": string;
+  readonly "providerMeta": string;
+  readonly "providerBadge": string;
+  readonly "providerActions": string;
+  readonly "providerEmpty": string;
+  readonly "providerForm": string;
+  readonly "providerFormRow": string;
+  readonly "providerField": string;
+  readonly "providerFieldLabel": string;
+  readonly "providerHint": string;
+  readonly "providerRisk": string;
+  readonly "providerModelRow": string;
+  readonly "providerError": string;
+  readonly "providerFormActions": string;
 };
 export = styles;
 
