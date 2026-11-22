@@ -77,30 +77,31 @@ jobs:
       - name: Package unsigned IPA
         run: |
           cd ios
-          rm -rf build/Payload build/DeepSeek-iOS-3.2.1-unsigned.ipa
+          rm -rf build/Payload build/DeepSeek-iOS-3.3.0-unsigned.ipa
           mkdir -p build/Payload
           cp -R build/DeepSeek.xcarchive/Products/Applications/DeepSeek.app build/Payload/
           cd build
-          zip -qr DeepSeek-iOS-3.2.1-unsigned.ipa Payload
+          zip -qr DeepSeek-iOS-3.3.0-unsigned.ipa Payload
 
       - uses: actions/upload-artifact@v4
         with:
-          name: DeepSeek-iOS-3.2.1
-          path: ios/build/DeepSeek-iOS-3.2.1-unsigned.ipa
+          name: DeepSeek-iOS-3.3.0
+          path: ios/build/DeepSeek-iOS-3.3.0-unsigned.ipa
           if-no-files-found: error
 
-      - name: Publish release
+      - name: Publish release (付费激活版)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v3.2.1
-          name: DeepSeek iOS 3.2.1 · 菜单幽灵白圈修复
+          tag_name: v3.3.0
+          name: DeepSeek iOS 3.3.0 · 付费激活版
           body: |
-            DeepSeek iOS 3.2.1（未签名 IPA / arm64）
+            DeepSeek iOS 3.3.0（未签名 IPA / arm64）· 付费激活版
 
-            - 修复侧栏“更多”和聊天“更多”菜单里的幽灵白圈、白色胶囊边框与焦点高亮残留
-            - 菜单层级提升并隔离底层悬浮控件；按压高亮和水波纹不再带入弹层
-            - 保留真液态玻璃、橡皮筋回弹、按住说话红蓝态与语义块流式渲染
+            安装后首次打开进入激活页：
+            1. 在闲鱼购买后获取一串激活码；
+            2. 填入激活码，验签通过后永久解锁；
+            3. 已激活标记存本机，删装重装需重新填码。
 
             未签名包，请使用 Sideloadly / AltStore 自签后安装。
-          files: ios/build/DeepSeek-iOS-3.2.1-unsigned.ipa
+          files: ios/build/DeepSeek-iOS-3.3.0-unsigned.ipa
           make_latest: true
