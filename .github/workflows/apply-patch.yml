@@ -1,10 +1,7 @@
 name: Apply source patch
 
-# 一次性补丁流水线：从 CDN 取本轮源码补丁，校验 sha256 后应用到 main。
-# 目的：远端只有单文件写入通道，整批改动用补丁一次落地，避免逐个文件覆盖。
-# 应用完成后触发 iOS 与 Android 构建。
-# v1：首次推送时 Actions 处于禁用状态，启用后靠本次提交重新触发。
-# v2：角色广场移到设置内并改为全自定义（无内置角色、支持自定义头像），首页还原。
+# 一次性补丁流水线：从 CDN 取源码补丁，校验 sha256 后应用到 main，再触发 iOS/Android 构建。
+# v3：深色模式白雾修复（玻璃底色改用深色变量）。
 
 on:
   push:
@@ -31,8 +28,8 @@ jobs:
       - name: Download and verify patch
         run: |
           curl -fsSL --retry 3 --retry-delay 2 \
-            "https://aka.doubaocdn.com/s/Keic4kp4y0" -o /tmp/code.patch
-          echo "47d03f8106fc2c98ea63e4e976cf07c7ee7ec09b473a36f72284a2b0721d5262  /tmp/code.patch" \
+            "https://aka.doubaocdn.com/s/rpxNVPeVlW" -o /tmp/code.patch
+          echo "f97f2dda65832a2b274fb21f25a0baf72bc0839f3198ca8174d649cf5a749425  /tmp/code.patch" \
             | sha256sum -c -
 
       - name: Apply patch
@@ -45,7 +42,7 @@ jobs:
           git config user.name "patch-bot"
           git config user.email "patch-bot@users.noreply.github.com"
           git add -A
-          git commit -m "角色广场改为全自定义并移入设置：去掉内置角色、支持角色头像，首页还原"
+          git commit -m "深色模式白雾修复：玻璃底色改为主题变量，新增第二张默认背景资源"
           git push origin HEAD:main
 
       - name: Trigger builds
