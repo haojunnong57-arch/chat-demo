@@ -22,8 +22,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Clean broken i18n lines
-        run: python3 tools/fix6.py
+      - name: Literal labels
+        run: python3 tools/fix7.py
 
       - name: Commit and push
         run: |
@@ -31,7 +31,7 @@ jobs:
           git config user.name "patch-bot"
           git config user.email "patch-bot@users.noreply.github.com"
           git add -A
-          git commit -m "删除残缺 i18n 行并补回逗号"
+          git commit -m "背景预设按钮改用字面文案"
           git push origin HEAD:main
 
       - name: Trigger builds
