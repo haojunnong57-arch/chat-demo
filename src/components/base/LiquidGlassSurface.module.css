@@ -41,8 +41,7 @@
   animation: causticDrift 16s ease-in-out infinite alternate;
 }
 
-/* 极细颗粒层：给玻璃一点真实材质的“肉体感”，避免大块纯色渐变显得像塑料。
-   用 SVG feTurbulence 生成一次性噪点贴图，平铺后透明度很低，不干扰文字。 */
+/* 极细颗粒层 */
 .grain {
   position: absolute;
   inset: 0;
@@ -56,7 +55,7 @@
   background-repeat: repeat;
 }
 
-/* 顶部镜面高光：一条极窄的亮边贴着上沿，制造“玻璃边缘把光折回来”的感觉 */
+/* 顶部镜面高光 */
 .specular {
   position: absolute;
   top: 0;
@@ -89,7 +88,7 @@
   opacity: 0.1;
 }
 
-/* 边缘镜面 + 轻微 RGB 色散，静态高光，不做斜向划过动画 */
+/* 边缘镜面 + 轻微 RGB 色散 */
 .edge {
   position: absolute;
   inset: 0;
@@ -100,15 +99,14 @@
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.48),
     inset 1px 0 0 rgba(255, 90, 120, 0.22),
     inset -1px 0 0 rgba(80, 200, 255, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 1px 0 var(--ds-glass-solid-2),
     inset 0 -1px 0 rgba(255, 255, 255, 0.2),
-    /* 下方内侧压一层极淡的暗部，让玻璃有厚度而不是一张贴纸 */
     inset 0 -14px 22px -18px rgba(16, 24, 40, 0.22);
   background: linear-gradient(128deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.08) 100%);
   background-size: 100% 100%;
 }
 
-/* rdev 的组件把折射层、描边层都绝对定位在父级里，这里强制铺满并裁到容器圆角 */
+/* rdev 组件层级收口 */
 .backdrop :global(.glass) {
   display: block !important;
   width: 100% !important;
@@ -123,16 +121,7 @@
   pointer-events: none !important;
 }
 
-/*
- * 包会在 backdrop 顶层挂两圈“白色渐变内描边”，尺寸取首次 getBoundingClientRect。
- * 菜单从触发胶囊展开时被缓存成 50×70 左右，于是菜单中心出现幽灵白圈/白胶囊；
- * 同一层还携带跟随鼠标偏移的斜向 linear-gradient，也就是被投诉的斜扫光泽。
- *
- * 这两层是包注入的裸 span，内联样式带 WebkitMask / maskComposite；用内联 mask
- * 子串精确命中，不误伤本组件自己的 caustic / edge / tint（它们没有内联 mask），
- * 也不误伤 canvas。宽选择器 .backdrop > span:not(.tint) 会把新层一起 display:none，
- * 这里不再使用。
- */
+/* 包注入的白色渐变内描边与斜扫光泽全部移除 */
 .backdrop > span[style*='mask'] {
   display: none !important;
 }
@@ -141,7 +130,6 @@
   display: none !important;
 }
 
-/* 包自带的纯黑承托层同样会按旧尺寸残留，直接移除，避免暗斑穿模 */
 .backdrop > :global(div.bg-black) {
   display: none !important;
 }
@@ -162,16 +150,10 @@
   }
 }
 
-/*
- * sheen 斜向划过的光泽动画已取消：包注入的斜扫层由上面的 mask 精确选择器移除，
- * 本组件不挂载任何斜扫关键帧；默认（不看 enhancedMotion）也不会出现斜向高光，
- * 只保留上面的静态边缘高光。
- */
-
-/* Safari / Firefox 的折射可能缺失；至少保留一层磨砂底，不能让面板消失 */
+/* 无 backdrop-filter 时的磨砂兜底 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .backdrop {
-    background: var(--glass-fallback-bg, rgba(255, 255, 255, 0.72));
+    background: var(--glass-fallback-bg, var(--ds-glass-solid));
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -195,4 +177,53 @@
 [data-motion='reduced'] .caustic,
 [data-motion='reduced'] .edge {
   animation: none !important;
+}
+
+/* ----------------------------------------------------------------------------
+   深色模式收口（v4）
+   ----------------------------------------------------------------------------
+   问题：底层 rdev 液态玻璃是按浅色场景生成的（折射底 + 白色高光），深色下
+   整块面板被提亮成一层灰白雾，白字直接糊掉。
+   做法：深色下不再让包的折射层铺满，改用我们自己的深色磨砂底 + 压低的白色
+   高光；这样既保留材质又不发白。浅色完全不受影响。
+   ---------------------------------------------------------------------------- */
+[data-ds-dark-theme] .backdrop,
+body.dark .backdrop {
+  background: rgba(22, 22, 26, 0.88) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(115%);
+  backdrop-filter: blur(22px) saturate(115%);
+}
+
+[data-ds-dark-theme] .backdrop :global(.glass),
+body.dark .backdrop :global(.glass) {
+  opacity: 0 !important;
+}
+
+[data-ds-dark-theme] .specular,
+body.dark .specular {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.02) 20%,
+    rgba(255, 255, 255, 0) 62%
+  );
+}
+
+[data-ds-dark-theme] .caustic,
+body.dark .caustic {
+  opacity: 0.2;
+}
+
+[data-ds-dark-theme] .edge,
+body.dark .edge {
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -14px 22px -18px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(128deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.03) 100%);
+}
+
+[data-ds-dark-theme] .tint,
+body.dark .tint {
+  background: rgba(255, 255, 255, 0.03);
 }
