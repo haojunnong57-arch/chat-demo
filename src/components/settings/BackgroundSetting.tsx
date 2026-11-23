@@ -95,10 +95,10 @@ export const BackgroundSetting = () => {
       </div>
       <div className={styles.backgroundActions}>
         <Button variant={background === null ? 'primary' : 'outlined'} size="m" onClick={() => setChatBackground(null)}>
-          {t('settingsChatBackgroundDefault')}
+          原版
         </Button>
         <Button variant={background === SEA_CAVE_BACKGROUND ? 'primary' : 'outlined'} size="m" onClick={() => setChatBackground(SEA_CAVE_BACKGROUND)}>
-          {t('settingsChatBackgroundSea')}
+          海景
         </Button>
       </div>
       <button
