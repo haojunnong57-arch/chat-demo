@@ -24,7 +24,8 @@ jobs:
 
       - name: Apply edits
         run: |
-          python3 tools/apply_edits.py
+          python3 tools/fix2.py
+          node --version
 
       - name: Commit and push
         run: |
@@ -32,7 +33,7 @@ jobs:
           git config user.name "patch-bot"
           git config user.email "patch-bot@users.noreply.github.com"
           git add -A
-          git commit -m "修复角色串味、新增两张默认背景预设、消除启动白闪"
+          git commit -m "修 i18n 语法并调整角色卡对话顺序"
           git push origin HEAD:main
 
       - name: Trigger builds
