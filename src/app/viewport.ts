@@ -10,8 +10,26 @@ const subscribe = (onChange: () => void) => {
 
 export const useIsMobile = () => useSyncExternalStore(subscribe, () => query.matches)
 
+const EDITABLE_SELECTOR =
+  'textarea, input, [contenteditable="true"], [contenteditable=""], [contenteditable="plaintext-only"]'
+
+/**
+ * 正在编辑文本、或页面上已有选中的文字时，touchmove 必须交给系统，
+ * 否则 iOS 长按选区拖动时放大镜会卡住不动。
+ */
+const isTextInteraction = (target: EventTarget | null) => {
+  if (target instanceof Element && target.closest(EDITABLE_SELECTOR)) {
+    return true
+  }
+  const selection = document.getSelection()
+  return Boolean(selection && !selection.isCollapsed)
+}
+
 const preventPageScroll = (event: TouchEvent) => {
   if (event.touches.length !== 1) {
+    return
+  }
+  if (isTextInteraction(event.target)) {
     return
   }
   for (
@@ -31,7 +49,7 @@ const preventPageScroll = (event: TouchEvent) => {
   event.preventDefault()
 }
 
-/** 阻止移动端整页滚动，保留内部可滚动区域的滚动和双指缩放。 */
+/** 阻止移动端整页滚动，保留内部可滚动区域的滚动、双指缩放和文本选择。 */
 export const usePreventPageScroll = (enabled: boolean) => {
   useEffect(() => {
     if (!enabled) {
