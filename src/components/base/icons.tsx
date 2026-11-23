@@ -601,3 +601,39 @@ export const IconToastError16 = () => (
     />
   </svg>
 )
+
+/** 角色广场 / 角色扮演：两个人形轮廓 */
+export const IconUsersOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M10.9 13.2v-1.2c0-1.2-.9-2.2-2.1-2.2H4.6c-1.2 0-2.1 1-2.1 2.2v1.2"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <circle cx="6.7" cy="5.6" r="2.3" stroke="currentColor" strokeWidth="1.3" />
+    <path
+      d="M13.5 13.2v-1.1c0-1-.7-1.8-1.6-2M10.8 3.5a2.2 2.2 0 0 1 0 4.2"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+)
+
+/** 上下文占用：层叠的记忆块 */
+export const IconStackOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M8 2.4 13.4 5 8 7.6 2.6 5 8 2.4Z"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path d="m2.6 8 5.4 2.6L13.4 8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+    <path d="m2.6 11 5.4 2.6L13.4 11" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+  </svg>
+)

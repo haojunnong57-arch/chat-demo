@@ -12,6 +12,7 @@ import { cancelUpload, describeUploadError, uploadAttachment, useUploads } from 
 import { useSettings } from '../settings.js'
 import { callMcpTool, getMcpToolDefinitions } from '../mcp/store.js'
 import { appendBranch, getVisibleMessages, normalizeSession, selectVersion } from './branches.js'
+import { applyCompaction, getCompaction, planCompaction, trimForRequest } from './context.js'
 import * as db from './db.js'
 import {
   clearAllDrafts,
@@ -43,18 +44,43 @@ type McpCall = Extract<ReplyBlock, { type: 'mcp_tool' }>
 
 /** deepseek-flash 同时支持深度思考与图片输入 */
 const MODEL: ChatModel = 'deepseek-flash'
+/** 新建角色对话时由角色模块写入；sendMessage 创建会话时取走并清空。 */
+let pendingSessionInstructions: string | undefined
+
+export const setPendingSessionInstructions = (value?: string) => {
+  pendingSessionInstructions = value
+}
+
+const takePendingInstructions = () => {
+  const value = pendingSessionInstructions
+  pendingSessionInstructions = undefined
+  return value
+}
+
+/** 沉浸增强：让角色在对话里保持连贯，不跳出角色做总结。 */
+const DEPTH_HINT = [
+  '<roleplay_depth>',
+  '保持角色连贯：接住上一句的情绪，用动作、语气和细节推进，不要频繁跳出角色做总结或解释设定。',
+  '需要收束时用一两句自然的收尾，而不是列点复盘。',
+  '</roleplay_depth>',
+].join('\n')
+
 /**
- * 系统提示完全由用户决定：设置里的自定义系统提示 + 当前对话设定。
- * 不追加任何内置身份、安全或优先级说明；两者都为空时不发送 system 字段。
+ * 系统提示完全由用户决定：设置里的自定义系统提示 + 当前对话设定（含角色卡）
+ * + 上下文压缩后的长期记忆。不追加任何内置身份或安全优先级说明。
  */
 const getSystemPrompt = (sessionId: string) => {
-  const custom = useSettings.getState().systemPrompt.trim()
+  const settings = useSettings.getState()
+  const custom = settings.systemPrompt.trim()
   const instructions = getSession(sessionId)?.instructions?.trim()
+  const memory = getCompaction(sessionId)?.digest?.trim()
   return [
     custom,
     instructions
       ? `<conversation_instructions>\n${instructions}\n</conversation_instructions>`
       : '',
+    settings.roleplayDepth ? DEPTH_HINT : '',
+    memory ? `<long_term_memory>\n${memory}\n</long_term_memory>` : '',
   ]
     .filter(Boolean)
     .join('\n\n')
@@ -623,6 +649,7 @@ export const sendMessage = (targetSessionId: string | null) => {
       title: '',
       createdAt: now,
       updatedAt: now,
+      instructions: takePendingInstructions(),
       messages: [],
       rootMessageId: null,
     }
@@ -666,7 +693,15 @@ export const sendMessage = (targetSessionId: string | null) => {
   }
   persist(sessionId)
   clearSentDraft(targetSessionId)
-  void streamReply(sessionId, reply, { history, question })
+  // 上下文压缩：按当前模式判断是否需要把早期消息折成长期记忆，再把请求历史裁到压缩边界之后
+  const compactTarget = getSession(sessionId)
+  if (compactTarget) {
+    const plan = planCompaction(compactTarget, useSettings.getState().contextMode)
+    if (plan) {
+      applyCompaction(sessionId, plan)
+    }
+  }
+  void streamReply(sessionId, reply, { history: trimForRequest(sessionId, history), question })
   return true
 }
 

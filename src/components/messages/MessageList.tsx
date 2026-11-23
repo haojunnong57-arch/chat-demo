@@ -6,6 +6,7 @@ import {
   type MessageVersions,
 } from '../../services/chat/branches.js'
 import { selectMessageVersion } from '../../services/chat/store.js'
+import { resolveSessionRole } from '../../services/roleplay/store.js'
 import type { Session } from '../../services/chat/types.js'
 import { closeSearchPanel } from '../search/searchPanelState.js'
 import { AssistantMessage } from './AssistantMessage.js'
@@ -51,6 +52,8 @@ export const MessageList = ({
   const scrollTopRef = useRef(0)
   const restoreScrollRef = useRef<{ messageId: string; top: number } | null>(null)
   const messages = getVisibleMessages(session)
+  // 会话指令里的角色标记 -> 角色卡；没有角色时返回 null
+  const sessionRole = useMemo(() => resolveSessionRole(session.instructions), [session.instructions])
   const [previousVersions, setPreviousVersions] = useState(() =>
     buildMessageVersions(session, new Map())
   )
@@ -166,6 +169,7 @@ export const MessageList = ({
                 <AssistantMessage
                   key={message.id}
                   sessionId={session.id}
+                  role={sessionRole}
                   message={message}
                   isLast={index === lastIndex}
                   enterIndex={Math.min(index, 6)}

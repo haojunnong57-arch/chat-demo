@@ -182,6 +182,19 @@
 }
 
 /* AI 头像：只有上传后才出现 */
+.roleAvatar {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  display: block;
+}
+
+.roleAvatar > * {
+  width: 30px;
+  height: 30px;
+  font-size: 13px;
+}
+
 .avatar {
   position: absolute;
   top: 2px;
@@ -205,6 +218,12 @@
     width: 28px;
     height: 28px;
     border-radius: 9px;
+  }
+
+  .roleAvatar > * {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
   }
 }
 

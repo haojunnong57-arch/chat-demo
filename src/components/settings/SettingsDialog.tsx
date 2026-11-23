@@ -9,6 +9,7 @@ import {
   IconLinkOutline16,
   IconSettingsOutline16,
   IconUploadOutline14,
+  IconUsersOutline16,
 } from '../base/icons.js'
 import {
   BackupError,
@@ -41,6 +42,7 @@ import { BackgroundSetting } from './BackgroundSetting.js'
 import { ProviderSettings } from './ProviderSettings.js'
 import { imageFileToAvatar } from '../../utils/image.js'
 import { McpSettings } from './McpSettings.js'
+import { RoleSettings } from '../roleplay/RoleSettings.js'
 import { SupportSettings } from './SupportSettings.js'
 import { closeSettings, useSettingsDialog, type SettingsSection } from './settingsDialogState.js'
 import styles from './Settings.module.css'
@@ -59,6 +61,11 @@ const sections: { value: SettingsSection; label: TranslationKey; icon: ReactNode
     value: 'general',
     label: 'settingDialogAsideGeneralOptionLabel',
     icon: <IconSettingsOutline16 />,
+  },
+  {
+    value: 'roleplay',
+    label: 'settingDialogAsideRoleplayOptionLabel',
+    icon: <IconUsersOutline16 />,
   },
   { value: 'data', label: 'settingDialogAsideDataOptionLabel', icon: <IconDataOutline16 /> },
   { value: 'mcp', label: 'settingDialogAsideMcpOptionLabel', icon: <IconLinkOutline16 /> },
@@ -121,6 +128,8 @@ const SettingsContent = () => {
               <TtsVoiceSetting />
               <LocationSetting />
             </>
+          ) : section === 'roleplay' ? (
+            <RoleSettings />
           ) : section === 'mcp' ? (
             <McpSettings />
           ) : section === 'community' ? (

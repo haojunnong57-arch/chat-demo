@@ -1,0 +1,39 @@
+.avatar {
+  position: relative;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  overflow: hidden;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: var(--role-accent, linear-gradient(135deg, #6f8cff, #9a6bff));
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
+    0 1px 3px rgba(16, 24, 40, 0.14);
+  user-select: none;
+}
+
+.avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.small {
+  width: 32px;
+  height: 32px;
+  font-size: 13px;
+}
+
+.large {
+  width: 64px;
+  height: 64px;
+  font-size: 22px;
+}

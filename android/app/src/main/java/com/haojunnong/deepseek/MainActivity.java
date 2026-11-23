@@ -3,6 +3,7 @@ package com.haojunnong.deepseek;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.ContentValues;
 import android.content.Context;
@@ -16,6 +17,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,6 +71,8 @@ public class MainActivity extends Activity {
     private String pendingBase64;
     private String pendingName;
     private String pendingMime;
+    /** 页面请求麦克风但系统还没授权时，先把请求挂起，等系统权限回调再 grant */
+    private PermissionRequest pendingAudioRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,10 +94,8 @@ public class MainActivity extends Activity {
 
         configureWebView();
 
-        if (Build.VERSION.SDK_INT >= 23
-                && checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO_PERMISSION);
-        }
+        // 不再在启动时弹麦克风权限：改为用户第一次按住说话时按需申请，
+        // 避免“仅本次允许”每次启动都被弹窗打断，也避免启动即拒绝导致语音长期不可用。
 
         server = new AssetServer(getApplicationContext());
         server.start();
@@ -237,10 +239,20 @@ public class MainActivity extends Activity {
                     for (String resource : request.getResources()) {
                         if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resource)) wantsAudio = true;
                     }
-                    if (local && wantsAudio && Build.VERSION.SDK_INT >= 23
-                            && checkSelfPermission(Manifest.permission.RECORD_AUDIO)
-                            == PackageManager.PERMISSION_GRANTED) {
-                        request.grant(new String[]{PermissionRequest.RESOURCE_AUDIO_CAPTURE});
+                    if (local && wantsAudio) {
+                        if (Build.VERSION.SDK_INT < 23
+                                || checkSelfPermission(Manifest.permission.RECORD_AUDIO)
+                                == PackageManager.PERMISSION_GRANTED) {
+                            request.grant(new String[]{PermissionRequest.RESOURCE_AUDIO_CAPTURE});
+                        } else {
+                            // 关键修复：以前这里直接 deny，用户第一次按麦克风或选“仅本次允许”后
+                            // 语音就永久失效，表现就是“时好时坏”。现在改为挂起请求并去申请系统权限，
+                            // 授予后在 onRequestPermissionsResult 里补发 grant。
+                            pendingAudioRequest = request;
+                            requestPermissions(
+                                    new String[]{Manifest.permission.RECORD_AUDIO},
+                                    REQUEST_AUDIO_PERMISSION);
+                        }
                     } else {
                         request.deny();
                     }
@@ -379,8 +391,36 @@ public class MainActivity extends Activity {
         if (requestCode == REQUEST_AUDIO_PERMISSION) {
             boolean granted = grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            // 补发挂起的 WebView 麦克风请求，避免授权后页面仍然拿不到录音权限
+            if (pendingAudioRequest != null) {
+                PermissionRequest request = pendingAudioRequest;
+                pendingAudioRequest = null;
+                if (granted) {
+                    request.grant(new String[]{PermissionRequest.RESOURCE_AUDIO_CAPTURE});
+                } else {
+                    request.deny();
+                }
+            }
             if (!granted) {
-                Toast.makeText(this, "未获得麦克风权限，语音功能不可用", Toast.LENGTH_LONG).show();
+                boolean permanent = Build.VERSION.SDK_INT >= 23
+                        && !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO);
+                if (permanent) {
+                    new AlertDialog.Builder(this)
+                            .setTitle("语音输入需要麦克风")
+                            .setMessage("你之前拒绝了麦克风权限。到系统设置里为「DeepSeek」打开麦克风后，按住说话即可恢复。")
+                            .setPositiveButton("去设置", (dialog, which) -> {
+                                try {
+                                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                            Uri.parse("package:" + getPackageName()));
+                                    startActivity(intent);
+                                } catch (Exception ignored) {
+                                }
+                            })
+                            .setNegativeButton("取消", null)
+                            .show();
+                } else {
+                    Toast.makeText(this, "未获得麦克风权限，语音功能不可用", Toast.LENGTH_LONG).show();
+                }
             }
         } else if (requestCode == REQUEST_STORAGE_PERMISSION) {
             boolean granted = grantResults.length > 0

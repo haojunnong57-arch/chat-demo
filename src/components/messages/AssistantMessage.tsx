@@ -19,6 +19,8 @@ import { ReplyArea } from './ReplyArea.js'
 import { McpToolCalls } from './McpToolCalls.js'
 import { useReplyView } from './useReplyView.js'
 import { useSettings } from '../../services/settings.js'
+import { RoleAvatar } from '../roleplay/RoleAvatar.js'
+import type { RoleCard } from '../../services/roleplay/types.js'
 import { haptic } from '../../utils/haptics.js'
 import {
   BranchSwitcher,
@@ -32,6 +34,7 @@ const TOP_UP_URL = 'https://platform.deepseek.com/top_up'
 export const AssistantMessage = memo(function AssistantMessage({
   sessionId,
   message,
+  role,
   isLast,
   enterIndex,
   streaming,
@@ -41,6 +44,8 @@ export const AssistantMessage = memo(function AssistantMessage({
 }: {
   sessionId: string
   message: AssistantMessageType
+  /** 当前会话的角色；有角色且开启分角色头像时优先显示角色头像 */
+  role?: RoleCard | null
   isLast: boolean
   /** 交错入场序号 */
   enterIndex: number
@@ -52,6 +57,8 @@ export const AssistantMessage = memo(function AssistantMessage({
   const t = useTranslate()
   const chatTheme = useSettings((state) => state.chatTheme)
   const aiAvatar = useSettings((state) => state.aiAvatar)
+  const roleAvatars = useSettings((state) => state.roleAvatars)
+  const roleCard = role && roleAvatars ? role : null
   const wasStreamingRef = useRef(streaming)
   const view = useReplyView(message, streaming)
 
@@ -75,10 +82,16 @@ export const AssistantMessage = memo(function AssistantMessage({
   const summaryEntry = `${message.id}-summary`
   return (
     <div
-      className={clsx(styles.message, aiAvatar && styles.hasAvatar, styles.enter)}
+      className={clsx(styles.message, (roleCard || aiAvatar) && styles.hasAvatar, styles.enter)}
       style={{ animationDelay: `${enterIndex * 45}ms` }}
     >
-      {aiAvatar ? <img className={styles.avatar} src={aiAvatar} alt="" draggable={false} /> : null}
+      {roleCard ? (
+        <span className={styles.roleAvatar}>
+          <RoleAvatar card={roleCard} size="small" />
+        </span>
+      ) : aiAvatar ? (
+        <img className={styles.avatar} src={aiAvatar} alt="" draggable={false} />
+      ) : null}
       <div
         className={clsx(
           styles.body,

@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 import { useSettings } from '../../services/settings.js'
 
-/** 设置弹窗的分组：通用设置 / API 与数据 / MCP 连接 */
-export type SettingsSection = 'general' | 'data' | 'mcp' | 'community'
+/** 设置弹窗的分组：通用设置 / 角色扮演 / API 与数据 / MCP 连接 */
+export type SettingsSection = 'general' | 'roleplay' | 'data' | 'mcp' | 'community'
 
 /** 设置弹窗：侧边栏底部、没有 API Key 时的操作与 401 提示都可以打开；section 为打开时选中的分组 */
 export const useSettingsDialog = create(() => ({

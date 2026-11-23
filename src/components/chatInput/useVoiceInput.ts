@@ -21,6 +21,10 @@ const describeRecordingError = (error: unknown): TranslationMessage => {
     if (error.name === 'NotFoundError') {
       return { key: 'voiceInputNoDevice' }
     }
+    // 安卓 WebView 里麦克风被其它应用占用、或权限刚撤销时常见
+    if (error.name === 'NotReadableError' || error.name === 'AbortError' || error.name === 'TrackStartError') {
+      return { key: 'voiceInputMicBusy' }
+    }
   }
   return { key: 'voiceInputFailed' }
 }

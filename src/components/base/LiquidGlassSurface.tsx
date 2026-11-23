@@ -124,6 +124,8 @@ export const LiquidGlassSurface = ({
       {isGlassTheme ? (
         <>
           <span className={styles.caustic} />
+          <span className={styles.grain} />
+          <span className={styles.specular} />
           <span className={styles.edge} />
         </>
       ) : null}

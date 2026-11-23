@@ -4,6 +4,7 @@ import { useIsMobile } from '../../app/viewport.js'
 import { useSettings } from '../../services/settings.js'
 import { useTranslate } from '../../i18n/index.js'
 import { ChatInput } from '../chatInput/ChatInput.js'
+import { RoleGallery } from '../roleplay/RoleGallery.js'
 import { MobileHeader } from './MobileHeader.js'
 import styles from './Welcome.module.css'
 
@@ -31,6 +32,9 @@ export const Welcome = () => {
     >
       {isMobile ? <MobileHeader /> : null}
       <div className={styles.welcome}>
+        <div className={styles.galleryWrap}>
+          <RoleGallery compact />
+        </div>
         <div className={styles.greeting}>{t('welcomeMessageChat250808')}</div>
         <ChatInput sessionId={null} />
       </div>

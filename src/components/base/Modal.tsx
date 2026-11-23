@@ -67,7 +67,7 @@ export const Modal = ({
           strength="strong"
           elasticity={0.04}
           mouseContainer={contentRef}
-          tint="color-mix(in srgb, var(--dsw-alias-bg-layer-2) 54%, transparent)"
+          tint="color-mix(in srgb, var(--dsw-alias-bg-layer-1, #ffffff) 86%, transparent)"
         />
         <div className={styles.header}>
           <div id={titleId} className={styles.title}>

@@ -12,11 +12,12 @@ import { showToast } from '../base/toastState.js'
 import { removeSession } from '../../services/chat/store.js'
 import { Button } from '../base/Button.js'
 import { IconButton } from '../base/IconButton.js'
-import { IconEllipsisOutline16, IconTrashOutline16 } from '../base/icons.js'
+import { IconEllipsisOutline16, IconStackOutline16, IconTrashOutline16 } from '../base/icons.js'
 import { Menu } from '../base/Menu.js'
 import { Modal } from '../base/Modal.js'
 import { AutoReadButton } from './AutoReadButton.js'
 import { MessageList } from '../messages/MessageList.js'
+import { ContextDialog } from '../context/ContextDialog.js'
 import { MobileHeader } from './MobileHeader.js'
 import styles from './SessionView.module.css'
 
@@ -41,6 +42,7 @@ export const SessionView = ({
   // 聊天页内的删除入口：不必回到侧栏也能删除当前对话
   const [deleting, setDeleting] = useState(false)
   const [deletePending, setDeletePending] = useState(false)
+  const [contextOpen, setContextOpen] = useState(false)
 
   useEffect(() => {
     const wasStreaming = previousStreaming.current
@@ -85,6 +87,12 @@ export const SessionView = ({
             <Menu
               options={[
                 {
+                  key: 'context',
+                  label: t('contextTitle'),
+                  icon: <IconStackOutline16 />,
+                  onSelect: () => setContextOpen(true),
+                },
+                {
                   key: 'delete',
                   label: t('delete'),
                   icon: <IconTrashOutline16 />,
@@ -111,6 +119,12 @@ export const SessionView = ({
           <div className={styles.headerActions}>
             <Menu
               options={[
+                {
+                  key: 'context',
+                  label: t('contextTitle'),
+                  icon: <IconStackOutline16 />,
+                  onSelect: () => setContextOpen(true),
+                },
                 {
                   key: 'delete',
                   label: t('delete'),
@@ -143,6 +157,7 @@ export const SessionView = ({
           </div>
         }
       />
+      {contextOpen ? <ContextDialog session={session} onClose={() => setContextOpen(false)} /> : null}
       {deleting ? (
         <Modal
           title={t('deleteSessionModalContentTitle')}

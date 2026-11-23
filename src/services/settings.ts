@@ -49,6 +49,14 @@ type Settings = {
   glassOpacity: number
   /** 增强动画：关闭后保留必要状态过渡，去掉倾斜、流光、语义块与呼吸动效 */
   enhancedMotion: boolean
+  /** 沉浸增强：角色扮演时保持角色连贯，少解释少总结 */
+  roleplayDepth: boolean
+  /** 分角色头像：助手消息旁显示当前会话的角色头像 */
+  roleAvatars: boolean
+  /** 选角色后自动发出开场白；关闭则只填进输入框 */
+  roleAutoGreeting: boolean
+  /** 上下文压缩模式：自动（接近上限再压）/ 每 50 轮 */
+  contextMode: 'auto' | 'every50'
   /** AI 回复完成后自动朗读 */
   autoRead: boolean
   thinking: boolean
@@ -73,6 +81,10 @@ const KEYS = {
   systemPrompt: 'chat-demo:system-prompt',
   glassOpacity: 'chat-demo:glass-opacity',
   enhancedMotion: 'chat-demo:enhanced-motion',
+  roleplayDepth: 'chat-demo:roleplay-depth',
+  roleAvatars: 'chat-demo:role-avatars',
+  roleAutoGreeting: 'chat-demo:role-auto-greeting',
+  contextMode: 'chat-demo:context-mode',
   autoRead: 'chat-demo:auto-read',
   thinking: 'chat-demo:thinking',
   search: 'chat-demo:search',
@@ -213,6 +225,10 @@ export const useSettings = create<Settings>(() => ({
   systemPrompt: read(KEYS.systemPrompt) ?? '',
   glassOpacity: initialGlassOpacity(),
   enhancedMotion: read(KEYS.enhancedMotion) !== 'false',
+  roleplayDepth: read(KEYS.roleplayDepth) !== 'false',
+  roleAvatars: read(KEYS.roleAvatars) !== 'false',
+  roleAutoGreeting: read(KEYS.roleAutoGreeting) !== 'false',
+  contextMode: read(KEYS.contextMode) === 'every50' ? 'every50' : 'auto',
   autoRead: read(KEYS.autoRead) === 'true',
   thinking: read(KEYS.thinking) === 'true',
   search: read(KEYS.search) === 'true',
@@ -329,6 +345,26 @@ export const setGlassOpacity = (glassOpacity: number) => {
 export const setEnhancedMotion = (enhancedMotion: boolean) => {
   write(KEYS.enhancedMotion, String(enhancedMotion))
   useSettings.setState({ enhancedMotion })
+}
+
+export const setRoleplayDepth = (roleplayDepth: boolean) => {
+  write(KEYS.roleplayDepth, String(roleplayDepth))
+  useSettings.setState({ roleplayDepth })
+}
+
+export const setRoleAvatars = (roleAvatars: boolean) => {
+  write(KEYS.roleAvatars, String(roleAvatars))
+  useSettings.setState({ roleAvatars })
+}
+
+export const setRoleAutoGreeting = (roleAutoGreeting: boolean) => {
+  write(KEYS.roleAutoGreeting, String(roleAutoGreeting))
+  useSettings.setState({ roleAutoGreeting })
+}
+
+export const setContextMode = (contextMode: 'auto' | 'every50') => {
+  write(KEYS.contextMode, contextMode)
+  useSettings.setState({ contextMode })
 }
 
 export const setAutoRead = (autoRead: boolean) => {

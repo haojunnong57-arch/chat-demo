@@ -83,6 +83,8 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const holdActiveRef = useRef(false)
+  /** 全局松手兜底监听；WebView 里 setPointerCapture 可能失败，事件会丢 */
+  const releaseHandlerRef = useRef<((event: PointerEvent) => void) | null>(null)
   const pointerStartYRef = useRef(0)
   const cancelArmedRef = useRef(false)
   const togglesRef = useRef<HTMLDivElement>(null)
@@ -199,6 +201,15 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
 
   voiceSendRef.current = () => send(true)
 
+  const cleanupRelease = () => {
+    const handler = releaseHandlerRef.current
+    if (handler) {
+      window.removeEventListener('pointerup', handler)
+      window.removeEventListener('pointercancel', handler)
+      releaseHandlerRef.current = null
+    }
+  }
+
   const holdStart = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (
       mode !== 'voice' ||
@@ -215,6 +226,17 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
     } catch {
       // 合成事件或 Safari 偶发不支持捕获；不影响按住录音本身
     }
+    // Android WebView 常出现 pointer capture 失效或 pointercancel 提前触发，
+    // 这里在 window 上补一层松手兜底，保证“按住说话”能正常收尾发送。
+    cleanupRelease()
+    const onRelease = () => {
+      cleanupRelease()
+      holdEnd(false)
+    }
+    releaseHandlerRef.current = onRelease
+    window.addEventListener('pointerup', onRelease)
+    window.addEventListener('pointercancel', onRelease)
+
     pointerStartYRef.current = event.clientY
     setCancelArmed(false)
     cancelArmedRef.current = false
@@ -245,6 +267,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
     if (!holdActiveRef.current) {
       return
     }
+    cleanupRelease()
     holdActiveRef.current = false
     setPressing(false)
     if (cancelled || cancelArmedRef.current) {
@@ -337,7 +360,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
           onPointerDown={holdStart}
           onPointerMove={holdMove}
           onPointerUp={() => holdEnd(false)}
-          onPointerCancel={() => holdEnd(true)}
+          onPointerCancel={() => holdEnd(false)}
           onContextMenu={(event) => event.preventDefault()}
         >
           {holdActive ? (
