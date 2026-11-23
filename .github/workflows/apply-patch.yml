@@ -18,21 +18,12 @@ concurrency:
 jobs:
   apply:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install deps
-        run: pnpm install --frozen-lockfile --ignore-scripts
-
       - name: Clean broken i18n lines
-        run: python3 tools/fix5.py
+        run: python3 tools/fix6.py
 
       - name: Commit and push
         run: |
