@@ -1,7 +1,7 @@
 name: Build DeepSeek Android
 
-# 与 build-ios.yml 并行、互不影响：只打未签名 debug APK 并上传 artifact，
-# 不发 release（避免与 iOS IPA 命名冲突）。
+# 与 build-ios.yml 并行、互不影响：打 debug APK，同时发到独立的 android tag，
+# 这样用户可以直接下载，不用登录去翻 Actions 产物。
 
 on:
   push:
@@ -14,8 +14,12 @@ on:
       - ".github/workflows/build-android.yml"
   workflow_dispatch:
 
+concurrency:
+  group: build-android-v350
+  cancel-in-progress: false
+
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -66,10 +70,30 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk \
+            app/build/outputs/apk/debug/DeepSeek-Android-3.5-debug.apk
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: DeepSeek-Android-3.2.1-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: DeepSeek-Android-3.5-debug
+          path: android/app/build/outputs/apk/debug/DeepSeek-Android-3.5-debug.apk
           if-no-files-found: error
+
+      - name: Publish release (Android 付费激活版)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v3.3.0-android
+          name: DeepSeek Android 3.5 · 付费激活版
+          body: |
+            DeepSeek Android 3.5（debug APK，arm64 / 通用）· 付费激活版
+
+            安装后首次打开进入激活页：
+            1. 在闲鱼购买后获取一串激活码；
+            2. 填入激活码，验签通过后永久解锁；
+            3. 已激活标记存本机，删装重装需重新填码。
+
+            本轮更新：角色广场与角色设定、上下文占用面板、全局苹果 R 角与液态玻璃优化；
+            修复安卓「按住说话」语音时好时坏的问题（麦克风运行时权限改为按需申请并补发授权）。
+          files: android/app/build/outputs/apk/debug/DeepSeek-Android-3.5-debug.apk
+          make_latest: false
