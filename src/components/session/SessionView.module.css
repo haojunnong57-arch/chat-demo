@@ -96,6 +96,8 @@
   width: 100%;
   margin: auto 0 0;
   padding-bottom: env(safe-area-inset-bottom);
+  /* 承托层底色的上沿跟着输入框走，避免键盘弹起后露出方形白框 */
+  border-radius: var(--ds-radius-xl) var(--ds-radius-xl) 0 0;
   /* 液态玻璃主题不铺底色，让消息真正从玻璃后面透出来 */
   background: linear-gradient(
     to bottom,
