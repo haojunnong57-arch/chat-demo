@@ -113,8 +113,8 @@ export const deleteRole = (id: string) => {
  */
 export const startRoleChat = (card: RoleCard) => {
   setActiveRole(card.id)
-  setPendingSessionInstructions(roleInstructions(card))
   newChat()
+  setPendingSessionInstructions(roleInstructions(card))
   setDraftText(null, card.greeting)
   // 关闭「自动发出开场白」时只填进输入框，让用户自己改一句再发
   if (useSettings.getState().roleAutoGreeting) {
