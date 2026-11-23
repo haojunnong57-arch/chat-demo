@@ -73,8 +73,8 @@ export const SessionView = ({
         {
           ...(chatBackground ? { backgroundImage: `url(${chatBackground})` } : null),
           // 通透度滑块：越大越通透，填充更少、模糊更轻
-          '--glass-fill': `${(0.44 - glassOpacity * 0.18).toFixed(3)}`,
-          '--glass-blur': `${Math.round(18 + (1 - glassOpacity) * 20)}px`,
+          '--glass-fill': `${(0.34 - glassOpacity * 0.29).toFixed(3)}`,
+          '--glass-blur': `${Math.round(6 + (1 - glassOpacity) * 26)}px`,
         } as CSSProperties
       }
     >

@@ -224,10 +224,8 @@ body[data-ds-dark-theme] {
 /* ---------- Liquid Glass ---------- */
 .chat-theme-glass {
   --chat-page-bg:
-    radial-gradient(1100px 760px at 8% -8%, rgba(0, 122, 255, 0.26), transparent 62%),
-    radial-gradient(900px 700px at 96% 12%, rgba(255, 45, 85, 0.16), transparent 65%),
-    radial-gradient(800px 620px at 50% 100%, rgba(52, 199, 89, 0.16), transparent 68%),
-    linear-gradient(145deg, #eff5ff 0%, #dfe8f5 48%, #f5ecf7 100%);
+    radial-gradient(130% 92% at 50% -12%, #ffffff 0%, rgba(255, 255, 255, 0) 64%),
+    linear-gradient(180deg, #f1f3f5 0%, #e6e9ed 100%);
 
   --chat-header-bg: color-mix(in srgb, #ffffff 34%, transparent);
   --chat-header-border: 0;
@@ -381,14 +379,12 @@ body[data-ds-dark-theme] .chat-theme-instagram {
 
 body[data-ds-dark-theme] .chat-theme-glass {
   --chat-page-bg:
-    radial-gradient(1100px 760px at 8% -8%, rgba(10, 132, 255, 0.32), transparent 62%),
-    radial-gradient(900px 700px at 96% 12%, rgba(255, 55, 95, 0.22), transparent 65%),
-    radial-gradient(800px 620px at 50% 100%, rgba(48, 209, 88, 0.14), transparent 68%),
-    linear-gradient(145deg, #0b1220 0%, #131a2a 48%, #1c1422 100%);
+    radial-gradient(130% 92% at 50% -12%, #1b1e23 0%, rgba(27, 30, 35, 0) 64%),
+    linear-gradient(180deg, #131519 0%, #0b0c0f 100%);
   --chat-header-bg: rgba(255, 255, 255, 0.06);
   --chat-header-border: 0;
   /* 深色玻璃用一层深色膜承托白字，避免拉到最透明后字幕直接压在照片上 */
-  --chat-input-bg: rgba(10, 16, 28, calc(var(--glass-fill, 0.32) * 0.95));
+  --chat-input-bg: rgba(255, 255, 255, calc(var(--glass-fill, 0.16) * 0.5 + 0.03));
   --chat-input-border: 1px solid rgba(255, 255, 255, 0.32);
   --chat-input-film: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 46%, rgba(255, 255, 255, 0.06) 100%);
   --chat-input-text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
