@@ -13,6 +13,9 @@ import { imageFileToBackground } from '../../utils/image.js'
 import { TiltCard } from '../base/TiltCard.js'
 import styles from './Settings.module.css'
 
+/** 默认背景 2：海景 */
+const SEA_CAVE_BACKGROUND = 'https://aka.doubaocdn.com/s/LjlYtUHQ6I'
+
 const chatThemes: { value: ChatTheme; label: TranslationKey }[] = [
   { value: 'default', label: 'settingsChatThemeDefault' },
   { value: 'wechat', label: 'settingsChatThemeWechat' },
@@ -89,6 +92,14 @@ export const BackgroundSetting = () => {
       <div className={styles.backgroundTitle}>{t('settingsChatBackground')}</div>
       <div className={styles.backgroundDescription}>
         {t('settingsChatBackgroundDescription')}
+      </div>
+      <div className={styles.backgroundActions}>
+        <Button variant={background === null ? 'primary' : 'outlined'} size="m" onClick={() => setChatBackground(null)}>
+          {t('settingsChatBackgroundDefault')}
+        </Button>
+        <Button variant={background === SEA_CAVE_BACKGROUND ? 'primary' : 'outlined'} size="m" onClick={() => setChatBackground(SEA_CAVE_BACKGROUND)}>
+          {t('settingsChatBackgroundSea')}
+        </Button>
       </div>
       <button
         type="button"

@@ -329,7 +329,9 @@ export const en = {
   settingsChatBackgroundChoose: 'Choose from Photos',
   settingsChatBackgroundChange: 'Change background',
   settingsChatBackgroundRemove: 'Remove background',
-  settingsChatBackgroundEmpty: 'Tap here to choose a photo',
+  settingsChatBackgroundEmpty: 'Tap here to choose a photo'
+  settingsChatBackgroundDefault: 'Original',
+  settingsChatBackgroundSea: 'Sea cave',,
   settingsChatBackgroundSaved: 'Chat background saved',
   settingsChatBackgroundRemoved: 'Default background restored',
   settingsChatBackgroundFailed: 'Could not read this image. Try another one.',

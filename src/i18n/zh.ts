@@ -320,7 +320,9 @@ export const zh = {
   settingsChatBackgroundChoose: '从相册选择',
   settingsChatBackgroundChange: '更换背景',
   settingsChatBackgroundRemove: '移除背景',
-  settingsChatBackgroundEmpty: '点击这里选择一张照片',
+  settingsChatBackgroundEmpty: '点击这里选择一张照片'
+  settingsChatBackgroundDefault: '原版',
+  settingsChatBackgroundSea: '海景',,
   settingsChatBackgroundSaved: '聊天背景已保存',
   settingsChatBackgroundRemoved: '已恢复默认背景',
   settingsChatBackgroundFailed: '图片读取失败，请换一张试试',

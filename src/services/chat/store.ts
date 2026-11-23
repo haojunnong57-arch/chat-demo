@@ -51,6 +51,11 @@ export const setPendingSessionInstructions = (value?: string) => {
   pendingSessionInstructions = value
 }
 
+/** 普通新建对话时清掉悬空的角色指令，避免串味到新会话。 */
+export const clearPendingSessionInstructions = () => {
+  pendingSessionInstructions = undefined
+}
+
 const takePendingInstructions = () => {
   const value = pendingSessionInstructions
   pendingSessionInstructions = undefined
@@ -495,6 +500,7 @@ export const replaceHistory = async (write: () => Promise<void>): Promise<number
 }
 
 export const newChat = () => {
+  clearPendingSessionInstructions()
   if (!get().importingHistory) {
     set({ activeId: null })
     trimSessionCache()
