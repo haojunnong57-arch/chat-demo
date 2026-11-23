@@ -100,7 +100,7 @@ export const LiquidGlassSurface = ({
   // 越通透，折射越明显；light 主题下包会把 displacement 减半，所以基线抬高
   const refractionScale =
     displacementScale ??
-    (isGlassTheme ? Math.round((48 + glassOpacity * 86) * (strength === 'strong' ? 0.92 : 1)) : 42)
+    (isGlassTheme ? Math.round((62 + glassOpacity * 96) * (strength === 'strong' ? 0.92 : 1)) : 42)
   const overLight = theme === 'light'
   // 大面积面板降低波幅，避免文字区随水面抖动
   const amplitude = strength === 'strong' ? 0.8 : 1
@@ -133,8 +133,8 @@ export const LiquidGlassSurface = ({
         className={styles.layer}
         displacementScale={refractionScale}
         blurAmount={blurAmount}
-        saturation={isGlassTheme ? 165 : 140}
-        aberrationIntensity={isGlassTheme ? 2.4 : 1.4}
+        saturation={isGlassTheme ? 176 : 140}
+        aberrationIntensity={isGlassTheme ? 2.9 : 1.4}
         elasticity={elasticity}
         cornerRadius={radius + 14}
         mode={isGlassTheme ? 'prominent' : 'standard'}

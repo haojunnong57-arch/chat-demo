@@ -202,12 +202,14 @@ body.dark .backdrop :global(.glass) {
 
 [data-ds-dark-theme] .specular,
 body.dark .specular {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.07) 0%,
-    rgba(255, 255, 255, 0.02) 20%,
-    rgba(255, 255, 255, 0) 62%
-  );
+  background:
+    linear-gradient(112deg, rgba(255, 255, 255, 0) 26%, rgba(255, 255, 255, 0.16) 44%, rgba(255, 255, 255, 0) 60%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.30) 0%,
+      rgba(255, 255, 255, 0.08) 22%,
+      rgba(255, 255, 255, 0) 64%
+    );
 }
 
 [data-ds-dark-theme] .caustic,
@@ -218,8 +220,9 @@ body.dark .caustic {
 [data-ds-dark-theme] .edge,
 body.dark .edge {
   box-shadow:
-    inset 0 0 0 0.5px rgba(255, 255, 255, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.34),
+    inset 2px 2px 0 rgba(255, 255, 255, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
     inset 0 -14px 22px -18px rgba(0, 0, 0, 0.4);
   background: linear-gradient(128deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.03) 100%);
 }
@@ -227,4 +230,27 @@ body.dark .edge {
 [data-ds-dark-theme] .tint,
 body.dark .tint {
   background: rgba(255, 255, 255, 0.03);
+}
+
+/* 液态玻璃高光呼吸：轻微位移 + 亮度变化，读起来是流动的光而不是死板的雾面 */
+.backdrop .specular {
+  will-change: opacity, transform;
+  animation: glassSheen 6.5s ease-in-out infinite alternate;
+}
+
+@keyframes glassSheen {
+  from {
+    opacity: 0.82;
+    transform: translate3d(-1.5%, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(1.5%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop .specular {
+    animation: none;
+  }
 }

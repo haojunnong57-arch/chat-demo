@@ -60,6 +60,20 @@ export const useRubberBand = (
       content.style.setProperty('--rubber-progress', Math.min(1, Math.abs(value) / LIMIT).toFixed(3))
     }
 
+    // 每帧最多写一次：touchmove 频率可达 120Hz，逐条写会抖成重影
+    let pendingValue = 0
+    let writeFrame = 0
+    const scheduleWrite = (value: number) => {
+      pendingValue = value
+      if (writeFrame) {
+        return
+      }
+      writeFrame = requestAnimationFrame(() => {
+        writeFrame = 0
+        write(pendingValue)
+      })
+    }
+
     // 真弹簧积分：略微欠阻尼，松手会自然回正，不果冻也不拖尾。
     const springBack = () => {
       stopSpring()
@@ -82,6 +96,7 @@ export const useRubberBand = (
           write(0)
           content.removeAttribute('data-rubber')
           content.style.willChange = ''
+          content.style.removeProperty('backface-visibility')
           offset = 0
           velocity = 0
           springFrame = 0
@@ -142,10 +157,12 @@ export const useRubberBand = (
         }
         dragging = true
         content.dataset.rubber = 'true'
+        content.style.backfaceVisibility = 'hidden'
+        content.style.transform = 'translate3d(0, 0, 0)'
       }
       event.preventDefault()
       const resisted = (dy >= 0 ? 1 : -1) * LIMIT * (1 - Math.exp((-Math.abs(dy) * RESISTANCE) / LIMIT))
-      write(resisted)
+      scheduleWrite(resisted)
       const now = event.timeStamp || performance.now()
       const dt = Math.max(1, now - lastTime)
       velocity = velocity * 0.72 + ((touch.clientY - lastY) / dt) * 0.28
@@ -207,6 +224,7 @@ export const useRubberBand = (
       content.style.removeProperty('transform')
       content.style.removeProperty('--rubber-progress')
       content.style.willChange = ''
+      content.style.removeProperty('backface-visibility')
       delete scroll.dataset.rubberEnabled
     }
   }, [scrollRef, contentRef, layoutKey])

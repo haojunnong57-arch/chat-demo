@@ -244,7 +244,7 @@ body[data-ds-dark-theme] {
     0 18px 44px rgba(23, 48, 92, 0.13),
     0 -10px 26px rgba(70, 120, 220, 0.07) inset,
     inset 0 1px 0 rgba(255, 255, 255, 0.55);
-  --chat-input-backdrop: saturate(190%) blur(var(--glass-blur, 30px));
+  --chat-input-backdrop: saturate(185%) blur(calc(var(--glass-blur, 30px) * 0.55));
   --chat-input-sheen: 0.14;
   --chat-input-scrim: transparent;
 
@@ -288,6 +288,13 @@ body[data-ds-dark-theme] {
   --dsw-specific-input-major: rgba(255, 255, 255, 0.46);
   --dsw-specific-bubble: rgba(255, 255, 255, 0.42);
   --dsw-alias-interactive-bg-hover: rgba(255, 255, 255, 0.22);
+}
+
+/* 移动端：气泡不做逐个 backdrop 模糊，滚动/回弹才跟手 */
+@media not all and (min-width: 768px) {
+  .chat-theme-glass {
+    --chat-bubble-backdrop: none;
+  }
 }
 
 /* ---------- 深色模式：同色系、低对比、保留皮肤识别度 ---------- */
@@ -394,7 +401,7 @@ body[data-ds-dark-theme] .chat-theme-glass {
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
   --chat-input-sheen: 0.1;
   --chat-input-scrim: transparent;
-  --chat-input-backdrop: saturate(190%) blur(var(--glass-blur, 30px));
+  --chat-input-backdrop: saturate(185%) blur(calc(var(--glass-blur, 30px) * 0.55));
   --chat-user-bubble: linear-gradient(145deg, rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.7)), rgba(255, 255, 255, calc(var(--glass-fill, 0.2) * 0.3)));
   --chat-user-text: #f5f8ff;
   --chat-user-shadow:
