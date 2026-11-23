@@ -58,7 +58,19 @@
 }
 
 .previewText {
+  flex: 1;
   min-width: 0;
+}
+
+.avatarActions {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fileInput {
+  display: none;
 }
 
 .previewName {

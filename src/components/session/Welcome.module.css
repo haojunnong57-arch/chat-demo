@@ -37,21 +37,6 @@
   padding: 0 32px 64px;
 }
 
-.galleryWrap {
-  box-sizing: border-box;
-  width: 100%;
-  max-height: 52vh;
-  margin-bottom: 22px;
-  padding-right: 2px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: none;
-}
-
-.galleryWrap::-webkit-scrollbar {
-  display: none;
-}
-
 .greeting {
   display: flex;
   align-items: center;
@@ -86,19 +71,9 @@
     padding: 0 16px env(safe-area-inset-bottom);
   }
 
-  .galleryWrap {
-    flex: 1;
-    min-height: 0;
-    max-height: none;
-    margin: 8px 0 0;
-  }
-
   .greeting {
     flex-shrink: 0;
-    margin: 12px 0 10px;
-    font-size: 20px;
-    line-height: 28px;
-    font-weight: 500;
+    margin: auto 0;
   }
 
   .caveat {

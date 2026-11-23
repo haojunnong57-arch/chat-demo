@@ -99,6 +99,17 @@
   line-height: 16px;
 }
 
+.empty {
+  margin: 0;
+  padding: 18px 14px;
+  border: 1px dashed var(--dsw-alias-border-l2);
+  border-radius: var(--ds-radius-m, 18px);
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+}
+
 .list {
   display: flex;
   flex-direction: column;

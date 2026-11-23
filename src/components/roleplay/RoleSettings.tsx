@@ -89,6 +89,9 @@ export const RoleSettings = () => {
           <span className={styles.blockTitle}>{t('roleSettingsCards')}</span>
           <span className={styles.count}>{roles.length}</span>
         </div>
+        {roles.length === 0 ? (
+          <p className={styles.empty}>{t('roleSettingsEmpty')}</p>
+        ) : (
         <div className={styles.list}>
           {roles.map((card) => (
             <div key={card.id} className={styles.row}>
@@ -126,6 +129,7 @@ export const RoleSettings = () => {
             </div>
           ))}
         </div>
+        )}
         <div className={styles.actions}>
           <Button variant="outlined" size="m" onClick={() => setEditor({ card: null, mode: 'manual' })}>
             {t('roleSettingsNew')}

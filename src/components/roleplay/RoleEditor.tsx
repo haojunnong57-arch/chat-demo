@@ -7,6 +7,7 @@ import { useTranslate } from '../../i18n/index.js'
 import { createRole, deleteRole, findRole, updateRole } from '../../services/roleplay/store.js'
 import type { RoleCard } from '../../services/roleplay/types.js'
 import { generateRoleCard } from '../../services/roleplay/generate.js'
+import { imageFileToAvatar } from '../../utils/image.js'
 import { RoleAvatar } from './RoleAvatar.js'
 import styles from './RoleEditor.module.css'
 
@@ -19,6 +20,7 @@ type Draft = {
   greeting: string
   initial: string
   accent: string
+  avatar: string | null
 }
 
 const EMPTY: Draft = {
@@ -28,6 +30,7 @@ const EMPTY: Draft = {
   greeting: '',
   initial: '',
   accent: '#5B8DEF',
+  avatar: null,
 }
 
 const draftOf = (card: RoleCard | null): Draft =>
@@ -39,6 +42,7 @@ const draftOf = (card: RoleCard | null): Draft =>
         greeting: card.greeting,
         initial: card.initial,
         accent: card.accent,
+        avatar: card.avatar ?? null,
       }
     : EMPTY
 
@@ -64,6 +68,7 @@ const parseImport = (raw: string): Draft | null => {
             greeting: value('greeting') || value('opening'),
             initial: name.slice(0, 1),
             accent: /^#[0-9a-fA-F]{6}$/.test(value('accent')) ? value('accent') : EMPTY.accent,
+            avatar: null,
           }
         }
       }
@@ -102,6 +107,7 @@ const parseImport = (raw: string): Draft | null => {
   if (!draft.persona) {
     return null
   }
+  draft.avatar = null
   draft.name = draft.name || '新角色'
   draft.initial = draft.initial || draft.name.slice(0, 1)
   return draft
@@ -128,11 +134,28 @@ export const RoleEditor = ({
   const [idea, setIdea] = useState('')
   const [importText, setImportText] = useState('')
   const [busy, setBusy] = useState(false)
+  const [avatarBusy, setAvatarBusy] = useState(false)
+  const avatarInputRef = useRef<HTMLInputElement | null>(null)
   const controllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => () => controllerRef.current?.abort(), [])
 
   const patch = (value: Partial<Draft>) => setDraft((prev) => ({ ...prev, ...value }))
+
+  /** 角色头像：本地裁成方形 data URL 存进角色卡，不上传服务器 */
+  const pickAvatar = async (file: File | undefined) => {
+    if (!file || avatarBusy) {
+      return
+    }
+    setAvatarBusy(true)
+    try {
+      patch({ avatar: await imageFileToAvatar(file) })
+    } catch {
+      showToast({ key: 'roleEditorAvatarFailed', type: 'error' })
+    } finally {
+      setAvatarBusy(false)
+    }
+  }
 
   const generate = async () => {
     if (busy || !idea.trim()) {
@@ -189,6 +212,7 @@ export const RoleEditor = ({
       greeting: draft.greeting.trim() || `我是${draft.name.trim()}，今天想聊点什么？`,
       initial: draft.initial.trim().slice(0, 1) || draft.name.trim().slice(0, 1),
       accent: draft.accent.trim() || EMPTY.accent,
+      avatar: draft.avatar,
     }
     if (card && card.source === 'custom') {
       updateRole(card.id, payload)
@@ -269,6 +293,7 @@ export const RoleEditor = ({
                 tagline: '',
                 persona: '',
                 greeting: '',
+                avatar: draft.avatar,
                 source: 'custom',
               }}
               size="large"
@@ -277,6 +302,31 @@ export const RoleEditor = ({
               <div className={styles.previewName}>{draft.name || t('roleEditorNamePlaceholder')}</div>
               <div className={styles.previewTagline}>{draft.tagline || t('roleEditorTaglinePlaceholder')}</div>
             </div>
+            <div className={styles.avatarActions}>
+              <Button
+                variant="outlined"
+                size="s"
+                disabled={avatarBusy}
+                onClick={() => avatarInputRef.current?.click()}
+              >
+                {avatarBusy ? t('roleEditorAvatarReading') : t('roleEditorAvatarUpload')}
+              </Button>
+              {draft.avatar ? (
+                <Button variant="outlined" size="s" onClick={() => patch({ avatar: null })}>
+                  {t('roleEditorAvatarClear')}
+                </Button>
+              ) : null}
+            </div>
+            <input
+              ref={avatarInputRef}
+              className={styles.fileInput}
+              type="file"
+              accept="image/*"
+              onChange={(event) => {
+                void pickAvatar(event.target.files?.[0])
+                event.target.value = ''
+              }}
+            />
           </div>
           <label className={styles.field}>
             <span className={styles.fieldLabel}>{t('roleEditorName')}</span>
