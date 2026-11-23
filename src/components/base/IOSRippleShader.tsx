@@ -67,6 +67,7 @@ uniform float u_has_texture;
 uniform sampler2D u_texture;
 uniform float u_clarity;
 uniform float u_amplitude;
+uniform float u_dark;
 // xy: 波源位置, zw: 归一化拖动方向
 uniform vec4 u_ripples[${MAX_RIPPLES}];
 uniform float u_strength[${MAX_RIPPLES}];
@@ -120,15 +121,22 @@ void main() {
   float energy = length(grad);
 
   vec2 uv = (u_bg_origin + p) / u_bg_size;
+  // 越通透偏移越大；RGB 三通道按不同系数分离，形成色散
+  vec2 offset = normal * (0.016 + 0.022 * u_clarity);
   vec3 refracted = vec3(0.96);
   if (u_has_texture > 0.5) {
-    // 越通透偏移越大；RGB 三通道按不同系数分离，形成色散
-    vec2 offset = normal * (0.016 + 0.022 * u_clarity);
     refracted = vec3(
       texture2D(u_texture, vec2(uv.x + offset.x * 1.08, 1.0 - (uv.y + offset.y * 1.08))).r,
       texture2D(u_texture, vec2(uv.x + offset.x, 1.0 - (uv.y + offset.y))).g,
       texture2D(u_texture, vec2(uv.x + offset.x * 0.92, 1.0 - (uv.y + offset.y * 0.92))).b
     );
+  } else {
+    // 没有照片时用中性渐变当底：偏移把渐变一起推歪，玻璃边缘就能看见弯折
+    float shift = offset.y * 0.55;
+    float base = clamp(1.0 - uv.y + shift, 0.0, 1.0);
+    vec3 lightSide = mix(vec3(0.94, 0.95, 0.97), vec3(0.83, 0.85, 0.88), base);
+    vec3 darkSide = mix(vec3(0.14, 0.15, 0.17), vec3(0.05, 0.06, 0.07), base);
+    refracted = mix(lightSide, darkSide, u_dark) + vec3(offset.x * 0.28);
   }
 
   float amount = clamp(energy * 3.2 * u_amplitude, 0.0, 0.5);
@@ -233,6 +241,7 @@ export const IOSRippleShader = ({
     const uHasTexture = gl.getUniformLocation(program, 'u_has_texture')
     const uClarity = gl.getUniformLocation(program, 'u_clarity')
     const uAmplitude = gl.getUniformLocation(program, 'u_amplitude')
+    const uDark = gl.getUniformLocation(program, 'u_dark')
     const uRipples = gl.getUniformLocation(program, 'u_ripples[0]')
     const uStrength = gl.getUniformLocation(program, 'u_strength[0]')
     const uAges = gl.getUniformLocation(program, 'u_ages[0]')
@@ -299,6 +308,14 @@ export const IOSRippleShader = ({
       gl.uniform1f(uHasTexture, hasTexture ? 1 : 0)
       gl.uniform1f(uClarity, liveProps.current.clarity)
       gl.uniform1f(uAmplitude, liveProps.current.amplitude)
+      if (uDark) {
+        gl.uniform1f(
+          uDark,
+          document.body.hasAttribute('data-ds-dark-theme') || document.body.classList.contains('dark')
+            ? 1
+            : 0
+        )
+      }
       if (uRipples) {gl.uniform4fv(uRipples, values)}
       if (uStrength) {gl.uniform1fv(uStrength, strengths)}
       if (uAges) {gl.uniform1fv(uAges, ages)}

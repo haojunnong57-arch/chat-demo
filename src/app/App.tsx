@@ -129,7 +129,8 @@ const useEdgeSwipe = () => {
       // 打开侧：过半或快速右滑 → 展开，否则回弹关闭；关闭侧：不足一半或快速左滑 → 关闭，否则回弹展开
       const snapOpen =
         mode === 'open'
-          ? progress >= SNAP_RATIO || (dx > 0 && velocity > FLING_VELOCITY)
+          // 左缘轻扫也要自动弹出：位移过 22% 或有一点右滑速度就吸附展开
+          ? progress >= 0.22 || (dx > 10 && velocity > FLING_VELOCITY * 0.5)
           : !(progress <= SNAP_RATIO || (dx < 0 && velocity < -FLING_VELOCITY))
       if (snapOpen) {
         openMobileSider()

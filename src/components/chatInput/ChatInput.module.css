@@ -25,11 +25,11 @@
 }
 
 .glassBackdrop {
-  --glass-tint: rgba(255, 255, 255, 0.15);
+  --glass-tint: rgba(255, 255, 255, 0.05);
 }
 
 [data-ds-dark-theme] .glassBackdrop {
-  --glass-tint: rgba(8, 14, 26, 0.3);
+  --glass-tint: rgba(12, 14, 18, 0.06);
 }
 
 /* 按住说话：蓝色液态光从输入区向下扩散，上滑取消时整片收束为红色 */

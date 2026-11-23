@@ -43,6 +43,7 @@ import { ensureApiKey } from '../settings/settingsDialogState.js'
 import { DragMask, useFileDrop } from './DragMask.js'
 import { showToast } from '../base/toastState.js'
 import { ACCEPT, useUploads } from '../../services/attachments.js'
+import { extractVideoFrames } from '../../services/videoFrames.js'
 import { DraftAttachments } from './DraftAttachments.js'
 import { useVoiceInput } from './useVoiceInput.js'
 import { Spectrum } from './Spectrum.js'
@@ -106,14 +107,41 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
     return () => observer.disconnect()
   }, [t])
 
+  const importVideo = async (video: File) => {
+    showToast('正在抽取视频画面…')
+    try {
+      const key = useSettings.getState().apiKey ?? ''
+      const frames = await extractVideoFrames(video)
+      if (frames.length === 0) {
+        showToast('这个视频抽不出画面，换一个试试')
+        return
+      }
+      const error = addDraftFiles(sessionId, frames, key)
+      if (error) {
+        showToast(error)
+        return
+      }
+      showToast(`已抽出 ${frames.length} 张画面帧，发送后模型会逐帧识别`)
+    } catch {
+      showToast('视频解码失败，换一个视频试试')
+    }
+  }
+
   const acceptFiles = (files: File[]) => {
     if (files.length === 0 || useChatStore.getState().importingHistory || !ensureApiKey()) {
       return
     }
-    const error = addDraftFiles(sessionId, files, useSettings.getState().apiKey ?? '')
-    if (error) {
-      showToast(error)
+    const videos = files.filter((file) => file.type.startsWith('video/'))
+    const rest = files.filter((file) => !file.type.startsWith('video/'))
+    if (rest.length > 0) {
+      const error = addDraftFiles(sessionId, rest, useSettings.getState().apiKey ?? '')
+      if (error) {
+        showToast(error)
+      }
     }
+    videos.forEach((video) => {
+      void importVideo(video)
+    })
   }
   const retryFile = useCallback(
     (id: string) => {
@@ -518,7 +546,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
             type="file"
             multiple
             hidden
-            accept={ACCEPT}
+            accept={`${ACCEPT},video/*`}
             onChange={(event) => {
               acceptFiles(Array.from(event.target.files ?? []))
               event.target.value = ''

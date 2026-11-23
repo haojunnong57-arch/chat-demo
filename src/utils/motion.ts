@@ -103,13 +103,13 @@ export const useTiltCard = <T extends HTMLElement = HTMLDivElement>({
 }
 
 /**
- * 把「减弱动态效果 / 省电模式 / 用户关闭增强动画」统一写到根节点，
- * CSS 只保留 80ms 的必要状态过渡，倾斜、流光、语义块和呼吸动效全部停用。
+ * 只在系统「减弱动态效果」或低电量时收掉装饰性动效（倾斜、流光、呼吸）。
+ * 「增强动画」开关只负责液态玻璃的水波纹，不再连带关闭普通 UI 交互动画。
  */
 export const setupMotionPreference = () => {
   const root = document.documentElement
   const apply = () => {
-    const reduced = prefersReducedMotion() || !useSettings.getState().enhancedMotion
+    const reduced = prefersReducedMotion()
     if (reduced) {
       root.dataset.motion = 'reduced'
     } else {
@@ -126,7 +126,7 @@ export const setupMotionPreference = () => {
   }
   batteryApi.getBattery?.().then((battery) => {
     const sync = () => {
-      if ((battery.level <= 0.2 && !battery.charging) || !useSettings.getState().enhancedMotion) {
+      if (battery.level <= 0.2 && !battery.charging) {
         root.dataset.motion = 'reduced'
       } else {
         delete root.dataset.motion
