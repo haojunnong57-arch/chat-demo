@@ -1,8 +1,5 @@
 name: Apply source patch
 
-# 一次性补丁流水线：从 CDN 取源码补丁，校验 sha256 后应用到 main，再触发 iOS/Android 构建。
-# v3：深色模式白雾修复（玻璃底色改用深色变量）。
-
 on:
   push:
     branches: [main]
@@ -27,10 +24,8 @@ jobs:
 
       - name: Download and verify patch
         run: |
-          curl -fsSL --retry 3 --retry-delay 2 \
-            "https://aka.doubaocdn.com/s/rpxNVPeVlW" -o /tmp/code.patch
-          echo "f97f2dda65832a2b274fb21f25a0baf72bc0839f3198ca8174d649cf5a749425  /tmp/code.patch" \
-            | sha256sum -c -
+          curl -fsSL --retry 3 --retry-delay 2 "https://aka.doubaocdn.com/s/Lez2l7O5gd" -o /tmp/code.patch
+          echo "44be800041d41445ae22214b0f280e1011e8d9c6b5b7c1a3a98c392bd8191c4e  /tmp/code.patch" | sha256sum -c -
 
       - name: Apply patch
         run: |
@@ -42,7 +37,7 @@ jobs:
           git config user.name "patch-bot"
           git config user.email "patch-bot@users.noreply.github.com"
           git add -A
-          git commit -m "深色模式白雾修复：玻璃底色改为主题变量，新增第二张默认背景资源"
+          git commit -m "输入区承托层改为顶部圆角，修键盘弹起后的方形白框"
           git push origin HEAD:main
 
       - name: Trigger builds
