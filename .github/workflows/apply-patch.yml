@@ -22,8 +22,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Smooth rubber band + liquid glass sheen
-        run: python3 tools/glass10.py
+      - name: Motion gate + refraction + video frames + edge swipe
+        run: |
+          python3 tools/video2.py
+          python3 tools/video3.py
 
       - name: Commit and push
         run: |
@@ -31,7 +33,7 @@ jobs:
           git config user.name "patch-bot"
           git config user.email "patch-bot@users.noreply.github.com"
           git add -A
-          git commit -m "回弹去重影 + 液态玻璃高光与折射" || echo "no change"
+          git commit -m "增强动画只管水波纹 + 折射可见 + 视频抽帧 + 左缘轻扫" || echo "no change"
           git push origin HEAD:main
 
       - name: Trigger builds
