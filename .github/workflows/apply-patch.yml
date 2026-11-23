@@ -18,14 +18,14 @@ concurrency:
 jobs:
   apply:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
       - name: Download and verify patch
         run: |
-          curl -fsSL --retry 3 --retry-delay 2 "https://aka.doubaocdn.com/s/5AbsEtNUqI" -o /tmp/code.patch
-          echo "2ef2cea0b30da075e3364edf2f7083019e33cc7ddd2d3ccf0c46554757291c24  /tmp/code.patch" | sha256sum -c -
+          curl -fsSL --retry 5 --retry-delay 3 --retry-all-errors "https://aka.doubaocdn.com/s/7S637JmZlY" -o /tmp/code.patch
+          echo "191b63c6a7f137d4da1778b69fcadb12515f2e544f1d09d8c42c0af5ad489ba4  /tmp/code.patch" | sha256sum -c -
 
       - name: Apply patch
         run: |
