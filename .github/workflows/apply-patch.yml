@@ -3,6 +3,7 @@ name: Apply source patch
 # 一次性补丁流水线：从 CDN 取本轮源码补丁，校验 sha256 后应用到 main。
 # 目的：远端只有单文件写入通道，整批改动用补丁一次落地，避免逐个文件覆盖。
 # 应用完成后自动触发 iOS 构建；Android 构建由随后更新 build-android.yml 触发。
+# v1：首次推送时 Actions 处于禁用状态，启用后靠本次提交重新触发。
 
 on:
   push:
